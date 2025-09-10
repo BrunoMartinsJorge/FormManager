@@ -16,6 +16,8 @@ async function salvarFormularioCompleto(dadosForm) {
     "SELECT idTipo_Pergunta FROM Tipo_Pergunta WHERE Descricao = ?"
   );
 
+
+
   const salvar = db.transaction((dadosForm) => {
     const result = insertFormulario.run(
       dadosForm.titulo,
@@ -107,42 +109,143 @@ async function createGoogleForm(newForm) {
 async function criarQuiz(newForm) {
   const auth = await getAuthClient();
   const formsApi = google.forms({ version: "v1", auth });
-  const createRes = await formsApi.forms.create({ requestBody: { info: { title: newForm.titulo } } });
-  const formId = createRes.data.formId;
 
-  const requests = (newForm.questoes || []).map((questao, index) => {
-    const item = { title: questao.titulo, questionItem: { question: {} } };
-    switch (questao.tipo) {
-      case "TEXTO": item.questionItem.question = { textQuestion: { paragraph: false } }; break;
-      case "PARAGRAFO": item.questionItem.question = { textQuestion: { paragraph: true } }; break;
-      case "NUMERO": item.questionItem.question = { textQuestion: {} }; break;
-      case "UNICA": item.questionItem.question = { choiceQuestion: { type: "RADIO", options: (questao.opcoes || []).map(v => ({ value: v })) } }; break;
-      case "MULTIPLA": item.questionItem.question = { choiceQuestion: { type: "CHECKBOX", options: (questao.opcoes || []).map(v => ({ value: v })) } }; break;
-      case "DATA": item.questionItem.question = { dateQuestion: {} }; break;
-      case "DATAHORA": item.questionItem.question = { dateTimeQuestion: {} }; break;
-      case "ESCALA": item.questionItem.question = { scaleQuestion: { low: questao.low || 1, high: questao.high || 5 } }; break;
-      case "VERDADEIRO_FALSO": item.questionItem.question = { choiceQuestion: { type: "RADIO", options: [{ value: "Verdadeiro" }, { value: "Falso" }] } }; break;
-      case "UPLOAD": item.questionItem.question = { fileUploadQuestion: { maxFiles: questao.maxFiles || 1, maxFileSize: questao.maxFileSize || 10 } }; break;
-    }
-
-    if (questao.pontos || questao.respostasCorretas) {
-      item.questionItem.question.grading = {
-        pointValue: questao.pontos || 1,
-        correctAnswers: { answers: (questao.respostasCorretas || []).map(i => ({ value: questao.opcoes[i] })) },
-        whenRight: { text: questao.feedbackCorreto || "Correto!" },
-        whenWrong: { text: questao.feedbackErrado || "Resposta incorreta." },
-      };
-    }
-
-    return { createItem: { item, location: { index } } };
+  const createRes = await formsApi.forms.create({
+    requestBody: { info: { title: newForm.titulo } }
   });
 
-  requests.push({ updateFormInfo: { info: { description: newForm.descricao || "" }, updateMask: "description" } });
-  requests.push({ updateSettings: { settings: { quizSettings: { isQuiz: true } }, updateMask: "quizSettings.isQuiz" } });
+  const formId = createRes.data.formId;
+  const tiposComCorrecao = ["TEXTO", "UNICA", "MULTIPLA", "VERDADEIRO_FALSO"];
 
-  await formsApi.forms.batchUpdate({ formId, requestBody: { requests } });
+  const requests = [
+    {
+      updateSettings: {
+        settings: { quizSettings: { isQuiz: true } },
+        updateMask: "quizSettings.isQuiz"
+      }
+    },
+    {
+      updateFormInfo: {
+        info: { description: newForm.descricao || "" },
+        updateMask: "description"
+      }
+    },
+    ...(newForm.questoes || []).map((questao, index) => {
+      const item = {
+        title: questao.titulo,
+        questionItem: { question: {} }
+      };
 
-  return { formId, formUrl: createRes.data.responderUri, titulo: newForm.titulo, descricao: newForm.descricao, questoes: newForm.questoes };
+      switch (questao.tipo) {
+        case "TEXTO":
+          item.questionItem.question = { textQuestion: { paragraph: false } };
+          break;
+        case "PARAGRAFO":
+          item.questionItem.question = { textQuestion: { paragraph: true } };
+          break;
+        case "NUMERO":
+          item.questionItem.question = { textQuestion: {} };
+          break;
+        case "UNICA":
+          item.questionItem.question = {
+            choiceQuestion: {
+              type: "RADIO",
+              options: (questao.opcoes || []).map(v => ({ value: v }))
+            }
+          };
+          break;
+        case "MULTIPLA":
+          item.questionItem.question = {
+            choiceQuestion: {
+              type: "CHECKBOX",
+              options: (questao.opcoes || []).map(v => ({ value: v }))
+            }
+          };
+          break;
+        case "DATA":
+          item.questionItem.question = { dateQuestion: {} };
+          break;
+        case "DATAHORA":
+          item.questionItem.question = { dateTimeQuestion: {} };
+          break;
+        case "ESCALA":
+          item.questionItem.question = {
+            scaleQuestion: {
+              low: questao.low || 1,
+              high: questao.high || 5
+            }
+          };
+          break;
+        case "VERDADEIRO_FALSO":
+          item.questionItem.question = {
+            choiceQuestion: {
+              type: "RADIO",
+              options: [{ value: "Verdadeiro" }, { value: "Falso" }]
+            }
+          };
+          break;
+        case "UPLOAD":
+          item.questionItem.question = {
+            fileUploadQuestion: {
+              maxFiles: questao.maxFiles || 1,
+              maxFileSize: questao.maxFileSize || 10
+            }
+          };
+          break;
+      }
+
+      if (
+        tiposComCorrecao.includes(questao.tipo) &&
+        (questao.pontos || questao.respostasCorretas)
+      ) {
+        if (questao.tipo === 'VERDADEIRO_FALSO') {
+          item.questionItem.question.grading = {
+            pointValue: questao.pontos || 1,
+            correctAnswers: {
+              answers: (questao.valorCorreto || []).map(i => ({
+                value: questao.opcoes?.[i] || i
+              }))
+            },
+            whenRight: { text: questao.feedbackCorreto || "Correto!" },
+            whenWrong: { text: questao.feedbackErrado || "Resposta incorreta." }
+          };
+        }
+        else {
+          item.questionItem.question.grading = {
+            pointValue: questao.pontos || 1,
+            correctAnswers: {
+              answers: (questao.respostasCorretas || []).map(i => ({
+                value: questao.opcoes?.[i] || i
+              }))
+            },
+            whenRight: { text: questao.feedbackCorreto || "Correto!" },
+            whenWrong: { text: questao.feedbackErrado || "Resposta incorreta." }
+          };
+        }
+      }
+
+      return {
+        createItem: {
+          item,
+          location: { index }
+        }
+      };
+    })
+  ];
+
+  // 3. Executa o batchUpdate
+  await formsApi.forms.batchUpdate({
+    formId,
+    requestBody: { requests }
+  });
+
+  return {
+    formId,
+    formUrl: createRes.data.responderUri,
+    titulo: newForm.titulo,
+    descricao: newForm.descricao,
+    questoes: newForm.questoes
+  };
 }
 
 async function listarRespostas(formId) {

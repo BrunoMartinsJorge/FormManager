@@ -23,7 +23,10 @@ import { Tooltip } from 'primeng/tooltip';
 import { InputGroup } from 'primeng/inputgroup';
 import { PanelModule } from 'primeng/panel';
 import { Textarea } from 'primeng/textarea';
-import { Select } from "primeng/select";
+import { Select } from 'primeng/select';
+import { ConfirmPopup } from 'primeng/confirmpopup';
+import { ConfirmationService } from 'primeng/api';
+import { InputText } from "primeng/inputtext";
 
 @Component({
   selector: 'app-gerar-graficos',
@@ -39,7 +42,9 @@ import { Select } from "primeng/select";
     Tooltip,
     PanelModule,
     Textarea,
-    Select
+    Select,
+    ConfirmPopup,
+    InputText
 ],
   templateUrl: './gerar-graficos.html',
   styleUrl: './gerar-graficos.css',
@@ -75,7 +80,7 @@ export class GerarGraficos implements OnChanges {
     TypeQuestEnum.UNICA
   );
 
-  constructor() {}
+  constructor(private confirmationService: ConfirmationService) {}
 
   ngOnChanges(changes: SimpleChanges): void {
     if (this.questoesRespondidas) {
@@ -83,6 +88,29 @@ export class GerarGraficos implements OnChanges {
       this.graficos = [];
       this.cleanData();
     }
+  }
+
+  public removeGraph(event: Event, index: number): void {
+    this.confirmationService.confirm({
+      target: event.currentTarget as EventTarget,
+      message: 'Você tem certeza que deseja apagar esse gráfico?',
+      icon: 'pi pi-exclamation-triangle',
+      rejectButtonProps: {
+        label: 'Cancelar',
+        severity: 'secondary',
+        outlined: true,
+      },
+      acceptButtonProps: {
+        label: 'Apagar',
+        severity: 'danger',
+      },
+      acceptLabel: 'Sim',
+      rejectLabel: 'Não',
+      accept: () => {
+        this.graficos.splice(index, 1);
+      },
+      reject: () => {},
+    });
   }
 
   public selectGraph(event: any): void {
@@ -208,8 +236,8 @@ export class GerarGraficos implements OnChanges {
     let option: any;
 
     switch (this.graficoEscolhido) {
-      case 'bar': // colunas
-      case 'line': // linhas
+      case 'bar':
+      case 'line':
         option = {
           responsive: true,
           maintainAspectRatio: false,
@@ -219,8 +247,7 @@ export class GerarGraficos implements OnChanges {
               position: 'top',
             },
             title: {
-              display: true,
-              text: questao,
+              display: false,
             },
           },
           scales: {
@@ -250,7 +277,6 @@ export class GerarGraficos implements OnChanges {
             },
             title: {
               display: true,
-              text: questao,
             },
           },
         };
@@ -267,7 +293,6 @@ export class GerarGraficos implements OnChanges {
             },
             title: {
               display: true,
-              text: questao,
             },
           },
           scales: {
@@ -291,7 +316,6 @@ export class GerarGraficos implements OnChanges {
             },
             title: {
               display: true,
-              text: questao,
             },
           },
         };
@@ -300,6 +324,7 @@ export class GerarGraficos implements OnChanges {
 
     let newGraph: GraficoModel = {
       labels,
+      titulo: questao,
       datasets: [
         {
           label: questao,
@@ -419,9 +444,5 @@ export class GerarGraficos implements OnChanges {
       mapa[r] = (mapa[r] || 0) + 1;
     }
     return mapa;
-  }
-
-  public removeGraph(index: number): void {
-    this.graficos.splice(index, 1);
   }
 }

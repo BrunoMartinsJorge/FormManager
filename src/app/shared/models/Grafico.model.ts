@@ -4,6 +4,7 @@ export class GraficoModel {
   public descricao: string;
   public posicao: 'left' | 'right' = 'left';
   public options: any = {};
+  public titulo: string = '';
 
   constructor(label: string[], datasets: DatasetsModel[], descricao: string) {
     this.labels = label;

@@ -76,8 +76,7 @@ export class AdicionarQuiz {
     this.quiz.questoes = this.quiz.questoes;
   }
 
-  constructor(private formulariosService: FormulariosServices) {
-  }
+  constructor(private formulariosService: FormulariosServices) {}
 
   public adicionarQuestaoQuiz() {
     const novaQuestao: NewQuestQuiz = {
@@ -86,7 +85,7 @@ export class AdicionarQuiz {
       obrigatoria: false,
       opcoes: undefined,
       favorito: false,
-      valorCorreto: '',
+      valorCorreto: [],
       respostasCorretas: [],
     };
     this.quiz.questoes.push(novaQuestao);
@@ -116,6 +115,17 @@ export class AdicionarQuiz {
     return questao.respostasCorretas.includes(indexOpcao);
   }
 
+  public opcaoCorretaVerdadeiroFalse(
+    indexQuestao: number,
+    opcao: 'Verdadeiro' | 'Falso'
+  ): boolean {
+    const questao = this.quiz.questoes[indexQuestao];
+    if (!questao.respostasCorretas) questao.respostasCorretas = [];
+    if (!questao.valorCorreto)
+      return false;
+    return questao.valorCorreto.includes(opcao);
+  }
+
   public toggleOpcaoCorreta(indexQuestao: number, indexOpcao: number): void {
     const questao = this.quiz.questoes[indexQuestao];
     if (!questao.respostasCorretas) questao.respostasCorretas = [];
@@ -131,6 +141,16 @@ export class AdicionarQuiz {
         questao.respostasCorretas.push(indexOpcao);
       }
     }
+  }
+
+  public toogleOpcaoCorretaVerdadeiroFalso(
+    indexQuestao: number,
+    opcao: 'Verdadeiro' | 'Falso'
+  ): void {
+    const questao = this.quiz.questoes[indexQuestao];
+    if (!questao.valorCorreto) questao.valorCorreto = [];
+    if (questao.valorCorreto.length > 0) questao.valorCorreto = [];
+    questao.valorCorreto.push(opcao);
   }
 
   public criarQuiz(): void {

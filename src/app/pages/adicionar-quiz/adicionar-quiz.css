@@ -231,7 +231,6 @@ span#urlForm{
 .inputs-list{
   display: flex;
   flex-wrap: wrap;
-  /* grid-gap: 1em; */
   justify-content: center;
   max-height: 250px;
   overflow-y: scroll;

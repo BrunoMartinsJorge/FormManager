@@ -62,7 +62,8 @@ router.get("/validate-token", async (req, res) => {
 router.post("/api/quiz", async (req, res) => {
   try {
     const resultado = await criarQuiz(req.body);
-    await salvarFormularioCompleto(req.body);
+    const dadosSalvar = { titulo: req.body.titulo, descricao: req.body.descricao, questoes: req.body.questoes, formId: resultado.formId, linkUrl: resultado.formUrl };
+    await salvarFormularioCompleto(dadosSalvar);
     res.status(201).json(resultado);
   } catch (err) {
     console.error("Erro ao criar quiz:", err.message || err);

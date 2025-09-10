@@ -44,7 +44,6 @@ strong {
 strong i {
   cursor: pointer;
   padding: 0.75em;
-  background-color: red;
   color: #fff;
   border-radius: 50%;
 }
@@ -58,7 +57,7 @@ strong i {
 
 .corpo-grafico .texto-grafico-left {
   text-align: right;
-  max-width: 250px;
+  max-width: 300px;
   width: 100%;
   overflow-wrap: break-word;
   overflow: hidden;
@@ -66,7 +65,7 @@ strong i {
 
 .corpo-grafico .texto-grafico-right {
   text-align: left;
-  max-width: 250px;
+  max-width: 300px;
   width: 100%;
   overflow-wrap: break-word;
   overflow: hidden;

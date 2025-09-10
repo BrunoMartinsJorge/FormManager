@@ -1,20 +1,13 @@
 <section class="container">
   <div class="info-header">
     <h1>Adicionar Quiz</h1>
-    <span
-      >Crie um novo quiz com questões
-      personalizadas.</span
-    >
+    <span>Crie um novo quiz com questões personalizadas.</span>
   </div>
   <div class="form-info">
-    <span
-      ><i class="pi pi-calendar"></i>Informações do Quiz
-    </span>
+    <span><i class="pi pi-calendar"></i>Informações do Quiz </span>
     <div class="quests-form">
       <div class="input-group">
-        <label for="titulo"
-          >Título do Quiz:</label
-        >
+        <label for="titulo">Título do Quiz:</label>
         <input
           id="titulo"
           type="text"
@@ -24,9 +17,7 @@
         />
       </div>
       <div class="input-group">
-        <label for="descricao"
-          >Descrição do Quiz:</label
-        >
+        <label for="descricao">Descrição do Quiz:</label>
         <textarea
           id="descricao"
           placeholder="Insira uma descrição para o quiz"
@@ -38,10 +29,7 @@
     </div>
   </div>
   <h2>Questões do Quiz</h2>
-  <div
-    class="quest"
-    *ngFor="let questao of quiz.questoes; let i = index"
-  >
+  <div class="quest" *ngFor="let questao of quiz.questoes; let i = index">
     <div class="quest-header">
       <h4>Questão {{ quiz.questoes.length }}</h4>
     </div>
@@ -115,7 +103,10 @@
           [(ngModel)]="questao.opcoes![index]"
         />
         <p-inputgroup-addon>
-          <p-button [icon]="opcaoCorreta(i, index) ? 'pi pi-check' : 'pi pi-times'" (click)="toggleOpcaoCorreta(i, index)"/>
+          <p-button
+            [icon]="opcaoCorreta(i, index) ? 'pi pi-check' : 'pi pi-times'"
+            (click)="toggleOpcaoCorreta(i, index)"
+          />
         </p-inputgroup-addon>
       </p-inputgroup>
     </div>
@@ -142,10 +133,67 @@
           placeholder="Valor máximo"
         />
       </div>
-      <!-- <input [(ngModel)]="questao.startLabel" placeholder="Label início" />
-      <input [(ngModel)]="questao.endLabel" placeholder="Label fim" /> -->
     </div>
-
+    <div
+      class="inputs-list"
+      *ngIf="questao.tipo && (questao.tipo === 'VERDADEIRO_FALSO')"
+    >
+      <p-inputgroup pSize="small">
+        <input pInputText value="Verdadeiro" [disabled]="true" />
+        <p-inputgroup-addon>
+          <p-button
+            [icon]="opcaoCorretaVerdadeiroFalse(i, 'Verdadeiro') ? 'pi pi-check' : 'pi pi-times'"
+            (click)="toogleOpcaoCorretaVerdadeiroFalso(i, 'Verdadeiro')"
+          />
+        </p-inputgroup-addon>
+      </p-inputgroup>
+      <p-inputgroup pSize="small">
+        <input pInputText value="Falso" [disabled]="true" />
+        <p-inputgroup-addon>
+          <p-button
+            [icon]="opcaoCorretaVerdadeiroFalse(i, 'Falso') ? 'pi pi-check' : 'pi pi-times'"
+            (click)="toogleOpcaoCorretaVerdadeiroFalso(i, 'Falso')"
+          />
+        </p-inputgroup-addon>
+      </p-inputgroup>
+    </div>
+    <div
+      class="pontos-questao"
+      *ngIf="questao.tipo == 'TEXTO' || questao.tipo == 'UNICA' || questao.tipo == 'MULTIPLA' || questao.tipo == 'VERDADEIRO_FALSO'"
+    >
+      <div class="input-group">
+        <label for="pontos-quest">Pontos:</label>
+        <p-input-number
+          id="pontos-quest"
+          type="number"
+          [(ngModel)]="questao.pontos"
+          placeholder="Pontos"
+        />
+      </div>
+    </div>
+    <div
+      class="feedback"
+      *ngIf="questao.tipo == 'TEXTO' || questao.tipo == 'UNICA' || questao.tipo == 'MULTIPLA' || questao.tipo == 'VERDADEIRO_FALSO'"
+    >
+      <div class="input-group">
+        <label for="feedback-quest">Caso acerte:</label>
+        <textarea
+          id="feedback-quest"
+          pInputTextarea
+          [(ngModel)]="questao.feedbackCorreto"
+          placeholder="Feedback"
+        ></textarea>
+      </div>
+      <div class="input-group">
+        <label for="feedback-quest">Caso erre:</label>
+        <textarea
+          id="feedback-quest"
+          pInputTextarea
+          [(ngModel)]="questao.feedbackErrado"
+          placeholder="Feedback"
+        ></textarea>
+      </div>
+    </div>
     <!-- <div *ngIf="questao.tipo === 'UPLOAD'">
       <input
         type="number"
@@ -162,10 +210,10 @@
         placeholder="Tipos permitidos, separados por vírgula"
       />
     </div> -->
-    <div class="input-group">
+    <!-- <div class="input-group">
       <label for="descricao-quest">Questão Obrigatória?</label>
       <p-toggleswitch [(ngModel)]="questao.obrigatoria" />
-    </div>
+    </div> -->
     <p-fieldset
       legend="Vizualizar questão"
       toggleable="true"

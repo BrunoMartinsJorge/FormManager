@@ -1,3 +1,4 @@
+<p-confirmpopup />
 <main>
   <p-fieldset legend="Configurações do gráfico">
     <div class="opcoes-graficos">
@@ -54,50 +55,34 @@
         ><i
           class="pi pi-trash"
           pTooltip="Remover gráfico"
-          (click)="removeGraph(i)"
+          (click)="removeGraph($event, i)"
         ></i
       ></strong>
       <br />
       <label [for]="'descricao-form-' + (i+1)"></label>
-      <div
-        style="
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-        "
-      >
-        <textarea
-          pTextarea
-          [id]="'descricao-form-' + (i+1)"
-          [(ngModel)]="grafico.descricao"
-          (input)="updateGraph(i)"
-          placeholder="Insira uma descrição para o gráfico"
-          style="
-            width: 80%;
-            resize: vertical;
-            max-height: 200px;
-            min-height: 100px;
-          "
-          [maxLength]="200"
-        ></textarea>
+      <div style="display: flex; gap: 1em;">
+        <div style="width: 100%;">
+          <input type="text" pInputText [(ngModel)]="grafico.titulo" />
+          <textarea
+            pTextarea
+            [id]="'descricao-form-' + (i+1)"
+            [(ngModel)]="grafico.descricao"
+            (input)="updateGraph(i)"
+            placeholder="Insira uma descrição para o gráfico"
+            style="
+              width: 80%;
+              resize: vertical;
+              max-height: 200px;
+              min-height: 100px;
+            "
+            [maxLength]="200"
+          ></textarea>
+        </div>
         <div style="display: flex; align-items: end; flex-direction: column">
-          <p-select [options]="[{label: 'Esquerda', value: 'left'}, {label: 'Direita', value: 'right'}]" [(ngModel)]="grafico.posicao"></p-select>
-          <!-- <span style="display: flex; align-items: center; grid-gap: 0.5em"
-            ><p-radioButton
-              name="posicao"
-              value="left"
-              [(ngModel)]="grafico.posicao"
-            />
-            <label for="left">Esquerda</label></span
-          >
-          <span style="display: flex; align-items: center; grid-gap: 0.5em"
-            ><p-radioButton
-              name="posicao"
-              value="right"
-              [(ngModel)]="grafico.posicao"
-            />
-            <label for="right">Direita</label></span
-          > -->
+          <p-select
+            [options]="[{label: 'Esquerda', value: 'left'}, {label: 'Direita', value: 'right'}]"
+            [(ngModel)]="grafico.posicao"
+          ></p-select>
         </div>
       </div>
     </p-panel>
@@ -111,11 +96,13 @@
   >
     <div class="lista-graficos" #pdfGraph>
       <div *ngFor="let grafico of graficos; let i = index">
+        <strong style="text-align: center">{{grafico.titulo}}</strong>
         <div class="corpo-grafico">
-          <div class="texto-grafico-left">
-            <span *ngIf="grafico.posicao === 'left'">
-              {{ grafico?.descricao }}
-            </span>
+          <div
+            class="texto-grafico-left"
+            *ngIf="grafico.posicao === 'left' && grafico.descricao !== ''"
+          >
+            <span> {{ grafico?.descricao }} </span>
           </div>
           <div class="grafico">
             <p-chart
@@ -125,10 +112,11 @@
               [style]="{ maxWidth: '500px', width: '100%' }"
             ></p-chart>
           </div>
-          <div class="texto-grafico-right">
-            <span *ngIf="grafico.posicao === 'right'">
-              {{ grafico?.descricao }}
-            </span>
+          <div
+            class="texto-grafico-right"
+            *ngIf="grafico.posicao === 'right' && grafico.descricao !== ''"
+          >
+            <span> {{ grafico?.descricao }} </span>
           </div>
         </div>
       </div>

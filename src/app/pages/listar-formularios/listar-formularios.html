@@ -46,6 +46,7 @@
           pTooltip="Visualizar formulário"
           icon="pi pi-eye"
           (click)="visualizarFormulario(form)"
+          [disabled]="!form.Link_Url"
         />
         <p-button
           severity="contrast"
