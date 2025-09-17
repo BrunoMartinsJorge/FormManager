@@ -82,18 +82,11 @@ export class AdicionarQuiz {
     const novaQuestao: NewQuestQuiz = {
       titulo: '',
       tipo: TypeQuestEnum.TEXTO,
-      obrigatoria: false,
       opcoes: undefined,
-      favorito: false,
       valorCorreto: [],
       respostasCorretas: [],
     };
     this.quiz.questoes.push(novaQuestao);
-  }
-
-  public favoritarQuestao(index: number): void {
-    const questao = this.quiz.questoes[index];
-    questao.favorito = !questao.favorito;
   }
 
   public getOpcao(questao: NewQuest, i: number): string {

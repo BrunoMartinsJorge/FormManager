@@ -16,8 +16,6 @@ async function salvarFormularioCompleto(dadosForm) {
     "SELECT idTipo_Pergunta FROM Tipo_Pergunta WHERE Descricao = ?"
   );
 
-
-
   const salvar = db.transaction((dadosForm) => {
     const result = insertFormulario.run(
       dadosForm.titulo,
@@ -53,6 +51,66 @@ async function salvarFormularioCompleto(dadosForm) {
   return salvar(dadosForm);
 }
 
+async function salvarQuizCompleto(dadosQuiz) {
+  const insertQuiz = db.prepare(
+    "INSERT INTO Quiz (Titulo, Descricao, Link_Url, quizId) VALUES (?, ?, ?, ?)"
+  );
+  const insertQuestao = db.prepare(
+    "INSERT INTO Questao (idTipo_Pergunta, idQuiz, Titulo, Obrigatoria, Favorita) VALUES (?, ?, ?, ?, ?)"
+  );
+  const insertAlternativa = db.prepare(
+    "INSERT INTO Alternativa (idQuestao, Texto) VALUES (?, ?)"
+  );
+  const getTipoPergunta = db.prepare(
+    "SELECT idTipo_Pergunta FROM Tipo_Pergunta WHERE Descricao = ?"
+  );
+
+  const salvar = db.transaction((dadosQuiz) => {
+    // Inserindo o quiz
+    const result = insertQuiz.run(
+      dadosQuiz.titulo,
+      dadosQuiz.descricao,
+      dadosQuiz.linkUrl,
+      dadosQuiz.formId
+    );
+
+    const quizId = result.lastInsertRowid;
+
+    // Iterando sobre as questões do quiz
+    dadosQuiz.questoes.forEach((q) => {
+      // Busca ou cria o tipo de pergunta
+      const tipo = getTipoPergunta.get(q.tipo);
+      let tipoId = tipo
+        ? tipo.idTipo_Pergunta
+        : db
+          .prepare("INSERT INTO Tipo_Pergunta (Descricao) VALUES (?)")
+          .run(q.tipo).lastInsertRowid;
+
+      // Insere a questão
+      const resQuestao = insertQuestao.run(
+        tipoId,
+        quizId,
+        q.titulo,
+        q.obrigatoria ? 1 : 0,
+        q.favorito ? 1 : 0
+      );
+
+      const questaoId = resQuestao.lastInsertRowid;
+
+      // Insere alternativas da questão, se houver
+      if (q.opcoes && q.opcoes.length > 0) {
+        q.opcoes.forEach((opcao) =>
+          insertAlternativa.run(questaoId, opcao)
+        );
+      }
+    });
+
+    return quizId;
+  });
+
+  return salvar(dadosQuiz);
+}
+
 function apagarFormulario(idFormulario) {
   db.prepare(
     "DELETE FROM Alternativa WHERE Pergunta_idPergunta IN (SELECT idPergunta FROM Pergunta WHERE Formulario_idFormulario = ?)"
@@ -68,6 +126,10 @@ function listarFormularios() {
   return db.prepare("SELECT * FROM Formulario ORDER BY idFormulario").all();
 }
 
+function listarQuizzes() {
+  return db.prepare("SELECT * FROM Quiz ORDER BY idQuiz").all();
+}
+
 function listarQuestoesPorFormulario(idForm) {
   return db.prepare("SELECT * FROM Pergunta WHERE Formulario_idFormulario = ? ORDER BY idPergunta").all(idForm);
 }
@@ -80,31 +142,99 @@ async function createGoogleForm(newForm) {
   const auth = await getAuthClient();
   const formsApi = google.forms({ version: "v1", auth });
 
-  const createRes = await formsApi.forms.create({ requestBody: { info: { title: newForm.titulo } } });
+  const createRes = await formsApi.forms.create({
+    requestBody: { info: { title: newForm.titulo } },
+  });
   const formId = createRes.data.formId;
 
-  const requests = (newForm.questoes || []).map((questao, index) => {
+  const requests = (newForm.questoes || []).flatMap((questao, index) => {
+    const reqs = [];
+
+    if (questao.imagemUrl) {
+      reqs.push({
+        createItem: {
+          item: {
+            title: "Imagem relacionada à pergunta",
+            imageItem: { image: { sourceUri: questao.imagemUrl } },
+          },
+          location: { index: index * 2 },
+        },
+      });
+    }
+
     const item = { title: questao.titulo, questionItem: { question: {} } };
     switch (questao.tipo) {
-      case "TEXTO": item.questionItem.question = { textQuestion: { paragraph: false } }; break;
-      case "PARAGRAFO": item.questionItem.question = { textQuestion: { paragraph: true } }; break;
-      case "NUMERO": item.questionItem.question = { textQuestion: {} }; break;
-      case "UNICA": item.questionItem.question = { choiceQuestion: { type: "RADIO", options: (questao.opcoes || []).map(v => ({ value: v })) } }; break;
-      case "MULTIPLA": item.questionItem.question = { choiceQuestion: { type: "CHECKBOX", options: (questao.opcoes || []).map(v => ({ value: v })) } }; break;
-      case "DATA": item.questionItem.question = { dateQuestion: {} }; break;
-      case "DATAHORA": item.questionItem.question = { dateTimeQuestion: {} }; break;
-      case "ESCALA": item.questionItem.question = { scaleQuestion: { low: questao.low || 1, high: questao.high || 5 } }; break;
-      case "VERDADEIRO_FALSO": item.questionItem.question = { choiceQuestion: { type: "RADIO", options: [{ value: "Verdadeiro" }, { value: "Falso" }] } }; break;
-      case "UPLOAD": item.questionItem.question = { fileUploadQuestion: { maxFiles: questao.maxFiles || 1, maxFileSize: questao.maxFileSize || 10 } }; break;
+      case "TEXTO":
+        item.questionItem.question = { textQuestion: { paragraph: false } };
+        break;
+      case "PARAGRAFO":
+        item.questionItem.question = { textQuestion: { paragraph: true } };
+        break;
+      case "NUMERO":
+        item.questionItem.question = { textQuestion: {} };
+        break;
+      case "UNICA":
+        item.questionItem.question = {
+          choiceQuestion: {
+            type: "RADIO",
+            options: (questao.opcoes || []).map(v => ({ value: v })),
+          },
+        };
+        break;
+      case "MULTIPLA":
+        item.questionItem.question = {
+          choiceQuestion: {
+            type: "CHECKBOX",
+            options: (questao.opcoes || []).map(v => ({ value: v })),
+          },
+        };
+        break;
+      case "DATA":
+        item.questionItem.question = { dateQuestion: {} };
+        break;
+      case "DATAHORA":
+        item.questionItem.question = { dateTimeQuestion: {} };
+        break;
+      case "ESCALA":
+        item.questionItem.question = {
+          scaleQuestion: { low: questao.low || 1, high: questao.high || 5 },
+        };
+        break;
+      case "VERDADEIRO_FALSO":
+        item.questionItem.question = {
+          choiceQuestion: { type: "RADIO", options: [{ value: "Verdadeiro" }, { value: "Falso" }] },
+        };
+        break;
+      case "UPLOAD":
+        item.questionItem.question = { fileUploadQuestion: { maxFiles: questao.maxFiles || 1, maxFileSize: questao.maxFileSize || 10 } };
+        break;
     }
-    return { createItem: { item, location: { index } } };
+
+    reqs.push({
+      createItem: {
+        item,
+        location: { index: index * 2 + (questao.imagemUrl ? 1 : 0) },
+      },
+    });
+
+    return reqs;
   });
 
-  requests.push({ updateFormInfo: { info: { description: newForm.descricao || "" }, updateMask: "description" } });
+  requests.push({
+    updateFormInfo: { info: { description: newForm.descricao || "" }, updateMask: "description" },
+  });
+
   await formsApi.forms.batchUpdate({ formId, requestBody: { requests } });
 
-  return { formId, formUrl: createRes.data.responderUri, titulo: newForm.titulo, descricao: newForm.descricao, questoes: newForm.questoes };
+  return {
+    formId,
+    formUrl: createRes.data.responderUri,
+    titulo: newForm.titulo,
+    descricao: newForm.descricao,
+    questoes: newForm.questoes,
+  };
 }
+
 
 async function criarQuiz(newForm) {
   const auth = await getAuthClient();
@@ -260,4 +390,4 @@ async function listarRespostas(formId) {
   }
 }
 
-module.exports = { salvarFormularioCompleto, apagarFormulario, listarFormularios, listarQuestoesPorFormulario, buscarFormularioPorId, createGoogleForm, criarQuiz, listarRespostas };
+module.exports = { salvarFormularioCompleto, apagarFormulario, listarFormularios, listarQuestoesPorFormulario, buscarFormularioPorId, createGoogleForm, criarQuiz, listarRespostas, listarQuizzes, salvarQuizCompleto };

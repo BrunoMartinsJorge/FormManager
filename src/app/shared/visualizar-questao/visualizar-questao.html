@@ -1,3 +1,6 @@
+<ng-container *ngIf="questao?.imagemUrl">
+  <img [src]="questao?.imagemUrl" alt="Imagem da questão" class="questao-imagem" />
+</ng-container>
 <ng-container [ngSwitch]="questao?.tipo">
   <ng-container *ngSwitchCase="'TEXTO'">
     <div class="questao-element">

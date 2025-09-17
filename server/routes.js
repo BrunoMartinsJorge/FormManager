@@ -1,6 +1,6 @@
 const express = require("express");
 const { oAuth2Client, SCOPES } = require("./googleAuth");
-const { criarQuiz, createGoogleForm, salvarFormularioCompleto, listarFormularios, apagarFormulario, buscarFormularioPorId, listarRespostas } = require("./formService");
+const { criarQuiz, createGoogleForm, salvarFormularioCompleto, listarFormularios, apagarFormulario, buscarFormularioPorId, listarRespostas, listarQuizzes, salvarQuizCompleto } = require("./formService");
 const { google } = require("googleapis");
 
 const router = express.Router();
@@ -61,9 +61,10 @@ router.get("/validate-token", async (req, res) => {
 
 router.post("/api/quiz", async (req, res) => {
   try {
-    const resultado = await criarQuiz(req.body);
+    const resultado = await criarQuiz(req.body);    
     const dadosSalvar = { titulo: req.body.titulo, descricao: req.body.descricao, questoes: req.body.questoes, formId: resultado.formId, linkUrl: resultado.formUrl };
-    await salvarFormularioCompleto(dadosSalvar);
+    console.log(dadosSalvar);
+    await salvarQuizCompleto(dadosSalvar);
     res.status(201).json(resultado);
   } catch (err) {
     console.error("Erro ao criar quiz:", err.message || err);
@@ -74,7 +75,9 @@ router.post("/api/quiz", async (req, res) => {
 router.post("/api/forms", async (req, res) => {
   try {
     const resultado = await createGoogleForm(req.body);
+    console.log(resultado);
     const dadosSalvar = { titulo: req.body.titulo, descricao: req.body.descricao, questoes: req.body.questoes, formId: resultado.formId, linkUrl: resultado.formUrl };
+    
     await salvarFormularioCompleto(dadosSalvar);
     res.status(201).json(resultado);
   } catch (err) {
@@ -115,6 +118,17 @@ router.get("/api/forms/:formId", (req, res) => {
 });
 
 router.get("/api/forms", (req, res) => res.json(listarFormularios()));
+
+router.get("/api/quiz", (req, res) => {
+  try {
+    const quizzes = listarQuizzes();
+    res.setHeader("Content-Type", "application/json"); // força o tipo
+    res.json(quizzes); // garante JSON
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Erro ao buscar quizzes" });
+  }
+});
 
 router.delete("/api/forms/:formId", (req, res) => {
   apagarFormulario(req.params.formId);

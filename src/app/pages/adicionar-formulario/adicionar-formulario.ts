@@ -131,16 +131,9 @@ export class AdicionarFormulario {
     const novaQuestao: NewQuest = {
       titulo: '',
       tipo: TypeQuestEnum.TEXTO,
-      obrigatoria: false,
       opcoes: [],
-      favorito: false,
     };
     this.formulario.questoes.push(novaQuestao);
-  }
-
-  public favoritarQuestao(index: number): void {
-    const questao = this.formulario.questoes[index];
-    questao.favorito = !questao.favorito;
   }
 
   public getOpcao(questao: NewQuest, i: number): string {
@@ -212,6 +205,11 @@ export class AdicionarFormulario {
           }
         }
       }
+      if (questao.imagemUrl && questao.imagemUrl.trim() != '') {
+        if (!questao.descricaoImagem || questao.descricaoImagem.trim() === '') {
+          return false;
+        }
+      }
     }
     if (this.formulario.dataAbertura > this.formulario.dataFechamento)
       return false;
@@ -229,5 +227,9 @@ export class AdicionarFormulario {
       questao.opcoes[i] = questao.opcoes[i + 1];
     }
     questao.opcoes.pop();
+  }
+
+  public copyLink(): void {
+    navigator.clipboard.writeText(this.urlForm);
   }
 }

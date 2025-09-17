@@ -1,1 +1,65 @@
-<p>listar-quiz works!</p>
+<div class="info-page">
+  <h1>Listagem de Formulários</h1>
+  <span
+    >Aqui você pode visualizar todos os formulários cadastrados no
+    sistema.</span
+  >
+</div>
+<p-table
+  [value]="listaQuizzes"
+  [paginator]="true"
+  [rows]="10"
+  [responsiveLayout]="'scroll'"
+  [tableStyle]="{ maxWidth: '98%', 'margin': '2em auto' }"
+  stripedRows
+  showGridlines
+>
+  <ng-template #header>
+    <tr>
+      <th>ID</th>
+      <th>Titulo</th>
+      <th>Descrição</th>
+      <th pSortableColumn="data_criacao">
+        <i class="pi pi-calendar"></i>Data de Criação
+        <p-sortIcon field="data_criacao" />
+      </th>
+      <th class="btn-list">Ações</th>
+    </tr>
+  </ng-template>
+  <ng-template #body let-quiz>
+    <tr>
+      <td>{{ quiz.idQuiz }}</td>
+      <td>{{ quiz.titulo }}</td>
+      <td>{{ quiz.descricao }}</td>
+      <td>{{ quiz.data_criacao | date: "dd/MM/yyyy HH:mm" }}</td>
+      <td class="btn-list">
+        <p-button
+          [pTooltip]="quiz.link_url ? 'Acessar formulário' : 'Sem link de acesso'"
+          [disabled]="!quiz.link_url"
+          severity="success"
+          icon="pi pi-external-link"
+          (click)="acessarFormulario(form)"
+        />
+        <p-button
+          severity="warn"
+          pTooltip="Visualizar formulário"
+          icon="pi pi-eye"
+          (click)="visualizarFormulario(form)"
+          [disabled]="!quiz.link_url"
+        />
+        <p-button
+          severity="contrast"
+          pTooltip="Apagar formulário"
+          icon="pi pi-trash"
+          (click)="apagarFormulario($event, quiz.idQuiz)"
+        />
+        <p-button
+          severity="info"
+          pTooltip="Gerar PDF do formulário"
+          icon="pi pi-file"
+          (click)="gerarPDF(form)"
+        />
+      </td>
+    </tr>
+  </ng-template>
+</p-table>

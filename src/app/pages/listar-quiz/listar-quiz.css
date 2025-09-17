@@ -1,0 +1,53 @@
+.info-page {
+  display: flex;
+  flex-direction: column;
+  padding: 1em 0 0 1em;
+  color: #333;
+}
+
+.info-page span {
+  font-size: 16px;
+}
+
+.btn-list {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  grid-gap: 0.25em;
+}
+
+.form-info{
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    grid-gap: 0.5em;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    padding: 1em;
+    width: 90%;
+    margin: 1em auto;
+}
+
+h2, h3{
+  text-align: center;
+}
+
+.form-empty {
+  display: flex;
+  text-align: center;
+  flex-direction: column;
+  color: #333;
+
+  span {
+    font-size: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    grid-gap: 0.15rem;
+
+    i {
+      color: #ff9800;
+    }
+  }
+}

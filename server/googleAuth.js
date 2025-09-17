@@ -18,6 +18,9 @@ const SCOPES = [
   "https://www.googleapis.com/auth/forms.responses.readonly",
   "https://www.googleapis.com/auth/spreadsheets",
   "https://www.googleapis.com/auth/drive.file",
+  "https://www.googleapis.com/auth/forms",
+  "https://www.googleapis.com/auth/script.projects",
+  "https://www.googleapis.com/auth/script.scriptapp",
 ];
 
 function getStoredTokens() {

@@ -6,64 +6,95 @@ const userDataPath = electronApp.getPath("userData");
 const dbPath = path.join(userDataPath, "banco.db");
 const db = new Database(dbPath);
 
+db.pragma('foreign_keys = ON');
+
 db.prepare(`
 CREATE TABLE IF NOT EXISTS Formulario (
   idFormulario INTEGER PRIMARY KEY AUTOINCREMENT,
-  Titulo VARCHAR(75),
-  Descricao TEXT,
-  Data_Criacao DATETIME DEFAULT CURRENT_TIMESTAMP,
-  Link_Url TEXT,
+  titulo VARCHAR(75),
+  descricao TEXT,
+  data_criacao DATETIME DEFAULT CURRENT_TIMESTAMP,
+  link_url TEXT,
   formId TEXT
+);`).run();
+
+db.prepare(`
+CREATE TABLE IF NOT EXISTS Quiz (
+  idQuiz INTEGER PRIMARY KEY AUTOINCREMENT,
+  titulo VARCHAR(75),
+  descricao TEXT,
+  data_criacao DATETIME DEFAULT CURRENT_TIMESTAMP,
+  link_url TEXT,
+  quizId TEXT
 );`).run();
 
 db.prepare(`
 CREATE TABLE IF NOT EXISTS Tipo_Pergunta (
   idTipo_Pergunta INTEGER PRIMARY KEY AUTOINCREMENT,
-  Descricao TEXT
+  descricao TEXT
 );`).run();
 
 db.prepare(`
 CREATE TABLE IF NOT EXISTS Pergunta (
   idPergunta INTEGER PRIMARY KEY AUTOINCREMENT,
-  Tipo_Pergunta_idTipo_Pergunta INTEGER,
-  Formulario_idFormulario INTEGER,
-  Titulo VARCHAR(255),
-  Descricao TEXT,
-  Obrigatorio BOOLEAN,
-  Favorita BOOLEAN,
-  FOREIGN KEY (Tipo_Pergunta_idTipo_Pergunta) REFERENCES Tipo_Pergunta(idTipo_Pergunta),
-  FOREIGN KEY (Formulario_idFormulario) REFERENCES Formulario(idFormulario)
+  idTipo_Pergunta INTEGER,
+  idFormulario INTEGER,
+  titulo VARCHAR(255),
+  descricao TEXT,
+  obrigatoria BOOLEAN,
+  favorita BOOLEAN,
+  FOREIGN KEY (idTipo_Pergunta) REFERENCES Tipo_Pergunta(idTipo_Pergunta),
+  FOREIGN KEY (idFormulario) REFERENCES Formulario(idFormulario)
+);`).run();
+
+db.prepare(`
+CREATE TABLE IF NOT EXISTS Questao (
+  idQuestao INTEGER PRIMARY KEY AUTOINCREMENT,
+  idTipo_Pergunta INTEGER,
+  idQuiz INTEGER,
+  titulo VARCHAR(255),
+  descricao TEXT,
+  obrigatoria BOOLEAN,
+  favorita BOOLEAN,
+  FOREIGN KEY (idTipo_Pergunta) REFERENCES Tipo_Pergunta(idTipo_Pergunta),
+  FOREIGN KEY (idQuiz) REFERENCES Quiz(idQuiz)
 );`).run();
 
 db.prepare(`
 CREATE TABLE IF NOT EXISTS Alternativa (
   idAlternativa INTEGER PRIMARY KEY AUTOINCREMENT,
-  Pergunta_idPergunta INTEGER,
-  Texto TEXT,
-  FOREIGN KEY (Pergunta_idPergunta) REFERENCES Pergunta(idPergunta)
+  idPergunta INTEGER,
+  idQuestao INTEGER,
+  texto TEXT,
+  FOREIGN KEY (idPergunta) REFERENCES Pergunta(idPergunta),
+  FOREIGN KEY (idQuestao) REFERENCES Questao(idQuestao)
 );`).run();
 
 db.prepare(`
 CREATE TABLE IF NOT EXISTS Participante (
   idParticipante INTEGER PRIMARY KEY AUTOINCREMENT,
-  Nome TEXT,
-  Email TEXT
+  nome TEXT,
+  email TEXT
 );`).run();
 
 db.prepare(`
 CREATE TABLE IF NOT EXISTS Resposta (
   idResposta INTEGER PRIMARY KEY AUTOINCREMENT,
-  Participante_idParticipante INTEGER,
-  Pergunta_idPergunta INTEGER,
-  Valor TEXT,
-  Data_Resposta DATE,
-  FOREIGN KEY (Participante_idParticipante) REFERENCES Participante(idParticipante),
-  FOREIGN KEY (Pergunta_idPergunta) REFERENCES Pergunta(idPergunta)
+  idParticipante INTEGER,
+  idPergunta INTEGER,
+  idQuestao INTEGER,
+  idAlternativa INTEGER,
+  valor TEXT,
+  data_resposta DATETIME DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (idParticipante) REFERENCES Participante(idParticipante),
+  FOREIGN KEY (idPergunta) REFERENCES Pergunta(idPergunta),
+  FOREIGN KEY (idQuestao) REFERENCES Questao(idQuestao),
+  FOREIGN KEY (idAlternativa) REFERENCES Alternativa(idAlternativa)
 );`).run();
 
 db.prepare(`
-CREATE TABLE IF NOT EXISTS tokens (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
+CREATE TABLE IF NOT EXISTS Token (
+  idToken INTEGER PRIMARY KEY AUTOINCREMENT,
   accessToken TEXT NOT NULL,
   refreshToken TEXT NOT NULL,
   createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,

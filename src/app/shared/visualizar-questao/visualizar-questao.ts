@@ -29,32 +29,21 @@ export class VisualizarQuestao {
   public simularResposta(): void {
     switch (this.questao?.tipo) {
       case 'TEXTO':
-        if (this.resposta.trim() === '' && this.questao?.obrigatoria) {
-          this.mensagemResposta = 'Por favor, preencha a resposta.';
-          this.disabled = true;
-        } else {
-          this.disabled = false;
-          this.mensagemResposta = 'Resposta enviada com sucesso!';
-        }
+        this.disabled = false;
+        this.mensagemResposta = 'Resposta enviada com sucesso!';
         break;
       case 'NUMERO':
-        if (this.resposta === null && this.questao?.obrigatoria) {
-          this.mensagemResposta = 'Por favor, preencha a resposta.';
-          this.disabled = true;
-        } else {
-          this.disabled = false;
-          this.mensagemResposta = 'Resposta enviada com sucesso!';
-        }
+        this.disabled = false;
+        this.mensagemResposta = 'Resposta enviada com sucesso!';
         break;
     }
-    console.log(this.questao?.obrigatoria);
   }
 
-  public get getMin(): number{
+  public get getMin(): number {
     return this.questao!.min || 0;
   }
 
-  public get getMax(): number{
+  public get getMax(): number {
     return this.questao!.max || this.getMin + 1;
   }
 
