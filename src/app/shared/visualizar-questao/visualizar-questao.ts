@@ -6,6 +6,9 @@ import { FormsModule } from '@angular/forms';
 import { Button } from 'primeng/button';
 import { InputNumber } from 'primeng/inputnumber';
 import { RadioButton } from 'primeng/radiobutton';
+import { TextareaModule } from 'primeng/textarea';
+import { CheckboxModule } from 'primeng/checkbox';
+import { DatePickerModule } from 'primeng/datepicker';
 
 @Component({
   selector: 'app-visualizar-questao',
@@ -16,6 +19,9 @@ import { RadioButton } from 'primeng/radiobutton';
     Button,
     InputNumber,
     RadioButton,
+    TextareaModule,
+    CheckboxModule,
+    DatePickerModule,
   ],
   templateUrl: './visualizar-questao.html',
   styleUrl: './visualizar-questao.css',
@@ -27,16 +33,8 @@ export class VisualizarQuestao {
   mensagemResposta: string = '';
 
   public simularResposta(): void {
-    switch (this.questao?.tipo) {
-      case 'TEXTO':
-        this.disabled = false;
-        this.mensagemResposta = 'Resposta enviada com sucesso!';
-        break;
-      case 'NUMERO':
-        this.disabled = false;
-        this.mensagemResposta = 'Resposta enviada com sucesso!';
-        break;
-    }
+    this.disabled = false;
+    this.mensagemResposta = 'Resposta enviada com sucesso!';
   }
 
   public get getMin(): number {

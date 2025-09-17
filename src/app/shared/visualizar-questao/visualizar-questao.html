@@ -1,5 +1,9 @@
 <ng-container *ngIf="questao?.imagemUrl">
-  <img [src]="questao?.imagemUrl" alt="Imagem da questão" class="questao-imagem" />
+  <img
+    [src]="questao?.imagemUrl"
+    alt="Imagem da questão"
+    class="questao-imagem"
+  />
 </ng-container>
 <ng-container [ngSwitch]="questao?.tipo">
   <ng-container *ngSwitchCase="'TEXTO'">
@@ -20,6 +24,29 @@
     <span [ngClass]="'mensagem-resposta ' + (disabled ? 'disabled' : '')"
       >{{ mensagemResposta }}</span
     >
+  </ng-container>
+  <ng-container [ngSwitch]="questao?.tipo">
+    <ng-container *ngSwitchCase="'PARAGRAFO'">
+      <div class="questao-element">
+        <div class="questao-body">
+          <h4>{{ questao?.titulo != '' ? questao?.titulo : 'Sem título' }}</h4>
+          <textarea
+            placeholder="Resposta..."
+            [(ngModel)]="resposta"
+            pTextarea
+          ></textarea>
+          <br />
+        </div>
+        <p-button
+          label="Enviar"
+          icon="pi pi-send"
+          (click)="simularResposta()"
+        />
+      </div>
+      <span [ngClass]="'mensagem-resposta ' + (disabled ? 'disabled' : '')"
+        >{{ mensagemResposta }}</span
+      >
+    </ng-container>
   </ng-container>
   <ng-container *ngSwitchCase="'NUMERO'">
     <div class="questao-element">
@@ -64,7 +91,113 @@
       >{{ mensagemResposta }}</span
     >
   </ng-container>
-  <ng-container *ngSwitchDefault>
-    <p>Informe o tipo da questão!</p>
+  <ng-container *ngSwitchCase="'UNICA'">
+    <div class="questao-element">
+      <div class="questao-body">
+        <h4>{{ questao?.titulo != '' ? questao?.titulo : 'Sem título' }}</h4>
+        <div class="opcoes-list" *ngIf="questao && questao.opcoes">
+          <div
+            class="input-group"
+            *ngFor="let opcao of questao.opcoes; let i = index"
+          >
+            <p-radiobutton
+              id="opcao-{{i}}"
+              [(ngModel)]="resposta"
+              [value]="'opcao-'+i"
+            />
+            <label for="opcao-{{i}}">{{opcao}}</label>
+          </div>
+        </div>
+      </div>
+      <p-button label="Enviar" icon="pi pi-send" (click)="simularResposta()" />
+    </div>
+    <span [ngClass]="'mensagem-resposta ' + (disabled ? 'disabled' : '')"
+      >{{ mensagemResposta }}</span
+    >
+  </ng-container>
+  <ng-container *ngSwitchCase="'MULTIPLA'">
+    <div class="questao-element">
+      <div class="questao-body">
+        <h4>{{ questao?.titulo != '' ? questao?.titulo : 'Sem título' }}</h4>
+        <div
+          *ngFor="let opcao of questao?.opcoes; let i = index"
+          class="flex items-center"
+        >
+          <p-checkbox
+            [inputId]="'opcao' + i"
+            [value]="'opcao' + i"
+            [(ngModel)]="resposta"
+            binary="false"
+          ></p-checkbox>
+          <label [for]="'opcao' + i" class="ml-2"> {{ opcao }} </label>
+        </div>
+      </div>
+      <p-button label="Enviar" icon="pi pi-send" (click)="simularResposta()" />
+    </div>
+    <span [ngClass]="'mensagem-resposta ' + (disabled ? 'disabled' : '')"
+      >{{ mensagemResposta }}</span
+    >
+  </ng-container>
+  <ng-container *ngSwitchCase="'DATA'">
+    <div class="questao-element">
+      <div class="questao-body">
+        <h4>{{ questao?.titulo != '' ? questao?.titulo : 'Sem título' }}</h4>
+        <p-datepicker [(ngModel)]="resposta" />
+        <br />
+      </div>
+      <p-button label="Enviar" icon="pi pi-send" (click)="simularResposta()" />
+    </div>
+    <span [ngClass]="'mensagem-resposta ' + (disabled ? 'disabled' : '')"
+      >{{ mensagemResposta }}</span
+    >
+  </ng-container>
+  <ng-container *ngSwitchCase="'VERDADEIRO_FALSO'">
+    <div class="questao-element">
+      <div class="questao-body">
+        <h4>{{ questao?.titulo != '' ? questao?.titulo : 'Sem título' }}</h4>
+        <div class="opcoes-list">
+          <div class="input-group">
+            <p-radiobutton
+              id="verdadeiro"
+              [(ngModel)]="resposta"
+              [value]="true"
+            />
+            <label for="verdadeiro">Verdadeiro</label>
+          </div>
+          <div class="input-group">
+            <p-radiobutton id="falso" [(ngModel)]="resposta" [value]="false" />
+            <label for="falso">Falso</label>
+          </div>
+          <br />
+        </div>
+      </div>
+      <p-button label="Enviar" icon="pi pi-send" (click)="simularResposta()" />
+    </div>
+    <span [ngClass]="'mensagem-resposta ' + (disabled ? 'disabled' : '')"
+      >{{ mensagemResposta }}</span
+    >
+  </ng-container>
+  <ng-container *ngSwitchCase="'MULTIPLA'">
+    <div class="questao-element">
+      <div class="questao-body">
+        <h4>{{ questao?.titulo != '' ? questao?.titulo : 'Sem título' }}</h4>
+        <div
+          *ngFor="let opcao of questao?.opcoes; let i = index"
+          class="flex items-center"
+        >
+          <p-checkbox
+            [inputId]="'opcao' + i"
+            [value]="'opcao' + i"
+            [(ngModel)]="resposta"
+            binary="false"
+          ></p-checkbox>
+          <label [for]="'opcao' + i" class="ml-2"> {{ opcao }} </label>
+        </div>
+      </div>
+      <p-button label="Enviar" icon="pi pi-send" (click)="simularResposta()" />
+    </div>
+    <span [ngClass]="'mensagem-resposta ' + (disabled ? 'disabled' : '')"
+      >{{ mensagemResposta }}</span
+    >
   </ng-container>
 </ng-container>

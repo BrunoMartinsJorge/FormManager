@@ -1,47 +1,63 @@
-h4{
-    font-size: 18px;
-    color: #333;
-    padding-left: 0.15rem;
+h4 {
+  font-size: 18px;
+  color: #333;
+  padding-left: 0.15rem;
 }
 
 p {
-    font-size: 14px;
-    color: #333;
-    padding-left: 0.15rem;
+  font-size: 14px;
+  color: #333;
+  padding-left: 0.15rem;
 }
 
 .questao-element {
-    display: flex;
-    align-items: end;
-    justify-content: space-between;
-    flex-wrap: wrap;
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  flex-wrap: wrap;
 }
 
 span.mensagem-resposta {
-    font-size: 14px;
-    color: rgb(15, 193, 39);
-    border-top: 1px solid #ccc;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-top: 0.5rem;
-    padding-top: 0.5rem;
+  font-size: 14px;
+  color: rgb(15, 193, 39);
+  border-top: 1px solid #ccc;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 0.5rem;
+  padding-top: 0.5rem;
 }
 
 span.mensagem-resposta.disabled {
-    color: rgb(255, 0, 0);
+  color: rgb(255, 0, 0);
 }
 
-div.inpu-selec{
-    display: flex;
-    flex-wrap: wrap;
-    grid-gap: 1em;
-    align-items: center;
+div.inpu-selec {
+  display: flex;
+  flex-wrap: wrap;
+  grid-gap: 1em;
+  align-items: center;
 
-    div.input-group{
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        flex-direction: column;
-    }
+  div.input-group {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+  }
+}
+
+div.opcoes-list {
+  display: flex;
+  grid-gap: 0.5em;
+  flex-direction: column;
+
+  div.input-group {
+    grid-gap: 0.5em;
+    display: flex;
+    align-items: center;
+  }
+}
+
+textarea[pTextarea] {
+  resize: none;
 }
