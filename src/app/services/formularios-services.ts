@@ -17,6 +17,14 @@ export class FormulariosServices {
     return this.http.post<any>(`${this.baseUrl}/api/forms`, formulario);
   }
 
+  public findAllQuestionsFavorites(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.baseUrl}/forms/find-favorite-questions`);
+  }
+
+  public addQuestionToFavorites(question: any): Observable<any> {
+    return this.http.post<any>(`${this.baseUrl}/forms/add-question-favorite`, question);
+  }
+
   public criarQuiz(quiz: any): Observable<any> {
     return this.http.post<any>(`${this.baseUrl}/api/quiz`, quiz);
   }
@@ -31,10 +39,10 @@ export class FormulariosServices {
     });
   }
   public buscarRespostasDeFormularioPorIdForm(formId: string): Observable<any> {
-    return this.http.get<any>(`${this.baseUrl}/forms/${formId}/responses`);
+    return this.http.get<any>(`${this.baseUrl}/forms/google/${formId}/responses`);
   }
 
   public buscarQuestoesDeFormularioPorIdForm(formId: string): Observable<any> {
-    return this.http.get<any>(`${this.baseUrl}/forms/quest/${formId}`);
+    return this.http.get<any>(`${this.baseUrl}/api/forms/${formId}/questions`);
   }
 }

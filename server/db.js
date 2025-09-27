@@ -38,13 +38,11 @@ db.prepare(`
 CREATE TABLE IF NOT EXISTS Pergunta (
   idPergunta INTEGER PRIMARY KEY AUTOINCREMENT,
   idTipo_Pergunta INTEGER,
-  idFormulario INTEGER,
   titulo VARCHAR(255),
-  descricao TEXT,
-  obrigatoria BOOLEAN,
+  url_imagem TEXT,
+  descricao_imagem TEXT,
   favorita BOOLEAN,
-  FOREIGN KEY (idTipo_Pergunta) REFERENCES Tipo_Pergunta(idTipo_Pergunta),
-  FOREIGN KEY (idFormulario) REFERENCES Formulario(idFormulario)
+  FOREIGN KEY (idTipo_Pergunta) REFERENCES Tipo_Pergunta(idTipo_Pergunta)
 );`).run();
 
 db.prepare(`
@@ -54,7 +52,6 @@ CREATE TABLE IF NOT EXISTS Questao (
   idQuiz INTEGER,
   titulo VARCHAR(255),
   descricao TEXT,
-  obrigatoria BOOLEAN,
   favorita BOOLEAN,
   FOREIGN KEY (idTipo_Pergunta) REFERENCES Tipo_Pergunta(idTipo_Pergunta),
   FOREIGN KEY (idQuiz) REFERENCES Quiz(idQuiz)

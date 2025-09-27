@@ -1,4 +1,5 @@
 <ng-container *ngIf="questao?.imagemUrl">
+  <p>{{questao?.descricaoImagem}}</p>
   <img
     [src]="questao?.imagemUrl"
     alt="Imagem da questão"
@@ -19,7 +20,7 @@
         />
         <br />
       </div>
-      <p-button label="Enviar" icon="pi pi-send" (click)="simularResposta()" />
+      <p-button label="Enviar" icon="pi pi-send" (click)="simularResposta()" *ngIf="buttonSendIsVisible"/>
     </div>
     <span [ngClass]="'mensagem-resposta ' + (disabled ? 'disabled' : '')"
       >{{ mensagemResposta }}</span
@@ -40,6 +41,7 @@
         <p-button
           label="Enviar"
           icon="pi pi-send"
+          *ngIf="buttonSendIsVisible"
           (click)="simularResposta()"
         />
       </div>
@@ -61,7 +63,7 @@
         />
         <br />
       </div>
-      <p-button label="Enviar" icon="pi pi-send" (click)="simularResposta()" />
+      <p-button label="Enviar" icon="pi pi-send" (click)="simularResposta()" *ngIf="buttonSendIsVisible"/>
     </div>
     <span [ngClass]="'mensagem-resposta ' + (disabled ? 'disabled' : '')"
       >{{ mensagemResposta }}</span
@@ -85,7 +87,7 @@
           </div>
         </div>
       </div>
-      <p-button label="Enviar" icon="pi pi-send" (click)="simularResposta()" />
+      <p-button label="Enviar" icon="pi pi-send" (click)="simularResposta()" *ngIf="buttonSendIsVisible"/>
     </div>
     <span [ngClass]="'mensagem-resposta ' + (disabled ? 'disabled' : '')"
       >{{ mensagemResposta }}</span
@@ -109,7 +111,7 @@
           </div>
         </div>
       </div>
-      <p-button label="Enviar" icon="pi pi-send" (click)="simularResposta()" />
+      <p-button label="Enviar" icon="pi pi-send" (click)="simularResposta()" *ngIf="buttonSendIsVisible"/>
     </div>
     <span [ngClass]="'mensagem-resposta ' + (disabled ? 'disabled' : '')"
       >{{ mensagemResposta }}</span
@@ -132,7 +134,7 @@
           <label [for]="'opcao' + i" class="ml-2"> {{ opcao }} </label>
         </div>
       </div>
-      <p-button label="Enviar" icon="pi pi-send" (click)="simularResposta()" />
+      <p-button label="Enviar" icon="pi pi-send" (click)="simularResposta()" *ngIf="buttonSendIsVisible"/>
     </div>
     <span [ngClass]="'mensagem-resposta ' + (disabled ? 'disabled' : '')"
       >{{ mensagemResposta }}</span
@@ -145,7 +147,7 @@
         <p-datepicker [(ngModel)]="resposta" />
         <br />
       </div>
-      <p-button label="Enviar" icon="pi pi-send" (click)="simularResposta()" />
+      <p-button label="Enviar" icon="pi pi-send" (click)="simularResposta()" *ngIf="buttonSendIsVisible"/>
     </div>
     <span [ngClass]="'mensagem-resposta ' + (disabled ? 'disabled' : '')"
       >{{ mensagemResposta }}</span
@@ -171,7 +173,7 @@
           <br />
         </div>
       </div>
-      <p-button label="Enviar" icon="pi pi-send" (click)="simularResposta()" />
+      <p-button label="Enviar" icon="pi pi-send" (click)="simularResposta()" *ngIf="buttonSendIsVisible"/>
     </div>
     <span [ngClass]="'mensagem-resposta ' + (disabled ? 'disabled' : '')"
       >{{ mensagemResposta }}</span
@@ -194,7 +196,7 @@
           <label [for]="'opcao' + i" class="ml-2"> {{ opcao }} </label>
         </div>
       </div>
-      <p-button label="Enviar" icon="pi pi-send" (click)="simularResposta()" />
+      <p-button label="Enviar" icon="pi pi-send" (click)="simularResposta()" *ngIf="buttonSendIsVisible"/>
     </div>
     <span [ngClass]="'mensagem-resposta ' + (disabled ? 'disabled' : '')"
       >{{ mensagemResposta }}</span

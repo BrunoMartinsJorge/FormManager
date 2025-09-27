@@ -170,7 +170,6 @@ export class GerarGraficos implements OnChanges {
   ): void {
     let labels: string[] = [];
     let data: number[] = [];
-    console.log(respostas);
 
     switch (tipo) {
       case TypeQuestEnum.TEXTO:
@@ -387,7 +386,6 @@ export class GerarGraficos implements OnChanges {
       descricao: '',
       posicao: 'left',
     };
-    console.log(newGraph);
     setTimeout(() => this.cleanData(), this.graficos.push(newGraph));
   }
 
@@ -397,7 +395,6 @@ export class GerarGraficos implements OnChanges {
   }
 
   public updateGraph(index: number): void {
-    console.log(this.graficos[index]);
   }
 
   public enableGraphGeneration(): boolean {

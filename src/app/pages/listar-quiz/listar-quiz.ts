@@ -67,7 +67,6 @@ export class ListarQuiz {
     this.service.getAllQuizzes().subscribe({
       next: (data) => {
         this.listaQuizzes = data;
-        console.log(data);
       },
       error: (err) => {
         console.error('Erro ao carregar quizzes:', err);
@@ -199,7 +198,6 @@ export class ListarQuiz {
           this.form.questoes = this.converterDados(response.items as any[]);
           this.form.titulo = formulario.Titulo;
           this.form.descricaoFormulario = formulario.Descricao;
-          console.log(this.form);
         },
         error: (error: Error) => {
           this.messageService.add({

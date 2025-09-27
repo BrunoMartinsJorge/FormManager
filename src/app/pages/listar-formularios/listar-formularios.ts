@@ -9,7 +9,7 @@ import { TooltipModule } from 'primeng/tooltip';
 import { Router } from '@angular/router';
 import { ConfirmPopupModule } from 'primeng/confirmpopup';
 import { ToastModule } from 'primeng/toast';
-import { ConfirmationService, MessageService } from 'primeng/api';
+import { ConfirmationService, MenuItem, MessageService } from 'primeng/api';
 import { DialogModule } from 'primeng/dialog';
 import { ProgressSpinner } from 'primeng/progressspinner';
 import { QuestaoModel } from '../../shared/models/questao.model';
@@ -19,10 +19,11 @@ import { GerarPdf } from '../gerar-pdf/gerar-pdf';
 import { SelectButton } from 'primeng/selectbutton';
 import { GerarGraficos } from '../gerar-graficos/gerar-graficos';
 import { TypeQuestEnum } from '../adicionar-formulario/enums/TypeQuestEnum';
+import { SplitButtonModule } from 'primeng/splitbutton';
 
 export interface Quest {
   titulo: string;
-  tipoQuestao: 'TEXT' | 'RADIO' | 'ESCALA';
+  tipoQuestao: any;
   opcoes?: string[];
   escala?: { min: number; max: number };
 }
@@ -47,6 +48,7 @@ export interface Form {
     Fieldset,
     GerarPdf,
     GerarGraficos,
+    SplitButtonModule,
   ],
   templateUrl: './listar-formularios.html',
   styleUrl: './listar-formularios.css',
@@ -61,12 +63,14 @@ export class ListarFormularios {
   public habilitarGerarGrafico: boolean = false;
   public formularioParaPDF: NewForm | any;
   public carregando_questoes: boolean = false;
+  public idFormSelecionado: number | null = null;
   public form: Form = {
     titulo: '',
     descricaoFormulario: '',
     questoes: [],
   };
   public opcoesGraficos: any[] = [];
+  public opcoesMenu: MenuItem[];
 
   constructor(
     private formulariosService: FormulariosServices,
@@ -75,6 +79,35 @@ export class ListarFormularios {
     private messageService: MessageService
   ) {
     this.getForms();
+    this.opcoesMenu = [
+      {
+        label: 'Acessar Formulário',
+        icon: 'pi pi-external-link',
+        command: () => {
+          this.acessarFormulario(this.formularioSelecionado);
+        },
+      },
+      {
+        label: 'Apagar Formulário',
+        icon: 'pi pi-trash',
+        command: () => {
+          this.apagarFormulario(this.formularioSelecionado.idFormulario);
+        },
+      },
+      { separator: true },
+      {
+        label: 'Gerar PDF',
+        icon: 'pi pi-file',
+        command: () => {
+          this.gerarPDF(this.formularioSelecionado);
+        },
+      },
+    ];
+  }
+
+  public selectForm(event: any, form: any): void {
+    if (!form) return;
+    this.formularioSelecionado = form;
   }
 
   private getForms(): void {
@@ -93,37 +126,23 @@ export class ListarFormularios {
       .map((item) => {
         const question = item.questionItem?.question;
 
-        if (!question) return null;
+        const tipo = question
+          ? question.choiceQuestion
+            ? 'MULTIPLA_ESCOLHA'
+            : question.textQuestion
+            ? 'TEXTO'
+            : question.scaleQuestion
+            ? 'ESCALA'
+            : 'OUTRO'
+          : 'IMAGEM';
 
-        if (question.choiceQuestion) {
-          return {
-            titulo: item.title,
-            tipoQuestao: 'RADIO',
-            opcoes: question.choiceQuestion.options.map(
-              (opt: any) => opt.value
-            ),
-          } as Quest;
-        }
+        const questao: Quest = {
+          titulo: item.titulo || '',
+          tipoQuestao: item.tipo,
+          opcoes: item.opcoes
+        };
 
-        if (question.textQuestion) {
-          return {
-            titulo: item.title,
-            tipoQuestao: 'TEXT',
-          } as Quest;
-        }
-
-        if (question.scaleQuestion) {
-          return {
-            titulo: item.title,
-            tipoQuestao: 'ESCALA',
-            escala: {
-              min: question.scaleQuestion.low,
-              max: question.scaleQuestion.high,
-            },
-          } as Quest;
-        }
-
-        return null;
+        return questao;
       })
       .filter((q): q is Quest => q !== null);
   }
@@ -192,8 +211,8 @@ export class ListarFormularios {
           this.messageService.add({
             severity: 'error',
             summary: 'Erro ao buscar respostas',
-            detail: error.message
-          })
+            detail: error.message,
+          });
         },
         complete: () => {
           this.formularioSelecionado = form;
@@ -211,20 +230,20 @@ export class ListarFormularios {
       .buscarQuestoesDeFormularioPorIdForm(formulario.formId)
       .subscribe({
         next: (response: any) => {
-          this.form.questoes = this.converterDados(response.items as any[]);
+          this.form.questoes = this.converterDados(response as any[]);
+          console.log(this.form.questoes);
+          
           this.form.titulo = formulario.Titulo;
           this.form.descricaoFormulario = formulario.Descricao;
-          console.log(this.form);
+          this.carregando_questoes = false;
         },
         error: (error: Error) => {
           this.messageService.add({
             severity: 'error',
             summary: 'Erro ao gerar PDF',
             detail: error.message,
-          })
+          });
           console.error(error);
-        },
-        complete: () => {
           this.carregando_questoes = false;
         },
       });
@@ -238,40 +257,19 @@ export class ListarFormularios {
     this.habilitarGerarGrafico = true;
   }
 
-  public apagarFormulario(event: Event, id: number): void {
-    this.confirmationService.confirm({
-      target: event.target as EventTarget,
-      message: 'Você tem certeza que desejá apagar esse formulário?',
-      header: 'Confirmar exclusão',
-      closable: true,
-      closeOnEscape: true,
-      icon: 'pi pi-exclamation-triangle',
-      acceptLabel: 'Sim',
-      rejectLabel: 'Não',
-      rejectButtonProps: {
-        label: 'Cancelar',
-        severity: 'secondary',
-        outlined: true,
-      },
-      acceptButtonProps: {
-        label: 'Apagar',
-      },
-      accept: () => {
-        this.formulariosService.deletarFormulario(id).subscribe({
-          next: () => {
-            this.messageService.add({
-              severity: 'success',
-              summary: 'Sucesso',
-              detail: 'Formulário apagado com sucesso',
-            });
-            this.getForms();
-          },
-          error: (error: Error) => {
-            console.error(error);
-          },
+  public apagarFormulario(id: number): void {
+    this.formulariosService.deletarFormulario(id).subscribe({
+      next: () => {
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Sucesso',
+          detail: 'Formulário apagado com sucesso',
         });
+        this.getForms();
       },
-      reject: () => {},
+      error: (error: Error) => {
+        console.error(error);
+      },
     });
   }
 }

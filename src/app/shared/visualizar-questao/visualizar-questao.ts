@@ -28,6 +28,7 @@ import { DatePickerModule } from 'primeng/datepicker';
 })
 export class VisualizarQuestao {
   @Input() questao: NewQuest | undefined;
+  @Input() buttonSendIsVisible: boolean = true;
   disabled: boolean = false;
   resposta: any = '';
   mensagemResposta: string = '';

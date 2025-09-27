@@ -25,16 +25,11 @@ import { InputNumberModule } from 'primeng/inputnumber';
 import { TooltipModule } from 'primeng/tooltip';
 import { InputGroupModule } from 'primeng/inputgroup';
 import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
-import {
-  trigger,
-  transition,
-  style,
-  animate,
-  query,
-  stagger,
-} from '@angular/animations';
-import { NewQuiz } from './forms/NewQuiz';
-import { NewQuestQuiz } from './forms/NewQuestQuiz';
+import { trigger, transition, style, animate } from '@angular/animations';
+import { SplitButtonModule } from 'primeng/splitbutton';
+import { MenuItem } from 'primeng/api';
+import { CheckboxModule } from 'primeng/checkbox';
+import { TableModule } from 'primeng/table';
 
 export interface Opcao {
   id: number;
@@ -61,6 +56,9 @@ export interface Opcao {
     TooltipModule,
     InputGroupModule,
     InputGroupAddonModule,
+    SplitButtonModule,
+    CheckboxModule,
+    TableModule,
   ],
   standalone: true,
   providers: [FormulariosServices],
@@ -90,6 +88,7 @@ export class AdicionarFormulario {
   visibilidadeDialog: boolean = false;
   urlForm: string = '';
   carregando: boolean = false;
+  questionsSelecteds: any[] = [];
   formulario: NewForm = {
     titulo: '',
     descricao: '',
@@ -97,7 +96,17 @@ export class AdicionarFormulario {
     dataAbertura: new Date(),
     dataFechamento: new Date(),
   };
+  visibilityQuestsSaved: boolean = false;
   opcao: Opcao[] = [];
+  buttonOptions: MenuItem[] = [
+    {
+      label: 'Utilizar Questão Existente',
+      command: () => {
+        this.getQuestSaved();
+      },
+    },
+  ];
+  questsSaved: any = {};
 
   tipoDeCampo: any[] = [
     { nome: 'Texto', value: TypeQuestEnum.TEXTO },
@@ -117,6 +126,21 @@ export class AdicionarFormulario {
     questao.opcoes.push('');
   }
 
+  public useQuestionsSelecteds(): void {
+    if (this.questionsSelecteds.length === 0) return;
+    this.questionsSelecteds.forEach((question) => {
+      const novaQuestao: NewQuest = {
+        titulo: question.titulo,
+        tipo: question.tipo,
+        opcoes: question.opcoes,
+        imagemUrl: question.imagem,
+        descricaoImagem: question.descricaoImagem,
+      };
+      this.formulario.questoes.push(novaQuestao);
+    });
+    this.visibilityQuestsSaved = false;
+  }
+
   public newDataFechamentoMin(): void {
     let data: Date = new Date(this.formulario.dataAbertura);
     data.setDate(data.getDate() + 1);
@@ -134,6 +158,25 @@ export class AdicionarFormulario {
       opcoes: [],
     };
     this.formulario.questoes.push(novaQuestao);
+  }
+
+  private getQuestSaved(): void {
+    this.formulariosService.findAllQuestionsFavorites().subscribe({
+      next: (res) => {
+        this.visibilityQuestsSaved = true;
+        this.questsSaved = res;
+      },
+      error: (error: Error) => {
+        console.error(error);
+      },
+    });
+  }
+
+  public urlImageIsValid(url: string): boolean {
+    if (!url || url.trim() === '') return false;
+    const regex =
+      /^(https?|ftp|file):\/\/((?!(https?|ftp|file):\/\/[-a-zA-Z\d+&@#/%?=~_|!:,.;]*[-a-zA-Z\d+&@#/%=~_|])[-a-zA-Z\d+&@#/%?=~_|!:,.;])*[-a-zA-Z\d+&@#/%=~_|]$/;
+    return regex.test(url);
   }
 
   public getOpcao(questao: NewQuest, i: number): string {

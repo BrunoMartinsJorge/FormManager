@@ -1,0 +1,229 @@
+<main>
+  <div>
+    <h1>Questões Salvas</h1>
+    <p>Aqui você pode visualizar todas as questões salvas</p>
+  </div>
+  <p-table
+    [value]="listOfSavedQuestions"
+    stripedRows
+    showGridlines
+    [rows]="10"
+    [paginator]="true"
+  >
+    <ng-template pTemplate="caption">
+      <p-button
+        (click)="openDialogAddQuestion()"
+        label="Adicionar Nova Questão"
+      />
+    </ng-template>
+    <ng-template pTemplate="header">
+      <tr>
+        <th>ID</th>
+        <th>Título</th>
+        <th>Tipo</th>
+        <th>Descrição Da Imagem</th>
+        <th style="text-align: center; width: 200px">Opções</th>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="body" let-question>
+      <tr>
+        <td>{{ question.id }}</td>
+        <td>{{ question.titulo }}</td>
+        <td>{{ question.tipo | typeQuestEnumTransform }}</td>
+        <td>
+          <span [ngClass]="!question.descricaoImagem ? 'not-image' : ''"
+            >{{ question.descricaoImagem || 'Sem Imagem' }}</span
+          >
+        </td>
+        <td
+          style="
+            display: flex;
+            gap: 0.5em;
+            justify-content: center;
+            align-items: center;
+          "
+        >
+          <p-splitbutton
+            icon="pi pi-pencil"
+            label="Editar"
+            (onClick)="viewImageQuest(question.imagem)"
+            (onDropdownClick)="selectQuestion($event, question)"
+            [model]="menuOptions"
+            severity="primary"
+          />
+        </td>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="emptymessage">
+      <tr>
+        <td colspan="5">
+          <span *ngIf="!load_questions && listOfSavedQuestions.length === 0">
+            Nenhuma questão salva
+          </span>
+          <div
+            *ngIf="load_questions"
+            style="display: grid; place-items: center"
+          >
+            <p-progressSpinner></p-progressSpinner>
+          </div>
+        </td>
+      </tr>
+    </ng-template>
+    <ng-template #footer>
+      <tr>
+        <td colspan="6">
+          <span
+            style="
+              font-size: 14px;
+              color: #333;
+            "
+          >
+            Você possui {{ listOfSavedQuestions ? listOfSavedQuestions.length :
+            0 }} perguntas salvas!
+          </span>
+        </td>
+      </tr>
+    </ng-template>
+  </p-table>
+</main>
+<p-dialog
+  header="Novo modelo de questão"
+  [modal]="true"
+  [draggable]="false"
+  [(visible)]="visibleDialogAddQuestion"
+>
+  <div class="quests-form">
+    <div class="input-group">
+      <label for="titulo-quest">Título da Questão:</label>
+      <input
+        id="titulo-quest"
+        type="text"
+        pInputText
+        [(ngModel)]="newQuestion.titulo"
+        placeholder="Título da Questão"
+      />
+    </div>
+    <div class="opcao-quest">
+      <div class="input-group">
+        <label for="tipo-quest">Qual o tipo da questão:</label>
+        <p-select
+          id="tipo-quest"
+          [options]="tipoDeCampo"
+          [(ngModel)]="newQuestion.tipo"
+          optionLabel="nome"
+          optionValue="value"
+          placeholder="Selecione o tipo de questão"
+          class="w-full md:w-56"
+        />
+      </div>
+      <p-button
+        *ngIf="newQuestion.tipo === 'MULTIPLA' || newQuestion.tipo === 'UNICA'"
+        label="Adicionar opção"
+        icon="pi pi-plus"
+        (click)="adicionarOpcao()"
+      />
+    </div>
+    <div class="image-group">
+      <div class="input-group">
+        <label for="titulo-quest">Imagem da Questão:</label>
+        <input
+          id="titulo-quest"
+          type="text"
+          pInputText
+          [(ngModel)]="newQuestion.imagemUrl"
+          placeholder="Imagem da Questão (URL)"
+          [invalid]="!urlImageIsValid(newQuestion.imagemUrl || '') && (newQuestion.imagemUrl || '').trim() !== ''"
+          pTooltip="Opcional."
+        />
+      </div>
+      <div class="input-group">
+        <label for="titulo-quest">Descrição da Imagem:</label>
+        <input
+          id="titulo-quest"
+          type="text"
+          pInputText
+          [(ngModel)]="newQuestion.descricaoImagem"
+          placeholder="Descrição da Imagem"
+          [disabled]="!urlImageIsValid(newQuestion.imagemUrl || '')"
+        />
+      </div>
+    </div>
+    <div class="info-input" *ngIf="newQuestion.tipo === 'NUMERO'">
+      <div class="input-group">
+        <label for="min-quest">Valor mínimo:</label>
+        <p-input-number
+          id="min-quest"
+          type="number"
+          [(ngModel)]="newQuestion.min"
+          placeholder="Mínimo"
+        />
+      </div>
+      <div class="input-group">
+        <label for="max-quest">Valor máximo:</label>
+        <p-input-number
+          id="max-quest"
+          type="number"
+          [(ngModel)]="newQuestion.max"
+          placeholder="Máximo"
+        />
+      </div>
+    </div>
+    <div
+      class="inputs-list"
+      *ngIf="newQuestion.tipo && (newQuestion.tipo === 'UNICA' || newQuestion.tipo === 'MULTIPLA')"
+    >
+      <p-inputgroup
+        pSize="small"
+        *ngFor="let opcao of newQuestion.opcoes; let index = index; trackBy: trackByIndex"
+      >
+        <p-button
+          label="Apagar"
+          icon="pi pi-trash"
+          (click)="removerOpcao(index)"
+        />
+        <input
+          pInputText
+          placeholder="Opção..."
+          [(ngModel)]="newQuestion.opcoes![index]"
+        />
+      </p-inputgroup>
+    </div>
+
+    <div class="info-input" *ngIf="newQuestion.tipo === 'ESCALA'">
+      <div class="input-group">
+        <label for="min-quest">Valor mínimo:</label>
+        <p-input-number
+          id="min-quest"
+          type="number"
+          [min]="0"
+          [max]="newQuestion.high ? newQuestion.high : 2"
+          [(ngModel)]="newQuestion.low"
+          placeholder="Valor mínimo"
+        />
+      </div>
+      <div class="input-group">
+        <label for="max-quest">Valor máximo:</label>
+        <p-input-number
+          id="max-quest"
+          type="number"
+          [min]="newQuestion.low ? newQuestion.low : 1"
+          [(ngModel)]="newQuestion.high"
+          placeholder="Valor máximo"
+        />
+      </div>
+    </div>
+    <p-fieldset
+      legend="Vizualizar questão"
+      toggleable="true"
+      [collapsed]="true"
+    >
+      <app-visualizar-questao [questao]="newQuestion"></app-visualizar-questao>
+    </p-fieldset>
+    <p-button
+      label="Adicionar Questão"
+      [style]="{ marginTop: '10px', width: '100%' }"
+      icon="pi pi-check"
+      (click)="addSavedQuestion()"
+      [disabled]="!questIsValid()"
+    /></div
+></p-dialog>

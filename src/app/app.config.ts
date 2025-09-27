@@ -9,7 +9,12 @@ import { providePrimeNG } from 'primeng/config';
 import Material from '@primeuix/themes/material';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { routes } from './app.routes';
-import { provideHttpClient, withFetch } from '@angular/common/http';
+import {
+  provideHttpClient,
+  withFetch,
+  withInterceptors,
+} from '@angular/common/http';
+import { guardInterceptor } from './core/interceptors/guard-interceptor-interceptor';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -17,11 +22,14 @@ export const appConfig: ApplicationConfig = {
     provideZoneChangeDetection({ eventCoalescing: true }),
     provideRouter(routes),
     provideAnimationsAsync(),
-    provideHttpClient(withFetch()),
+    provideHttpClient(
+      withFetch(),
+      withInterceptors([guardInterceptor])
+    ),
     BrowserAnimationsModule,
     providePrimeNG({
       theme: {
-      preset: Material,
+        preset: Material,
         options: {
           darkModeSelector: false,
         },

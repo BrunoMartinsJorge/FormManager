@@ -7,6 +7,8 @@ import { VisualisarFormulario } from './pages/visualisar-formulario/visualisar-f
 import { AdicionarQuiz } from './pages/adicionar-quiz/adicionar-quiz';
 import { ListarQuiz } from './pages/listar-quiz/listar-quiz';
 import { GerarPdf } from './pages/gerar-pdf/gerar-pdf';
+import { QuestoesSalvasFormulario } from './pages/questoes-salvas-formulario/questoes-salvas-formulario';
+import { QuestoesSalvasQuiz } from './pages/questoes-salvas-quiz/questoes-salvas-quiz';
 
 export const routes: Routes = [
     {
@@ -48,6 +50,18 @@ export const routes: Routes = [
         path: 'gerar-formulario',
         component: GerarPdf,
         title: 'Visualizar Formulário',
+        canActivate: [authGuardGuard],
+    },
+    {
+        path: 'questoes-salvas-formularios',
+        component: QuestoesSalvasFormulario,
+        title: 'Questões Salvas - Formulários',
+        canActivate: [authGuardGuard],
+    },
+    {
+        path: 'questoes-salvas-quiz',
+        component: QuestoesSalvasQuiz,
+        title: 'Questões Salvas - Quiz',
         canActivate: [authGuardGuard],
     }
 ];

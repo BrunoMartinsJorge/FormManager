@@ -1,13 +1,13 @@
-const db = require("./db");
-const { google } = require("googleapis");
-const { getAuthClient } = require("./googleAuth");
+import db from "./db.js";
+import { google } from "googleapis";
+import { getAuthClient } from "./googleAuth.js";
 
 async function salvarFormularioCompleto(dadosForm) {
   const insertFormulario = db.prepare(
     "INSERT INTO Formulario (Titulo, Descricao, Link_Url, formId) VALUES (?, ?, ?, ?)"
   );
   const insertPergunta = db.prepare(
-    "INSERT INTO Pergunta (Tipo_Pergunta_idTipo_Pergunta, Formulario_idFormulario, Titulo, Obrigatorio, Favorita) VALUES (?, ?, ?, ?, ?)"
+    "INSERT INTO Pergunta (idTipo_Pergunta, titulo, favorita) VALUES (?, ?, ?)"
   );
   const insertAlternativa = db.prepare(
     "INSERT INTO Alternativa (Pergunta_idPergunta, Texto) VALUES (?, ?)"
@@ -32,9 +32,7 @@ async function salvarFormularioCompleto(dadosForm) {
 
       const resPergunta = insertPergunta.run(
         tipoId,
-        formularioId,
         q.titulo,
-        q.obrigatoria ? 1 : 0,
         q.favorito ? 1 : 0
       );
 
@@ -49,6 +47,46 @@ async function salvarFormularioCompleto(dadosForm) {
   });
 
   return salvar(dadosForm);
+}
+
+function insertNewQuestionFavorite(question) {
+  const insertPergunta = db.prepare(
+    `INSERT INTO Pergunta (idTipo_Pergunta, titulo, favorita, url_imagem, descricao_imagem)
+     VALUES (?, ?, ?, ?, ?)`
+  );
+
+  const insertAlternativa = db.prepare(
+    `INSERT INTO Alternativa (idPergunta, texto) VALUES (?, ?)`
+  );
+
+  const getTipoPergunta = db.prepare(
+    `SELECT idTipo_Pergunta FROM Tipo_Pergunta WHERE descricao = ?`
+  );
+
+  const insertTipo = db.prepare("INSERT INTO Tipo_Pergunta (descricao) VALUES (?)");
+
+  const salvar = db.transaction((question) => {
+    let tipo = getTipoPergunta.get(question.tipo);
+    let tipoId = tipo ? tipo.idTipo_Pergunta : insertTipo.run(question.tipo).lastInsertRowid;
+
+    const resPergunta = insertPergunta.run(
+      tipoId,
+      question.titulo,
+      1,
+      question.imagemUrl,
+      question.descricaoImagem
+    );
+
+    const perguntaId = resPergunta.lastInsertRowid;
+
+    if (question.opcoes && question.opcoes.length > 0) {
+      question.opcoes.forEach((opcao) => insertAlternativa.run(perguntaId, opcao));
+    }
+
+    return perguntaId;
+  });
+
+  return salvar(question);
 }
 
 async function salvarQuizCompleto(dadosQuiz) {
@@ -140,13 +178,14 @@ function buscarFormularioPorId(idFormulario) {
 
 async function createGoogleForm(newForm) {
   const auth = await getAuthClient();
-  const formsApi = google.forms({ version: "v1", auth });
+  const forms = google.forms({ version: "v1", auth: auth });
 
-  const createRes = await formsApi.forms.create({
+  const createRes = await forms.forms.create({
     requestBody: { info: { title: newForm.titulo } },
   });
   const formId = createRes.data.formId;
 
+  let currentIndex = 0;
   const requests = (newForm.questoes || []).flatMap((questao, index) => {
     const reqs = [];
 
@@ -157,9 +196,10 @@ async function createGoogleForm(newForm) {
             title: "Imagem relacionada à pergunta",
             imageItem: { image: { sourceUri: questao.imagemUrl } },
           },
-          location: { index: index * 2 },
+          location: { index: currentIndex },
         },
       });
+      currentIndex++;
     }
 
     const item = { title: questao.titulo, questionItem: { question: {} } };
@@ -213,7 +253,7 @@ async function createGoogleForm(newForm) {
     reqs.push({
       createItem: {
         item,
-        location: { index: index * 2 + (questao.imagemUrl ? 1 : 0) },
+        location: { index: currentIndex },
       },
     });
 
@@ -224,7 +264,7 @@ async function createGoogleForm(newForm) {
     updateFormInfo: { info: { description: newForm.descricao || "" }, updateMask: "description" },
   });
 
-  await formsApi.forms.batchUpdate({ formId, requestBody: { requests } });
+  await forms.forms.batchUpdate({ formId, requestBody: { requests } });
 
   return {
     formId,
@@ -235,6 +275,71 @@ async function createGoogleForm(newForm) {
   };
 }
 
+async function findAllQuestionsByFormId(formId) {
+  const auth = await getAuthClient();
+  const forms = google.forms({ version: "v1", auth });
+
+  const response = await forms.forms.get({ formId });
+  const form = response.data;
+
+  if (!form.items) return [];
+
+  const questoes_formatadas = form.items.map((item) => {
+    const questao = item.questionItem?.question;
+
+    return {
+      id: item.itemId,
+      titulo: item.title || "",
+      tipo: questao
+        ? questao.choiceQuestion
+          ? "MULTIPLA_ESCOLHA"
+          : questao.textQuestion
+            ? "TEXTO"
+            : "OUTRO"
+        : "IMAGEM",
+      favorito: false,
+      imagem: item.imageItem?.image?.sourceUri || null,
+      descricaoImagem: item.imageItem?.image?.altText || null,
+      opcoes: questao?.choiceQuestion?.options?.map((opt) => opt.value) || [],
+    };
+  });
+
+  return questoes_formatadas;
+}
+
+async function findAllQuestionsFavorites() {
+  const questoes = db.prepare(
+    "SELECT * FROM Pergunta WHERE favorita = 1 ORDER BY idPergunta"
+  ).all();
+  const tipo_perguntas = db.prepare(
+    "SELECT idTipo_Pergunta, descricao FROM Tipo_Pergunta"
+  ).all();
+
+  const questoes_formatadas = questoes.map((q) => {
+
+    const tipo = tipo_perguntas.find((t) => t.idTipo_Pergunta === q.idTipo_Pergunta);
+    return {
+      ...q,
+      tipo: tipo ? tipo.Descricao : null,
+    };
+  });
+
+  return questoes_formatadas.map((questao) => {
+
+    return {
+      id: questao.idPergunta,
+      titulo: questao.titulo,
+      tipo: questao.tipo,
+      favorito: questao.favorita === 1,
+      imagem: questao.url_imagem,
+      descricaoImagem: questao.descricao_imagem,
+      opcoes: db
+        .prepare("SELECT texto FROM Alternativa WHERE idPergunta = ? ORDER BY idAlternativa")
+        .all(questao.idPergunta)
+        .map((alt) => alt.texto),
+    };
+  });
+}
 
 async function criarQuiz(newForm) {
   const auth = await getAuthClient();
@@ -390,4 +495,18 @@ async function listarRespostas(formId) {
   }
 }
 
-module.exports = { salvarFormularioCompleto, apagarFormulario, listarFormularios, listarQuestoesPorFormulario, buscarFormularioPorId, createGoogleForm, criarQuiz, listarRespostas, listarQuizzes, salvarQuizCompleto };
+export {
+  salvarFormularioCompleto,
+  apagarFormulario,
+  listarFormularios,
+  listarQuestoesPorFormulario,
+  buscarFormularioPorId,
+  createGoogleForm,
+  criarQuiz,
+  listarRespostas,
+  listarQuizzes,
+  salvarQuizCompleto,
+  findAllQuestionsFavorites,
+  insertNewQuestionFavorite,
+  findAllQuestionsByFormId,
+};

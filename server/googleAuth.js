@@ -28,7 +28,6 @@ function getStoredTokens() {
 }
 
 function storeTokens(tokens) {
-  console.log(access_token);
   db.prepare(
     "INSERT INTO tokens (accessToken, refreshToken, expiryDate) VALUES (?, ?, ?)"
   ).run(tokens.access_token, tokens.refresh_token, tokens.expiry_date);

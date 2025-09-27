@@ -24,7 +24,7 @@
         <i class="pi pi-calendar"></i>Data de Criação
         <p-sortIcon field="Data_Criacao" />
       </th>
-      <th class="btn-list">Ações</th>
+      <th style="width: 300px; text-align: center">Ações</th>
     </tr>
   </ng-template>
   <ng-template #body let-form>
@@ -34,31 +34,14 @@
       <td>{{ form.Descricao }}</td>
       <td>{{ form.Data_Criacao | date : 'dd/MM/yyyy HH:mm' }}</td>
       <td class="btn-list">
-        <p-button
-          [pTooltip]="form.Link_Url ? 'Acessar formulário' : 'Sem link de acesso'"
-          [disabled]="!form.Link_Url"
-          severity="success"
-          icon="pi pi-external-link"
-          (click)="acessarFormulario(form)"
-        />
-        <p-button
-          severity="warn"
-          pTooltip="Visualizar formulário"
+        <p-splitbutton
           icon="pi pi-eye"
-          (click)="visualizarFormulario(form)"
-          [disabled]="!form.Link_Url"
-        />
-        <p-button
-          severity="contrast"
-          pTooltip="Apagar formulário"
-          icon="pi pi-trash"
-          (click)="apagarFormulario($event, form.idFormulario)"
-        />
-        <p-button
-          severity="info"
-          pTooltip="Gerar PDF do formulário"
-          icon="pi pi-file"
-          (click)="gerarPDF(form)"
+          label="Ver Respostas"
+          (onClick)="visualizarFormulario(form)"
+          (onDropdownClick)="selectForm($event, form)"
+          [model]="opcoesMenu"
+          severity="secondary"
+          [disabled]="!form.formId"
         />
       </td>
     </tr>
