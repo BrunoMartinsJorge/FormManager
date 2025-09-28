@@ -1,160 +1,152 @@
-<p-toast />
-<p-confirmpopup />
-<div class="info-page">
-  <h1>Listagem de Formulários</h1>
-  <span
-    >Aqui você pode visualizar todos os formulários cadastrados no
-    sistema.</span
-  >
-</div>
-<p-table
-  [value]="listOfForms"
-  [tableStyle]="{ maxWidth: '98%', 'margin': '2em auto' }"
-  stripedRows
-  showGridlines
-  [rows]="10"
-  [paginator]="true"
->
-  <ng-template #header>
-    <tr>
-      <th>ID</th>
-      <th>Titulo</th>
-      <th>Descrição</th>
-      <th pSortableColumn="Data_Criacao">
-        <i class="pi pi-calendar"></i>Data de Criação
-        <p-sortIcon field="Data_Criacao" />
-      </th>
-      <th style="width: 300px; text-align: center">Ações</th>
-    </tr>
-  </ng-template>
-  <ng-template #body let-form>
-    <tr>
-      <td>{{ form.idFormulario }}</td>
-      <td>{{ form.Titulo }}</td>
-      <td>{{ form.Descricao }}</td>
-      <td>{{ form.Data_Criacao | date : 'dd/MM/yyyy HH:mm' }}</td>
-      <td class="btn-list">
-        <p-splitbutton
-          icon="pi pi-eye"
-          label="Ver Respostas"
-          (onClick)="visualizarFormulario(form)"
-          (onDropdownClick)="selectForm($event, form)"
-          [model]="opcoesMenu"
-          severity="secondary"
-          [disabled]="!form.formId"
-        />
-      </td>
-    </tr>
-  </ng-template>
-  <ng-template #emptymessage>
-    <tr>
-      <td colspan="5">
-        Nenhum formulário cadastrado
-        <br />
-        <p-button
-          size="small"
-          label="Adicionar Formulário"
-          (click)="adicionarFormulario()"
-          icon="pi pi-plus"
-        ></p-button>
-      </td>
-    </tr>
-  </ng-template>
-</p-table>
-<section class="form-info">
-  <div class="form-empty" *ngIf="!formularioSelecionado">
-    <h3>Nenhum formulário selecionado</h3>
-    <span
-      >Selecione um formulário para visualizar suas informações -
-      <strong>Clique no icone <i class="pi pi-eye"></i></strong
-    ></span>
-    <span style="flex-direction: column">
-      <strong *ngIf="carregando_formulario">Aguarde...</strong>
-      <p-progressSpinner *ngIf="carregando_formulario"></p-progressSpinner>
-    </span>
-  </div>
-  <ng-container *ngIf="formularioSelecionado">
-    <h2>{{ formularioSelecionado?.Titulo }}</h2>
-    <p>
-      <strong>Descrição do formulário:</strong>
-      {{ formularioSelecionado?.Descricao }}
-    </p>
-    <div class="card-box">
-      Data de criação: {{formularioSelecionado?.Data_Criacao | date: "dd/MM/yyyy
-      HH:mm"}}
-    </div>
-    <hr />
-    <h3>Questões do Formulário</h3>
-    <div class="questoes-list">
-      <div
-        class="quest-element"
-        *ngFor="let questao of questoes; let indexQuestao = index"
-      >
-        <span>
-          <strong> {{indexQuestao + 1}}ª Questão - </strong>
-          {{questao?.titulo}}
-        </span>
-        <p-fieldset toggleable="true" [collapsed]="true">
-          <ng-template #header>
-            Respostas - {{questao?.resposta?.length}}
-            <ng-template #expandicon>
-              <i class="pi pi-eye-slash"></i>
-            </ng-template>
-            <ng-template #collapseicon>
-              <i class="pi pi-eye"></i>
-            </ng-template>
-          </ng-template>
-          <div class="response-list" *ngIf="questao?.resposta">
-            <div
-              class="response-element"
-              *ngFor="let resposta of questao?.resposta; let indexResposta = index"
-            >
-              <strong>{{indexResposta + 1}}ª Resposta - </strong>
-              {{resposta?.valor}}
-            </div>
-          </div>
-        </p-fieldset>
-      </div>
+<main class="page-content">
+  <header class="header-page">
+    <div class="info-header">
+      <h1>Gerenciador de Formulários</h1>
+      <p>Gerencie seus formulários do Google Forms de forma eficiente</p>
     </div>
     <p-button
-      label="Gerar Gráfico"
-      severity="secondary"
-      icon="pi pi-chart-bar"
-      (click)="abrirGrafico()"
-    ></p-button>
-  </ng-container>
-</section>
-<p-dialog
-  [(visible)]="habilitarGerarPDF"
-  header="Gerar PDF do formulário"
-  [draggable]="false"
-  [modal]="true"
-  [style]="{ width: '60%' }"
->
-  <app-gerar-pdf
-    [formulario]="form"
-    [hidden]="questoes.length == 0 && carregando_questoes"
-  ></app-gerar-pdf>
-  <ng-container *ngIf="questoes.length == 0 && carregando_questoes">
-    <span
-      style="
-        flex-direction: column;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-      "
-    >
-      <p-progressSpinner></p-progressSpinner>
-      <strong>Aguarde enquanto as questões do formulário são carregadas</strong>
-    </span>
-  </ng-container>
-</p-dialog>
-<p-dialog
-  [(visible)]="habilitarGerarGrafico"
-  header="Gerar Gráfico"
-  [draggable]="false"
-  [modal]="true"
-  [style]="{ width: '60%', overflow: 'hidden' }"
->
-  <app-gerar-graficos [questoesRespondidas]="questoes"></app-gerar-graficos>
-</p-dialog>
+      label="Novo Formulário"
+      (click)="createNewForm()"
+      icon="pi pi-plus"
+      severity="contrast"
+    />
+  </header>
+  <!-- <section class="cards-content">
+    <div class="card">
+      <h4>Total de formulários: {{getQuantityOfQuestions}}</h4>
+    </div>
+    <div class="card"></div>
+  </section> -->
+  <section class="forms-content">
+    <div class="forms-list">
+      <div class="fillter-form">
+        <div class="input-group">
+          <i class="pi pi-search"></i>
+          <input
+            type="text"
+            placeholder="Filtrar formulários..."
+            (input)="fillterForm($event.target)"
+          />
+        </div>
+      </div>
+      <div class="forms-grid">
+        @for (form of formsList; track form.idFormulario) {
+        <div
+          [ngClass]="formSelectedId == form.idFormulario ? 'form-element selected' : 'form-element'"
+          (click)="selecForm(form.idFormulario)"
+        >
+          <div class="header-form">
+            <span>{{form.Titulo}}</span>
+            <p>{{form.Descricao}}</p>
+          </div>
+          <div class="info-form">
+            <span
+              >Criado em {{form.Data_Criacao | date : 'dd/MM/yyyy HH:mm'}}</span
+            >
+            <span>ID: {{form.idFormulario}}</span>
+          </div>
+        </div>
+        } @empty {
+        <p>Voce ainda nao possui nenhum formulario salvo</p>
+        }
+      </div>
+    </div>
+    <div class="form-select">
+      @if (loadingFormSelected && !formSelected){
+      <div class="loading">
+        <p-progressSpinner></p-progressSpinner>
+        <span>Carregando formulário...</span>
+      </div>
+      } @if (formSelected && !loadingFormSelected) {
+      <div class="header-form-selected">
+        <h3>{{getFormSelected.Titulo}}</h3>
+        <span>{{getFormSelected.Descricao}}</span>
+        <p>
+          <span
+            ><i class="pi pi-calendar"></i>Criado em
+            {{getFormSelected.Data_Criacao | date : 'dd/MM/yyyy HH:mm'}}</span
+          >
+          <span><i class="pi pi-eye"></i> respostas</span>
+        </p>
+        <div class="btn-list">
+          <button>
+            <i class="pi pi-file-pdf"></i>
+            Gerar PDF
+          </button>
+          <button>
+            <i class="pi pi-chart-line"></i>
+            Gerar Gráficos
+          </button>
+        </div>
+      </div>
+      <div class="body-form-selected">
+        <div class="list-question-form">
+          <div class="header-question-list">
+            <h3>
+              <i class="pi pi-list"></i>
+              {{responsesOrQuestions == 'quest' ? 'Respostas do Formulário' :
+              'Questões do Formulário'}}
+            </h3>
+            <p-button
+              icon="pi pi-eye"
+              [label]="responsesOrQuestions == 'responses' ? 'Ver Questões' : 'Ver Respostas'"
+              severity="contrast"
+              (click)="toogleResponseOrQuestions()"
+            />
+          </div>
+          @if (responsesOrQuestions == 'quest') { @if (formSelected != null){
+          @for (quest of formSelected.questoes; let i = $index; track quest.id)
+          {
+          <div class="quest-element">
+            <div class="header-question">
+              <strong>{{i+1}}º Questão - {{quest.titulo}}</strong>
+              <span class="type-quest">{{quest.tipo}}</span>
+            </div>
+            <span class="responses">
+              <i class="pi pi-eye"></i>
+              Respostas - {{getNumberOfResponses(quest.id)}}
+            </span>
+          </div>
+          } } } @if (responsesOrQuestions == 'responses') { @if (formSelected !=
+          null){
+          <section class="response-sends">
+            <div class="header-response">
+              <p-button
+                icon="pi pi-angle-left"
+                severity="secondary"
+                [disabled]="indexByResponses === 0"
+                (click)="previousResponse()"
+              />
+              <span><i class="pi pi-user"></i>{{indexByResponses + 1}}ª - Resposta Individual</span>
+              <p-button
+                icon="pi pi-angle-right"
+                severity="secondary"
+                [disabled]="indexByResponses === responsesByUser.length - 1"
+                (click)="nextResponse()"
+              />
+            </div>
+            <div class="questions-list">
+              @for(response of getResponseSelectedByIndex.respostas; let i =
+              $index; track response.idResposta){
+              <div class="response-quest-element">
+                <div class="header-quest">
+                  <strong
+                    ><span class="quest-number">{{i + 1}}</span>
+                    {{response.titulo}}</strong
+                  >
+                  <div class="type-quest">
+                    {{getTypeQuestByIdQuestion(response.idQuestao)}}
+                  </div>
+                </div>
+                <p>Resposta - {{response.valor}}</p>
+              </div>
+              }
+            </div>
+          </section>
+          }}
+        </div>
+      </div>
+      }
+    </div>
+  </section>
+</main>
