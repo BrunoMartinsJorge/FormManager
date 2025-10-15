@@ -222,6 +222,29 @@ router.get("/forms/google/:formId", async (req, res, next) => {
   }
 });
 
+router.get("/forms/quiz/google/:formId/responses", async (req, res, next) => {
+  const formId = req.params.formId;
+  try {
+    const forms = google.forms({ version: "v1", auth: oAuth2Client });
+    const formRes = await forms.forms.get({ formId });
+    
+    const respostasRes = await forms.forms.responses.list({ formId });
+
+    res.json({
+      items: formRes.data.items || [],
+      responses: respostasRes.data.responses || [],
+    });
+  } catch (err) {
+    try {
+      handleGoogleAuthError(err);
+    } catch (authErr) {
+      return next(authErr);
+    }
+    console.error(err);
+    res.status(500).send("Erro ao buscar respostas do formulário.");
+  }
+});
+
 // --- Google Forms: respostas
 router.get("/forms/google/:formId/responses", async (req, res, next) => {
   const formId = req.params.formId;

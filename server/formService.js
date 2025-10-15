@@ -349,8 +349,10 @@ async function criarQuiz(newForm) {
     requestBody: { info: { title: newForm.titulo } }
   });
 
+  createRes.data.settings.emailCollectionType = "AUTO_COLLECTION";
+
   const formId = createRes.data.formId;
-  const tiposComCorrecao = ["TEXTO", "UNICA", "MULTIPLA", "VERDADEIRO_FALSO"];
+  const tiposComCorrecao = ["UNICA", "MULTIPLA", "VERDADEIRO_FALSO"];
 
   const requests = [
     {
@@ -468,11 +470,12 @@ async function criarQuiz(newForm) {
     })
   ];
 
-  // 3. Executa o batchUpdate
   await formsApi.forms.batchUpdate({
     formId,
     requestBody: { requests }
   });
+
+  console.log(createRes);
 
   return {
     formId,

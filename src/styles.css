@@ -15,6 +15,7 @@ body {
   height: 100%;
   background-color: var(--branco-claro);
   overflow-x: hidden;
+  transition: all 0.4s ease;
 }
 
 :root {
@@ -23,4 +24,9 @@ body {
   --branco-claro: #ffffff;
   --vermelho-claro: #ef5350;
   --cinza-medio: #757575;
+}
+
+body.dark {
+  background-color: #333;
+  color: #fff;
 }

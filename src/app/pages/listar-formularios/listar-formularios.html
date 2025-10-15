@@ -11,12 +11,6 @@
       severity="contrast"
     />
   </header>
-  <!-- <section class="cards-content">
-    <div class="card">
-      <h4>Total de formulários: {{getQuantityOfQuestions}}</h4>
-    </div>
-    <div class="card"></div>
-  </section> -->
   <section class="forms-content">
     <div class="forms-list">
       <div class="fillter-form">
@@ -33,7 +27,7 @@
         @for (form of formsList; track form.idFormulario) {
         <div
           [ngClass]="formSelectedId == form.idFormulario ? 'form-element selected' : 'form-element'"
-          (click)="selecForm(form.idFormulario)"
+          (click)="selectForm(form.idFormulario)"
         >
           <div class="header-form">
             <span>{{form.Titulo}}</span>
@@ -47,7 +41,7 @@
           </div>
         </div>
         } @empty {
-        <p>Voce ainda nao possui nenhum formulario salvo</p>
+        <p>Nenhum formulário encontrado</p>
         }
       </div>
     </div>
@@ -57,6 +51,18 @@
         <p-progressSpinner></p-progressSpinner>
         <span>Carregando formulário...</span>
       </div>
+      } @else if (!formSelected && !loadingFormSelected) {
+      <p
+        style="
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          text-align: center;
+          flex: 1;
+        "
+      >
+        Problemas ao carregar formulário
+      </p>
       } @if (formSelected && !loadingFormSelected) {
       <div class="header-form-selected">
         <h3>{{getFormSelected.Titulo}}</h3>
@@ -66,14 +72,21 @@
             ><i class="pi pi-calendar"></i>Criado em
             {{getFormSelected.Data_Criacao | date : 'dd/MM/yyyy HH:mm'}}</span
           >
-          <span><i class="pi pi-eye"></i> respostas</span>
         </p>
         <div class="btn-list">
-          <button>
+          <button (click)="toogleGeneratePDF($event)">
             <i class="pi pi-file-pdf"></i>
             Gerar PDF
           </button>
-          <button>
+          <button (click)="exportFormToExcel()">
+            <i class="pi pi-file-excel"></i>
+            Gerar Excel
+          </button>
+          <button (click)="openForm()">
+            <i class="pi pi-external-link"></i>
+            Acessar Formulário
+          </button>
+          <button (click)="toogleCreateGraphics($event)">
             <i class="pi pi-chart-line"></i>
             Gerar Gráficos
           </button>
@@ -84,13 +97,14 @@
           <div class="header-question-list">
             <h3>
               <i class="pi pi-list"></i>
-              {{responsesOrQuestions == 'quest' ? 'Respostas do Formulário' :
+              {{responsesOrQuestions != 'quest' ? 'Respostas do Formulário' :
               'Questões do Formulário'}}
             </h3>
             <p-button
               icon="pi pi-eye"
-              [label]="responsesOrQuestions == 'responses' ? 'Ver Questões' : 'Ver Respostas'"
+              [label]="responsesOrQuestions == 'responses' ? 'Ver Questões' : (formSelected.respostas.length > 0 ? 'Ver Respostas' : 'Nenhuma Resposta') "
               severity="contrast"
+              [disabled]="formSelected == null || formSelected.respostas.length === 0"
               (click)="toogleResponseOrQuestions()"
             />
           </div>
@@ -117,7 +131,10 @@
                 [disabled]="indexByResponses === 0"
                 (click)="previousResponse()"
               />
-              <span><i class="pi pi-user"></i>{{indexByResponses + 1}}ª - Resposta Individual</span>
+              <span
+                ><i class="pi pi-user"></i>{{indexByResponses + 1}}ª - Resposta
+                Individual</span
+              >
               <p-button
                 icon="pi pi-angle-right"
                 severity="secondary"
@@ -150,3 +167,5 @@
     </div>
   </section>
 </main>
+<app-gerar-graficos [formSelected]="formSelected" [(visibilityOfGenerateGraphic)]="visibilityOfGraphicCreate"></app-gerar-graficos>
+<app-gerar-pdf [formSelected]="formPdfData" [(visibilityOfGeneratePDF)]="visibilityOfGeneratePDF"></app-gerar-pdf>

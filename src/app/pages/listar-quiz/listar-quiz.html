@@ -1,65 +1,235 @@
-<div class="info-page">
-  <h1>Listagem de Formulários</h1>
-  <span
-    >Aqui você pode visualizar todos os formulários cadastrados no
-    sistema.</span
-  >
-</div>
-<p-table
-  [value]="listaQuizzes"
-  [paginator]="true"
-  [rows]="10"
-  [responsiveLayout]="'scroll'"
-  [tableStyle]="{ maxWidth: '98%', 'margin': '2em auto' }"
-  stripedRows
-  showGridlines
+<main class="page-content">
+  <header class="header-page">
+    <div class="info-header">
+      <h1>Gerenciador de Quizzes</h1>
+      <p>Gerencie seus quizzes do Google Forms de forma eficiente</p>
+    </div>
+    <p-button
+      label="Novo Quiz"
+      (click)="criarNovoQuiz()"
+      icon="pi pi-plus"
+      severity="contrast"
+    ></p-button>
+  </header>
+
+  <section class="forms-content">
+    <div class="forms-list">
+      <div class="fillter-form">
+        <div class="input-group">
+          <i class="pi pi-search"></i>
+          <input
+            type="text"
+            placeholder="Filtrar quizzes..."
+            (input)="fillterQuiz($event.target)"
+          />
+        </div>
+      </div>
+      <div class="forms-grid">
+        <ng-container
+          *ngFor="let quiz of quizList; let idx = index; trackBy: trackByQuizId"
+        >
+          <div
+            [ngClass]="quizSelectedId === quiz.idFormulario ? 'form-element selected' : 'form-element'"
+            (click)="selectForm(quiz.idFormulario)"
+          >
+            <div class="header-form">
+              <span>{{ quiz.Titulo }}</span>
+              <p>{{ quiz.Descricao }}</p>
+            </div>
+            <div class="info-form">
+              <span
+                >Criado em {{ quiz.Data_Criacao | date: 'dd/MM/yyyy HH:mm'
+                }}</span
+              >
+              <span>ID: {{ quiz.idFormulario }}</span>
+            </div>
+          </div>
+        </ng-container>
+        <p *ngIf="quizList.length === 0">Nenhum quiz encontrado</p>
+      </div>
+    </div>
+
+    <div class="form-select">
+      @if (carregandoQuiz && !quizSelecionado) {
+
+      <div class="loading">
+        <p-progressSpinner></p-progressSpinner>
+        <span>Carregando quiz...</span>
+      </div>
+      } @else if (!quizSelecionado && !carregandoQuiz) {
+      <p
+        style="
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          text-align: center;
+          flex: 1;
+        "
+      >
+        Problemas ao carregar quiz
+      </p>
+      }
+      <div *ngIf="quizSelecionado && !carregandoQuiz">
+        <div class="header-form-selected">
+          <h3>{{ quizSelecionado.titulo }}</h3>
+          <span>{{ quizSelecionado.descricao }}</span>
+          <p>
+            <span
+              ><i class="pi pi-calendar"></i> Criado em {{
+              quizSelecionado.dataCriacao | date: 'dd/MM/yyyy HH:mm' }}</span
+            >
+          </p>
+          <div class="btn-list">
+            <button (click)="openDialogByPdf(quizSelecionado)">
+              <i class="pi pi-file-pdf"></i> Gerar PDF
+            </button>
+            <button (click)="exportFormToExcel()">
+              <i class="pi pi-file-excel"></i> Gerar Excel
+            </button>
+            <button (click)="acessarQuiz()">
+              <i class="pi pi-external-link"></i> Acessar Quiz
+            </button>
+            <button (click)="openDialogByGraphic()">
+              <i class="pi pi-chart-line"></i> Gerar Gráficos
+            </button>
+          </div>
+        </div>
+
+        <div class="body-form-selected">
+          <div class="list-question-form">
+            <div class="header-question-list">
+              <h3>
+                <i class="pi pi-list"></i>
+                {{ responsesOrQuestions !== 'quest' ? 'Respostas do Quiz' :
+                'Questões do Quiz' }}
+              </h3>
+              <p-button
+                icon="pi pi-eye"
+                [label]="responsesOrQuestions === 'responses' ? 'Ver Questões' : (quizSelecionado.respostas!.length > 0 ? 'Ver Respostas' : 'Nenhuma Resposta')"
+                severity="contrast"
+                [disabled]="!quizSelecionado || quizSelecionado.respostas?.length === 0"
+                (click)="toogleResponseOrQuestions()"
+              ></p-button>
+            </div>
+            <ng-container
+              *ngIf="responsesOrQuestions === 'quest' && quizSelecionado"
+            >
+              <div
+                *ngFor="let quest of quizSelecionado.questoes; let i = index"
+                class="quest-element"
+              >
+                <div class="header-question">
+                  <strong>{{ i + 1 }}º Questão - {{ quest.titulo }}</strong>
+                  <span class="type-quest">{{ quest.tipo }}</span>
+                </div>
+                <span class="responses">
+                  <i class="pi pi-eye"></i> Respostas - {{
+                  getNumberOfResponses(quest.id) }}
+                </span>
+              </div>
+            </ng-container>
+
+            <ng-container
+              *ngIf="responsesOrQuestions === 'responses' && quizSelecionado"
+            >
+              <section class="response-sends">
+                <div class="header-response">
+                  <p-button
+                    icon="pi pi-angle-left"
+                    severity="secondary"
+                    [disabled]="indexByRespostas === 0"
+                    (click)="previousResponse()"
+                  ></p-button>
+                  <span
+                    ><i class="pi pi-user"></i>{{ indexByRespostas + 1 }}ª -
+                    Resposta Individual</span
+                  >
+                  <p-button
+                    icon="pi pi-angle-right"
+                    severity="secondary"
+                    [disabled]="indexByRespostas === respostasPorUsuario.length - 1"
+                    (click)="nextResponse()"
+                  ></p-button>
+                </div>
+                <div class="pontuacao-candidato">
+                  <i class="pi pi-star"></i>
+                  Pontuação total: {{ getPontuacaoByResponse(getResponseSelectedByIndex).total }}
+                  pts
+                  <br>
+                  <i class="pi pi-star"></i>
+                  Pontuação maxima: {{ getPontuacaoByResponse(getResponseSelectedByIndex).max }}
+                  pts
+                </div>
+
+                <div class="questions-list">
+                  <ng-container
+                    *ngFor="let response of getResponseSelectedByIndex.respostas; let i = index"
+                  >
+                    <div class="response-quest-element">
+                      <div class="header-quest">
+                        <strong>
+                          <span class="quest-number">{{ i + 1 }}</span> {{
+                          response.titulo }}
+                        </strong>
+                        <div class="type-quest">
+                          {{ getTypeQuestByIdQuestion(response.idQuestao) }}
+                        </div>
+                      </div>
+                      <p>Resposta - {{ response.valor }}</p>
+                    </div>
+                  </ng-container>
+                </div>
+              </section>
+            </ng-container>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<p-dialog
+  [draggable]="false"
+  [(visible)]="visibilityOfGraphicCreate"
+  [modal]="true"
+  [style]="{ width: '50%' }"
 >
   <ng-template #header>
-    <tr>
-      <th>ID</th>
-      <th>Titulo</th>
-      <th>Descrição</th>
-      <th pSortableColumn="data_criacao">
-        <i class="pi pi-calendar"></i>Data de Criação
-        <p-sortIcon field="data_criacao" />
-      </th>
-      <th class="btn-list">Ações</th>
-    </tr>
+    <div class="inline-flex items-center justify-center gap-2">
+      <span
+        style="
+          display: flex;
+          align-items: center;
+          gap: 0.25em;
+          font-size: 1.2em;
+        "
+      >
+        <i class="pi pi-chart-bar"></i> Gerar Gráfico
+      </span>
+    </div>
   </ng-template>
-  <ng-template #body let-quiz>
-    <tr>
-      <td>{{ quiz.idQuiz }}</td>
-      <td>{{ quiz.titulo }}</td>
-      <td>{{ quiz.descricao }}</td>
-      <td>{{ quiz.data_criacao | date: "dd/MM/yyyy HH:mm" }}</td>
-      <td class="btn-list">
-        <p-button
-          [pTooltip]="quiz.link_url ? 'Acessar formulário' : 'Sem link de acesso'"
-          [disabled]="!quiz.link_url"
-          severity="success"
-          icon="pi pi-external-link"
-          (click)="acessarFormulario(form)"
-        />
-        <p-button
-          severity="warn"
-          pTooltip="Visualizar formulário"
-          icon="pi pi-eye"
-          (click)="visualizarFormulario(form)"
-          [disabled]="!quiz.link_url"
-        />
-        <p-button
-          severity="contrast"
-          pTooltip="Apagar formulário"
-          icon="pi pi-trash"
-          (click)="apagarFormulario($event, quiz.idQuiz)"
-        />
-        <p-button
-          severity="info"
-          pTooltip="Gerar PDF do formulário"
-          icon="pi pi-file"
-          (click)="gerarPDF(form)"
-        />
-      </td>
-    </tr>
+  <app-gerar-graficos [formSelected]="quizSelecionado"></app-gerar-graficos>
+</p-dialog>
+
+<p-dialog
+  [draggable]="false"
+  [(visible)]="visibilityOfGeneratePDF"
+  [modal]="true"
+  [style]="{ width: '50%' }"
+>
+  <ng-template #header>
+    <div class="inline-flex items-center justify-center gap-2">
+      <span
+        style="
+          display: flex;
+          align-items: center;
+          gap: 0.25em;
+          font-size: 1.2em;
+        "
+      >
+        <i class="pi pi-file-pdf"></i> Gerar PDF do Quiz
+      </span>
+    </div>
   </ng-template>
-</p-table>
+  <!-- <app-gerar-pdf [formSelected]="quizPdfData"></app-gerar-pdf> -->
+</p-dialog>

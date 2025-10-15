@@ -1,8 +1,6 @@
 <main>
   <div
     class="sidebar"
-    (mouseenter)="ativarNavbar()"
-    (mouseleave)="fecharNavbar()"
     *ngIf="isAuthenticated()"
     >
     <app-navbar></app-navbar>
@@ -11,4 +9,4 @@
     <router-outlet></router-outlet>
   </section>
 </main>
-<div [ngClass]="navbarAtiva ? 'active' : 'desactive'">a</div>
+<div [ngClass]="navbarAtiva ? 'active' : 'desactive'"></div>

@@ -15,19 +15,26 @@ export class App {
   protected readonly title = signal('Angular_Electron');
   public navbarAtiva: boolean = false;
 
-  constructor(private router: Router) {
+  public theme: 'dark' | 'light' = 'light';
+  private observer!: MutationObserver;
+
+  constructor(private router: Router) {}
+
+  ngOnInit() {
+    this.updateTheme();
+    this.observer = new MutationObserver(() => this.updateTheme());
+    this.observer.observe(document.body, { attributes: true, attributeFilter: ['class'] });
   }
 
-  public ativarNavbar(): void {
-    this.navbarAtiva = true;
+  ngOnDestroy() {
+    this.observer.disconnect();
   }
 
-  public fecharNavbar(): void {
-    this.navbarAtiva = false;
+  private updateTheme() {
+    this.theme = document.body.classList.contains('dark') ? 'dark' : 'light';
   }
 
   public isAuthenticated(): boolean {
-    let isAuth = this.router.url !== '/';
-    return isAuth;
+    return this.router.url !== '/';
   }
 }

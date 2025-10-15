@@ -18,4 +18,23 @@ declare global {
   styleUrl: './navbar.css',
 })
 export class Navbar {
+
+  public sidebarIsOpen: boolean = false;
+  public theme: string = this.getTheme;
+
+  constructor(){
+  }
+
+  public toggleSidebar() {
+    this.sidebarIsOpen = !this.sidebarIsOpen;
+  }
+
+  private get getTheme(): string {
+    return document.body.classList.contains('dark') ? 'dark' : 'light';
+  }
+
+  public toggleTheme() {
+    document.body.classList.toggle('dark');
+    this.theme = this.getTheme; 
+  }
 }

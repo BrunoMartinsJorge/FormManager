@@ -1,0 +1,126 @@
+<p-dialog
+  [draggable]="false"
+  [(visible)]="visibilityOfGenerateGraphic"
+  [modal]="true"
+  [style]="{ width: '50%'}"
+  (onHide)="closeDialog()"
+>
+  <ng-template #header>
+    <div class="inline-flex items-center justify-center gap-2">
+      <span
+        style="
+          display: flex;
+          align-items: center;
+          gap: 0.25em;
+          font-size: 1.2em;
+        "
+        ><i class="pi pi-file-pdf"></i>Gerar PDF do Formulário
+      </span>
+    </div>
+  </ng-template>
+  <main class="container">
+    <section class="graphic-config">
+      <h4>Configurações do Gráfico</h4>
+
+      <label>Tipo do gráfico</label>
+      <p-selectbutton
+        [options]="typeOfChart"
+        [(ngModel)]="typeOfChartSelected"
+        optionLabel="label"
+        optionValue="value"
+      >
+      </p-selectbutton>
+
+      <hr />
+
+      <label>Selecione a questão</label>
+      <p-select
+        [options]="optionsByDropdownQuests"
+        [(ngModel)]="questSelected"
+        optionLabel="label"
+        placeholder="Selecione uma questão"
+        appendTo="body"
+        emptyMessage="Nenhuma questão encontrada"
+      >
+      </p-select>
+
+      <div style="margin-top: 0.5rem">
+        <button
+          type="button"
+          pButton
+          label="Adicionar gráfico"
+          icon="pi pi-plus"
+          (click)="toAddGraphic()"
+          [disabled]="!questSelected"
+          class="p-button-success"
+        ></button>
+      </div>
+    </section>
+
+    <section class="graphic-list" style="margin-top: 1.5rem">
+      <div
+        *ngFor="let g of graficos; let i = index; trackBy: trackByGrafico"
+        class="graphic-card"
+      >
+        <div
+          style="
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+          "
+        >
+          <div>
+            <strong>{{ g.titulo }}</strong>
+            <small style="margin-left: 0.5rem">({{ g.tipo }})</small>
+          </div>
+          <div>
+            <button
+              pButton
+              type="button"
+              icon="pi pi-times"
+              class="p-button-danger"
+              (click)="removeGraphic(i)"
+            ></button>
+          </div>
+        </div>
+
+        <div style="margin-top: 0.5rem">
+          <ng-container [ngSwitch]="g.tipo">
+            <p-chart
+              *ngSwitchCase="'bar'"
+              type="bar"
+              [data]="g.dados"
+              class="h-[30rem]"
+            ></p-chart>
+            <p-chart
+              *ngSwitchCase="'pie'"
+              type="pie"
+              [data]="g.dados"
+              class="h-[30rem]"
+            ></p-chart>
+            <p-chart
+              *ngSwitchCase="'doughnut'"
+              type="doughnut"
+              [data]="g.dados"
+              class="h-[30rem]"
+            ></p-chart>
+
+            <div *ngSwitchCase="'texto'">
+              <p>
+                <b>{{ g.titulo }}:</b> Questão de texto aberto — não gera
+                gráfico automático.
+              </p>
+            </div>
+
+            <p-chart
+              *ngSwitchDefault
+              type="bar"
+              [data]="g.dados"
+              class="h-[30rem]"
+            ></p-chart>
+          </ng-container>
+        </div>
+      </div>
+    </section>
+  </main>
+</p-dialog>

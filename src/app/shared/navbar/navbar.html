@@ -1,4 +1,24 @@
-<div class="sidebar">
+<div
+  [ngClass]="{
+    sidebar: true,
+    open: sidebarIsOpen,
+    dark: theme === 'dark'
+  }"
+>
+  <div class="header-sidebar">
+    <div class="logo"></div>
+
+    <!-- Texto só aparece quando aberto -->
+    <span><strong>Form Manager</strong></span>
+
+    <!-- Botão de abrir/fechar sempre visível -->
+    <i
+      [ngClass]="'pi pi-' + (sidebarIsOpen ? 'angle-left' : 'angle-right')"
+      (click)="toggleSidebar()"
+      id="btn-toggle"
+    ></i>
+  </div>
+
   <ul>
     <li>
       <a>
@@ -13,10 +33,13 @@
           <a [routerLink]="'/listar-formularios'">📋 Listar Formulários</a>
         </li>
         <li>
-          <a [routerLink]="'/questoes-salvas-formularios'">📝 Questões Salvas</a>
+          <a [routerLink]="'/questoes-salvas-formularios'"
+            >📝 Questões Salvas</a
+          >
         </li>
       </ul>
     </li>
+
     <li>
       <a>
         <i class="pi pi-question-circle"></i>
@@ -26,9 +49,17 @@
         <li><a [routerLink]="'/adicionar-quiz'">➕ Adicionar Quiz</a></li>
         <li><a [routerLink]="'/listar-quiz'">📋 Listar Quiz</a></li>
         <li>
-          <a [routerLink]="'/questoes-salvas-quiz'">📝 Questões Salvas</a>
+          <a [routerLink]="'/questoes-salvas-quiz'" [routerLinkActive]="'active'">📝 Perguntas Salvas</a>
         </li>
       </ul>
     </li>
   </ul>
+
+  <!-- <div class="footer">
+    <i
+      [ngClass]="'pi pi-' + (theme === 'dark' ? 'sun' : 'moon')"
+      (click)="toggleTheme()"
+    ></i>
+    <span>{{ theme === 'dark' ? 'Modo Claro' : 'Modo Escuro' }}</span>
+  </div> -->
 </div>

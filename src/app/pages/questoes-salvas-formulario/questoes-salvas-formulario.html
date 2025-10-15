@@ -4,9 +4,9 @@
     <p>Aqui você pode visualizar todas as questões salvas</p>
   </div>
   <p-table
+    style="border: 1px solid #ccc; border-top: none;"
     [value]="listOfSavedQuestions"
     stripedRows
-    showGridlines
     [rows]="10"
     [paginator]="true"
   >
@@ -46,7 +46,7 @@
           <p-splitbutton
             icon="pi pi-pencil"
             label="Editar"
-            (onClick)="viewImageQuest(question.imagem)"
+            (onClick)="toggleVisibilityDialogEditQuestion(question)"
             (onDropdownClick)="selectQuestion($event, question)"
             [model]="menuOptions"
             severity="primary"
@@ -72,12 +72,7 @@
     <ng-template #footer>
       <tr>
         <td colspan="6">
-          <span
-            style="
-              font-size: 14px;
-              color: #333;
-            "
-          >
+          <span style="font-size: 14px; color: #333">
             Você possui {{ listOfSavedQuestions ? listOfSavedQuestions.length :
             0 }} perguntas salvas!
           </span>
@@ -87,7 +82,7 @@
   </p-table>
 </main>
 <p-dialog
-  header="Novo modelo de questão"
+  [header]="dialogMode === 'edit' ? 'Editar Questão' : 'Novo modelo de questão'"
   [modal]="true"
   [draggable]="false"
   [(visible)]="visibleDialogAddQuestion"
@@ -130,7 +125,7 @@
           id="titulo-quest"
           type="text"
           pInputText
-          [(ngModel)]="newQuestion.imagemUrl"
+          [(ngModel)]="newQuestion.imagem"
           placeholder="Imagem da Questão (URL)"
           [invalid]="!urlImageIsValid(newQuestion.imagemUrl || '') && (newQuestion.imagemUrl || '').trim() !== ''"
           pTooltip="Opcional."
@@ -220,10 +215,10 @@
       <app-visualizar-questao [questao]="newQuestion"></app-visualizar-questao>
     </p-fieldset>
     <p-button
-      label="Adicionar Questão"
+      [label]="dialogMode == 'edit' ? 'Editar Questão' : 'Adicionar Questão'"
       [style]="{ marginTop: '10px', width: '100%' }"
       icon="pi pi-check"
-      (click)="addSavedQuestion()"
+      (click)="dialogMode === 'edit' ? editSavedQuestion() : addSavedQuestion()"
       [disabled]="!questIsValid()"
     /></div
 ></p-dialog>

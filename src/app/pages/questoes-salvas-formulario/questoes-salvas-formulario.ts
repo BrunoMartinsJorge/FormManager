@@ -15,7 +15,7 @@ import { MessageService } from 'primeng/api';
 import { TableModule } from 'primeng/table';
 import { TypeQuestEnumTransformPipe } from '../../shared/pipes/type-quest-enum-transform-pipe';
 import { SplitButton } from 'primeng/splitbutton';
-import { ProgressSpinner } from "primeng/progressspinner";
+import { ProgressSpinner } from 'primeng/progressspinner';
 
 @Component({
   selector: 'app-questoes-salvas-formulario',
@@ -34,8 +34,8 @@ import { ProgressSpinner } from "primeng/progressspinner";
     TableModule,
     TypeQuestEnumTransformPipe,
     SplitButton,
-    ProgressSpinner
-],
+    ProgressSpinner,
+  ],
   providers: [FormulariosServices, MessageService],
   templateUrl: './questoes-salvas-formulario.html',
   styleUrl: './questoes-salvas-formulario.css',
@@ -43,6 +43,7 @@ import { ProgressSpinner } from "primeng/progressspinner";
 export class QuestoesSalvasFormulario {
   public listOfSavedQuestions: any[] = [];
   public visibleDialogAddQuestion: boolean = false;
+  public dialogMode: 'add' | 'edit' = 'add';
   public newQuestion: any = {};
   public load_questions: boolean = false;
   public tipoDeCampo: any[] = [
@@ -111,7 +112,7 @@ export class QuestoesSalvasFormulario {
           },
         },
       ];
-    }else {
+    } else {
       this.menuOptions = [
         {
           label: 'Ver Imagem',
@@ -133,6 +134,7 @@ export class QuestoesSalvasFormulario {
   }
 
   public openDialogAddQuestion(): void {
+    this.dialogMode = 'add';
     this.visibleDialogAddQuestion = true;
     this.newQuestion = {
       titulo: '',
@@ -140,6 +142,27 @@ export class QuestoesSalvasFormulario {
       opcoes: [],
       favorita: true,
     };
+  }
+
+  public editSavedQuestion(): void {}
+
+  public toggleVisibilityDialogEditQuestion(questao: any): void {
+    this.dialogMode = 'edit';
+    console.log(questao);
+
+    this.visibleDialogAddQuestion = !this.visibleDialogAddQuestion;
+    if (this.visibleDialogAddQuestion) {
+      this.newQuestion = {
+        descricaoImagem: questao.descricaoImagem,
+        favorita: questao.favorito,
+        id: questao.id,
+        imagem: questao.imagem,
+        opcoes: questao.opcoes,
+        titulo: questao.titulo,
+        tipo: questao.tipo,
+      };
+      console.log(this.newQuestion);
+    } else this.newQuestion = {};
   }
 
   public viewImageQuest(url: string): void {

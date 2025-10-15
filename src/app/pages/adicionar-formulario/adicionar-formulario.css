@@ -20,8 +20,8 @@ section.container {
   div.form-info {
     width: 80%;
     padding: 1em;
-    border: 2px solid #ccc;
-    border-radius: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
     display: flex;
     flex-direction: column;
     grid-gap: 1em;
@@ -84,7 +84,7 @@ section.container {
     flex-direction: column;
     grid-gap: 0.5em;
 
-    div.quest-header {
+    div.quest-header{
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -102,7 +102,7 @@ section.container {
         background-color: #d72632a8;
         padding: 0.75em;
         border-radius: 50%;
-        border: 2px solid #d72631;
+        border: 2px solid #D72631;
         font-size: 1em;
         font-weight: bold;
         cursor: pointer;
@@ -120,7 +120,7 @@ section.container {
       }
     }
 
-    .info-input {
+    .info-input{
       display: flex;
       grid-gap: 1em;
       flex-wrap: wrap;
@@ -162,7 +162,7 @@ section.tela-acao {
   color: #fff;
   text-align: center;
   grid-gap: 0.1em;
-  transition: 0.4s;
+  transition: .4s;
 }
 
 section.tela-acao.erro {
@@ -182,75 +182,33 @@ section.tela-acao.carregando {
   color: #fff;
   text-align: center;
   grid-gap: 0.1em;
-  transition: 0.4s;
+  transition: .4s;
   backdrop-filter: blur(5px);
 }
 
-span#urlForm {
-  font-size: 1.2em;
-  color: #333;
-  margin-top: 1em;
-  grid-gap: 0.5em;
-  display: flex;
-  align-items: center;
-  background-color: rgba(6, 123, 6, 0.42);
-  padding-right: 10px;
-
-  i {
-    color: #fff;
-    font-size: 1.5em;
-    padding: 15px;
-    background-color: rgb(6, 123, 6);
-    transition: background-color 0.3s;
-  }
-
-  a {
-    color: #333;
-    text-decoration: none;
-  }
-}
-
-.footer-quest {
+.footer-quest{
   display: flex;
   align-items: center;
   justify-content: end;
   grid-gap: 1em;
 }
 
-.opcao-quest {
+.opcao-quest{
   display: flex;
   flex-wrap: wrap;
   grid-gap: 1em;
   align-items: end;
 
-  .input-group {
+  .input-group{
     flex: 1;
   }
 }
 
-.inputs-list {
+.inputs-list{
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
   max-height: 250px;
   overflow-y: scroll;
   grid-gap: 0.25em;
-}
-
-.image-group {
-  display: flex;
-  align-items: center;
-  grid-gap: 1em;
-
-  .input-group {
-    flex: 1;
-  }
-}
-
-.quest-saved-container {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  grid-gap: 1em;
 }

@@ -6,9 +6,9 @@ import { AdicionarFormulario } from './pages/adicionar-formulario/adicionar-form
 import { VisualisarFormulario } from './pages/visualisar-formulario/visualisar-formulario';
 import { AdicionarQuiz } from './pages/adicionar-quiz/adicionar-quiz';
 import { ListarQuiz } from './pages/listar-quiz/listar-quiz';
-import { GerarPdf } from './pages/gerar-pdf/gerar-pdf';
 import { QuestoesSalvasFormulario } from './pages/questoes-salvas-formulario/questoes-salvas-formulario';
 import { QuestoesSalvasQuiz } from './pages/questoes-salvas-quiz/questoes-salvas-quiz';
+import { GerarPdf } from './shared/components/gerar-pdf/gerar-pdf';
 
 export const routes: Routes = [
     {

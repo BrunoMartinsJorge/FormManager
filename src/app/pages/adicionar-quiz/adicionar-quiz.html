@@ -31,7 +31,7 @@
   <h2>Questões do Quiz</h2>
   <div class="quest" *ngFor="let questao of quiz.questoes; let i = index">
     <div class="quest-header">
-      <h4>Questão {{ quiz.questoes.length }}</h4>
+      <h4>Questão {{ i + 1 }}</h4>
     </div>
     <hr />
     <div class="input-group">
@@ -63,26 +63,6 @@
         icon="pi pi-plus"
         (click)="adicionarOpcao(i)"
       />
-    </div>
-    <div class="info-input" *ngIf="questao.tipo === 'NUMERO'">
-      <div class="input-group">
-        <label for="min-quest">Valor mínimo:</label>
-        <p-input-number
-          id="min-quest"
-          type="number"
-          [(ngModel)]="questao.min"
-          placeholder="Mínimo"
-        />
-      </div>
-      <div class="input-group">
-        <label for="max-quest">Valor máximo:</label>
-        <p-input-number
-          id="max-quest"
-          type="number"
-          [(ngModel)]="questao.max"
-          placeholder="Máximo"
-        />
-      </div>
     </div>
     <div
       class="inputs-list"
@@ -157,9 +137,9 @@
         </p-inputgroup-addon>
       </p-inputgroup>
     </div>
+    <ng-container *ngIf="questao.tipo == 'UNICA' || questao.tipo == 'MULTIPLA' || questao.tipo == 'VERDADEIRO_FALSO'">
     <div
       class="pontos-questao"
-      *ngIf="questao.tipo == 'TEXTO' || questao.tipo == 'UNICA' || questao.tipo == 'MULTIPLA' || questao.tipo == 'VERDADEIRO_FALSO'"
     >
       <div class="input-group">
         <label for="pontos-quest">Pontos:</label>
@@ -173,7 +153,6 @@
     </div>
     <div
       class="feedback"
-      *ngIf="questao.tipo == 'TEXTO' || questao.tipo == 'UNICA' || questao.tipo == 'MULTIPLA' || questao.tipo == 'VERDADEIRO_FALSO'"
     >
       <div class="input-group">
         <label for="feedback-quest">Caso acerte:</label>
@@ -194,26 +173,7 @@
         ></textarea>
       </div>
     </div>
-    <!-- <div *ngIf="questao.tipo === 'UPLOAD'">
-      <input
-        type="number"
-        [(ngModel)]="questao.maxFiles"
-        placeholder="Máx. arquivos"
-      />
-      <input
-        type="number"
-        [(ngModel)]="questao.maxFileSize"
-        placeholder="Tamanho máximo (MB)"
-      />
-      <input
-        [(ngModel)]="questao.allowedMimeTypes"
-        placeholder="Tipos permitidos, separados por vírgula"
-      />
-    </div> -->
-    <!-- <div class="input-group">
-      <label for="descricao-quest">Questão Obrigatória?</label>
-      <p-toggleswitch [(ngModel)]="questao.obrigatoria" />
-    </div> -->
+    </ng-container>
     <p-fieldset
       legend="Vizualizar questão"
       toggleable="true"

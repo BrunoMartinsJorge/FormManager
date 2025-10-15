@@ -6,7 +6,11 @@ const userDataPath = electronApp.getPath("userData");
 const dbPath = path.join(userDataPath, "banco.db");
 const db = new Database(dbPath);
 
-db.pragma('foreign_keys = ON');
+db.pragma('foreign_keys = OFF');
+
+db.prepare(`
+  DROP TABLE IF EXISTS Alternativa;  
+`);
 
 db.prepare(`
 CREATE TABLE IF NOT EXISTS Formulario (
@@ -62,6 +66,7 @@ CREATE TABLE IF NOT EXISTS Alternativa (
   idAlternativa INTEGER PRIMARY KEY AUTOINCREMENT,
   idPergunta INTEGER,
   idQuestao INTEGER,
+  correta BOOLEAN,
   texto TEXT,
   FOREIGN KEY (idPergunta) REFERENCES Pergunta(idPergunta),
   FOREIGN KEY (idQuestao) REFERENCES Questao(idQuestao)

@@ -93,26 +93,6 @@
         (click)="adicionarOpcao(i)"
       />
     </div>
-    <div class="info-input" *ngIf="questao.tipo === 'NUMERO'">
-      <div class="input-group">
-        <label for="min-quest">Valor mínimo:</label>
-        <p-input-number
-          id="min-quest"
-          type="number"
-          [(ngModel)]="questao.min"
-          placeholder="Mínimo"
-        />
-      </div>
-      <div class="input-group">
-        <label for="max-quest">Valor máximo:</label>
-        <p-input-number
-          id="max-quest"
-          type="number"
-          [(ngModel)]="questao.max"
-          placeholder="Máximo"
-        />
-      </div>
-    </div>
     <div
       class="inputs-list"
       *ngIf="questao.tipo && (questao.tipo === 'UNICA' || questao.tipo === 'MULTIPLA')"
@@ -156,8 +136,6 @@
           placeholder="Valor máximo"
         />
       </div>
-      <!-- <input [(ngModel)]="questao.startLabel" placeholder="Label início" />
-      <input [(ngModel)]="questao.endLabel" placeholder="Label fim" /> -->
     </div>
     <p-fieldset
       legend="Vizualizar questão"
@@ -208,24 +186,24 @@
 <p-dialog
   [style]="{ width: '50%' }"
   [(visible)]="visibilidadeDialog"
-  header="Formulário criado com sucesso"
+  header="Formulário criado com sucesso!"
   [modal]="true"
-  [draggable]="false"
 >
-  <div>
-    <p-inputgroup>
-      <input type="text" pInputText [value]="urlForm" readonly />
-      <p-inputgroup-addon>
-        <p-button
-          icon="pi pi-copy"
-          severity="secondary"
-          variant="text"
-          pTooltip="Copiar link"
-          (click)="copyLink()"
-        />
-      </p-inputgroup-addon>
-    </p-inputgroup>
-  </div>
+  <p-inputgroup>
+    <p-button
+      pTooltip="Copiar link"
+      tooltipPosition="top"
+      icon="pi pi-copy"
+      severity="contrast"
+      (click)="copyLink()"
+    />
+    <input
+      pInputText
+      placeholder="Link do formulário"
+      [(ngModel)]="urlForm"
+      [disabled]="true"
+    />
+  </p-inputgroup>
 </p-dialog>
 <p-dialog
   [style]="{ width: '50%' }"

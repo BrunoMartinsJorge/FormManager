@@ -36,7 +36,7 @@ export class QuizService {
       });
     }
     public buscarRespostasDeFormularioPorIdForm(formId: string): Observable<any> {
-      return this.http.get<any>(`${this.baseUrl}/forms/${formId}/responses`);
+      return this.http.get<any>(`${this.baseUrl}/forms/quiz/google/${formId}/responses`);
     }
   
     public buscarQuestoesDeFormularioPorIdForm(formId: string): Observable<any> {

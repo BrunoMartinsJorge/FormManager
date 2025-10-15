@@ -1,0 +1,49 @@
+<p-dialog
+  [(visible)]="visibilityOfGeneratePDF"
+  [draggable]="false"
+  [modal]="true"
+  [style]="{ width: '50%'}"
+  (onHide)="closeDialog()"
+  header="Gerar PDF"
+>
+  <section>
+    <div #pdfSection>
+      <div class="header-form">
+        <h1>{{formSelected?.titulo}}</h1>
+        <p>{{formSelected?.descricao}}</p>
+      </div>
+      <br>
+      <div class="body-form">
+        <h2>Questões do Formulário</h2>
+        <div class="quest-list">
+          @for (quest of formSelected?.questoes; let i = $index; track
+          quest.id){
+          <div class="quest-element">
+            <strong>{{i+1}}. {{quest.titulo}}</strong>
+            <div class="response-element"></div>
+          </div>
+          }
+        </div>
+      </div>
+      <div class="footer-form">
+        <div class="signature">
+          <span>Assinatura do Responsável:</span>
+        </div>
+        <p>
+          <span
+            ><i class="pi pi-calendar"></i>Criado em {{formSelected?.dataCriacao
+            | date : 'dd/MM/yyyy HH:mm'}}</span
+          >
+        </p>
+      </div>
+    </div>
+  </section>
+  <br />
+  <p-button
+    label="Gerar PDF"
+    (click)="createPdf()"
+    icon="pi pi-file-pdf"
+    severity="contrast"
+    [style]="{width: '100%'}"
+  ></p-button>
+</p-dialog>
