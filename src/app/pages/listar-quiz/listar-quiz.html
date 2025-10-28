@@ -37,10 +37,7 @@
               <p>{{ quiz.Descricao }}</p>
             </div>
             <div class="info-form">
-              <span
-                >Criado em {{ quiz.Data_Criacao | date: 'dd/MM/yyyy HH:mm'
-                }}</span
-              >
+              <span>Criado em {{ quiz.Data_Criacao }}</span>
               <span>ID: {{ quiz.idFormulario }}</span>
             </div>
           </div>
@@ -51,7 +48,6 @@
 
     <div class="form-select">
       @if (carregandoQuiz && !quizSelecionado) {
-
       <div class="loading">
         <p-progressSpinner></p-progressSpinner>
         <span>Carregando quiz...</span>
@@ -70,6 +66,25 @@
       </p>
       }
       <div *ngIf="quizSelecionado && !carregandoQuiz">
+        <div class="header-info-api">
+          <span>
+            A API do Google Forms é limitada em seu uso, o que pode causar
+            problemas em aplicativos que necessitem de uma grande quantidade de
+            requisições. Além disso, algumas coisas podem precisar ser alteradas
+            manualmente, tornando o processo mais demorado. Por isso, é
+            importante ter em mente essas limitações ao utilizar a API do Google
+            Forms em seu aplicativo.
+          </span>
+          <p-button
+            label="Acessae Formulário Manualmente"
+            icon="pi pi-cog"
+            severity="contrast"
+            (click)="getLinkByManualForm()"
+          ></p-button>
+          <span>
+            Caso ocorra problemas com o botão acima, tente acessar o formulário pelo seu perfil do Google Forms
+          </span>
+        </div>
         <div class="header-form-selected">
           <h3>{{ quizSelecionado.titulo }}</h3>
           <span>{{ quizSelecionado.descricao }}</span>
@@ -153,12 +168,13 @@
                 </div>
                 <div class="pontuacao-candidato">
                   <i class="pi pi-star"></i>
-                  Pontuação total: {{ getPontuacaoByResponse(getResponseSelectedByIndex).total }}
+                  Pontuação total: {{
+                  getPontuacaoByResponse(getResponseSelectedByIndex).total }}
                   pts
-                  <br>
+                  <br />
                   <i class="pi pi-star"></i>
-                  Pontuação maxima: {{ getPontuacaoByResponse(getResponseSelectedByIndex).max }}
-                  pts
+                  Pontuação maxima: {{
+                  getPontuacaoByResponse(getResponseSelectedByIndex).max }} pts
                 </div>
 
                 <div class="questions-list">
@@ -169,7 +185,7 @@
                       <div class="header-quest">
                         <strong>
                           <span class="quest-number">{{ i + 1 }}</span> {{
-                          response.titulo }}
+                          getTitleQuestByIdQuestion(response.idQuestao) }}
                         </strong>
                         <div class="type-quest">
                           {{ getTypeQuestByIdQuestion(response.idQuestao) }}

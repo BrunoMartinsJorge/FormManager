@@ -1,5 +1,6 @@
 export interface QuizSelected {
   idQuiz: number;
+  quizId: string;
   titulo: string;
   descricao: string;
   dataCriacao: string;

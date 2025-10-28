@@ -81,11 +81,19 @@ export class ListarQuiz {
   }
 
   selectForm(id: number): void {
-    console.log(id);
-    
     this.quizSelectedId = id;
     this.responsesOrQuestions = 'quest';
     this.getDataQuizSelecionado();
+  }
+
+  public getLinkByManualForm(): void {
+    if (!this.quizSelecionado) return;
+    const quiz = this.listaQuizzes.find(
+      (q) => q.idFormulario === this.quizSelectedId
+    );
+    if (!quiz || !quiz.quizId) return;
+    const urlPadrao: string = `https://docs.google.com/forms/d/${quiz.quizId}/edit`;
+    window.open(urlPadrao, '_blank');
   }
 
   private carregarQuizzes(): void {
@@ -102,12 +110,13 @@ export class ListarQuiz {
           }))
           .sort((a: any, b: any) => b.idFormulario - a.idFormulario);
         this.quizList = [...this.listaQuizzes];
-        // const quizzes = this.listaQuizzes.filter((q) => q.quizId);
-        this.quizSelecionado = this.listaQuizzes.length > 0 ? this.listaQuizzes[0] : null;
-        console.log(this.quizSelecionado);
+        this.quizSelecionado =
+          this.listaQuizzes.length > 0 ? this.listaQuizzes[0] : null;
 
-        this.quizSelectedId = this.listaQuizzes.length > 0 ? this.listaQuizzes[0].idFormulario : null;
-        console.log(this.quizSelectedId);
+        this.quizSelectedId =
+          this.listaQuizzes.length > 0
+            ? this.listaQuizzes[0].idFormulario
+            : null;
 
         this.getDataQuizSelecionado();
       },
@@ -116,6 +125,8 @@ export class ListarQuiz {
   }
 
   private getDataQuizSelecionado(): void {
+    console.log(this.quizSelecionado!.quizId);
+
     const quiz = this.listaQuizzes.find(
       (q) => q.idFormulario === this.quizSelectedId
     );
@@ -123,14 +134,15 @@ export class ListarQuiz {
     this.carregandoQuiz = true;
     if (!quiz || !quiz.quizId) {
       this.carregandoQuiz = false;
-      console.log(this.quizSelecionado);
 
       return;
     }
     this.service.buscarRespostasDeFormularioPorIdForm(quiz.quizId).subscribe({
-      next: (res: any) => {
-        this.quizSelecionado = this.convertQuizData(res);
+      next: (res: QuizSelected) => {
+        this.quizSelecionado = res;
+
         this.respostasPorUsuario = this.mapResponsesByUser(res);
+
         this.carregandoQuiz = false;
       },
       error: (err) => {
@@ -140,39 +152,26 @@ export class ListarQuiz {
     });
   }
 
-  private mapResponsesByUser(data: any): any[] {
-    const questoes = data.items || [];
-    const responses = data.responses || [];
+  private mapResponsesByUser(data: QuizSelected): any[] {
+    const questoes = data.questoes || [];
+    const respostas = data.respostas || [];
 
-    return responses.map((resp: any) => {
-      const respostasUsuario: any[] = [];
+    if (!questoes.length || !respostas.length) return [];
 
-      Object.values(resp.answers).forEach((answer: any) => {
-        const questao = questoes.find(
-          (q: any) => q.questionItem?.question?.questionId === answer.questionId
-        );
-        if (!questao) return;
-
-        const titulo = questao.title;
-        const idQuestao = answer.questionId;
-
-        if (answer.textAnswers) {
-          answer.textAnswers.answers.forEach((a: any) =>
-            respostasUsuario.push({ idQuestao, titulo, valor: a.value })
-          );
-        }
-
-        if (answer.choiceAnswers) {
-          answer.choiceAnswers.answers.forEach((a: any) =>
-            respostasUsuario.push({ idQuestao, titulo, valor: a.value })
-          );
-        }
-      });
+    return respostas.map((resp: any) => {
+      // resp.respostas é um array com as respostas de uma submissão
+      const respostasUsuario = resp.respostas.map((r: any) => ({
+        idQuestao: r.idQuestao,
+        valor: r.valor,
+        score: r.score,
+        correta: r.correta,
+      }));
 
       return {
-        idResposta: resp.responseId,
-        dataEnviada: resp.lastSubmittedTime,
+        idResposta: resp.idResposta,
+        dataEnviada: resp.dataEnviada,
         respostas: respostasUsuario,
+        totalScore: resp.totalScore ?? 0,
       };
     });
   }
@@ -298,6 +297,13 @@ export class ListarQuiz {
     return (
       this.quizSelecionado?.questoes.find((q: any) => q.id === questId)?.tipo ||
       ''
+    );
+  }
+
+  public getTitleQuestByIdQuestion(questId: string): string {
+    return (
+      this.quizSelecionado?.questoes.find((q: any) => q.id === questId)
+        ?.titulo || ''
     );
   }
 

@@ -9,7 +9,7 @@ import { environment } from '../core/environments/environment';
 export class QuizService {
 
   private baseUrl = environment.apiUrl;
-  private readonly quizEndpoint = '/api/quiz';
+  private readonly quizEndpoint = '/quiz';
 
   constructor(private http: HttpClient) { }
 
@@ -23,11 +23,11 @@ export class QuizService {
   }
 
     public criarFormulario(formulario: any): Observable<any> {
-      return this.http.post<any>(`${this.baseUrl}/api/forms`, formulario);
+      return this.http.post<any>(`${this.baseUrl}${this.quizEndpoint}`, formulario);
     }
   
     public criarQuiz(quiz: any): Observable<any> {
-      return this.http.post<any>(`${this.baseUrl}/api/quiz`, quiz);
+      return this.http.post<any>(`${this.baseUrl}/quiz`, quiz);
     }
   
     public deletarFormulario(formId: number) {
@@ -36,7 +36,7 @@ export class QuizService {
       });
     }
     public buscarRespostasDeFormularioPorIdForm(formId: string): Observable<any> {
-      return this.http.get<any>(`${this.baseUrl}/forms/quiz/google/${formId}/responses`);
+      return this.http.get<any>(`${this.baseUrl}/quiz/${formId}/responses`);
     }
   
     public buscarQuestoesDeFormularioPorIdForm(formId: string): Observable<any> {

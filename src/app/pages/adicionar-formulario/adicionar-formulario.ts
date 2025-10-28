@@ -201,7 +201,7 @@ export class AdicionarFormulario {
 
     this.formulariosService.criarFormulario(payload).subscribe(
       (response) => {
-        this.urlForm = response.formUrl;
+        this.urlForm = response.url;
         this.visibilidadeDialog = true;
         this.carregando = false;
       },

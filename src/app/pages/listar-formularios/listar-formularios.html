@@ -41,7 +41,16 @@
           </div>
         </div>
         } @empty {
-        <p>Nenhum formulário encontrado</p>
+        <div
+          style="
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex: 1;
+          "
+        >
+          <p>Nenhum formulário encontrado</p>
+        </div>
         }
       </div>
     </div>
@@ -167,5 +176,11 @@
     </div>
   </section>
 </main>
-<app-gerar-graficos [formSelected]="formSelected" [(visibilityOfGenerateGraphic)]="visibilityOfGraphicCreate"></app-gerar-graficos>
-<app-gerar-pdf [formSelected]="formPdfData" [(visibilityOfGeneratePDF)]="visibilityOfGeneratePDF"></app-gerar-pdf>
+<app-gerar-graficos
+  [formSelected]="formSelected"
+  [(visibilityOfGenerateGraphic)]="visibilityOfGraphicCreate"
+></app-gerar-graficos>
+<app-gerar-pdf
+  [formSelected]="formPdfData"
+  [(visibilityOfGeneratePDF)]="visibilityOfGeneratePDF"
+></app-gerar-pdf>

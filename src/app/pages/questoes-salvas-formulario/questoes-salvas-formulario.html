@@ -7,7 +7,7 @@
     style="border: 1px solid #ccc; border-top: none;"
     [value]="listOfSavedQuestions"
     stripedRows
-    [rows]="10"
+    [rows]="8"
     [paginator]="true"
   >
     <ng-template pTemplate="caption">
@@ -27,7 +27,7 @@
     </ng-template>
     <ng-template pTemplate="body" let-question>
       <tr>
-        <td>{{ question.id }}</td>
+        <td>{{ question.idPergunta }}</td>
         <td>{{ question.titulo }}</td>
         <td>{{ question.tipo | typeQuestEnumTransform }}</td>
         <td>
@@ -84,6 +84,7 @@
 <p-dialog
   [header]="dialogMode === 'edit' ? 'Editar Questão' : 'Novo modelo de questão'"
   [modal]="true"
+  [style]="{'maxWidth': '600px', 'width': '100%'}"
   [draggable]="false"
   [(visible)]="visibleDialogAddQuestion"
 >
@@ -140,26 +141,6 @@
           [(ngModel)]="newQuestion.descricaoImagem"
           placeholder="Descrição da Imagem"
           [disabled]="!urlImageIsValid(newQuestion.imagemUrl || '')"
-        />
-      </div>
-    </div>
-    <div class="info-input" *ngIf="newQuestion.tipo === 'NUMERO'">
-      <div class="input-group">
-        <label for="min-quest">Valor mínimo:</label>
-        <p-input-number
-          id="min-quest"
-          type="number"
-          [(ngModel)]="newQuestion.min"
-          placeholder="Mínimo"
-        />
-      </div>
-      <div class="input-group">
-        <label for="max-quest">Valor máximo:</label>
-        <p-input-number
-          id="max-quest"
-          type="number"
-          [(ngModel)]="newQuestion.max"
-          placeholder="Máximo"
         />
       </div>
     </div>

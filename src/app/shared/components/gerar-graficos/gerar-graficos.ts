@@ -14,6 +14,7 @@ import { SelectModule } from 'primeng/select';
 import { ChartModule } from 'primeng/chart';
 import { ButtonModule } from 'primeng/button';
 import { Dialog } from 'primeng/dialog';
+import { QuizSelected } from '../../models/ChatSelected.model';
 
 @Component({
   selector: 'app-gerar-graficos',
@@ -31,7 +32,7 @@ import { Dialog } from 'primeng/dialog';
   styleUrls: ['./gerar-graficos.css'],
 })
 export class GerarGraficos implements OnChanges {
-  @Input() formSelected: any;
+  @Input() formSelected: QuizSelected | null = null;
   @Input() visibilityOfGenerateGraphic: boolean = false;
   @Output() visibilityOfGenerateGraphicChange = new EventEmitter<boolean>();
 
@@ -49,7 +50,7 @@ export class GerarGraficos implements OnChanges {
     [];
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes['formSelected'] && this.formSelected) {
+    if (changes['formSelected'] && this.formSelected) {      
       this.optionsByDropdownQuests = this.formSelected.questoes.map(
         (q: any, i: number) => ({
           label: `${i + 1}º Questão - ${q.titulo}`,
@@ -65,7 +66,7 @@ export class GerarGraficos implements OnChanges {
   }
 
   public toAddGraphic() {
-    if (!this.questSelected || !this.formSelected) return;
+    if (!this.questSelected || this.formSelected == null) return;
 
     const questId = this.questSelected.value ?? this.questSelected;
     const quest = this.formSelected.questoes.find((q: any) => q.id === questId);
@@ -88,7 +89,7 @@ export class GerarGraficos implements OnChanges {
     );
 
     const counts = labels.map((label: any) =>
-      (this.formSelected.respostas || []).reduce((acc: number, resp: any) => {
+      (this.formSelected!.respostas || []).reduce((acc: number, resp: any) => {
         const r = (resp.respostas || []).find(
           (x: any) => x.idQuestao === quest.id
         );

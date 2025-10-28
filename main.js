@@ -1,62 +1,58 @@
 const { app: electronApp, BrowserWindow, Menu } = require("electron");
 const path = require("path");
 const url = require("url");
-const { startExpress } = require("./server/expressServer");
-const db = require("./server/db");
+
+const serverPath = path.join(__dirname, "server", "dist", "server.js");
+const { startExpress } = require(serverPath);
 
 let mainWindow;
 
 async function createWindow() {
-  await startExpress();
+  try {
+    await startExpress();
+    console.log("✅ Servidor Express + TypeORM iniciado com sucesso.");
+  } catch (err) {
+    console.error("❌ Erro ao iniciar o servidor Express:", err);
+  }
+
+  process.on("uncaughtException", (err) => {
+    console.error("🔥 Erro não tratado:", err);
+  });
 
   mainWindow = new BrowserWindow({
     width: 800,
     height: 600,
     icon: path.join(__dirname, "logo.ico"),
-    webPreferences: { nodeIntegration: true, contextIsolation: false },
+    webPreferences: {
+      nodeIntegration: true,
+      contextIsolation: false,
+    },
   });
 
-  const template = [
+  const menu = Menu.buildFromTemplate([
     {
       label: "Visão",
       submenu: [
+        { label: "Tela cheia", role: "togglefullscreen" },
         {
-          label: "Abrir Tela Cheia",
-          role: "togglefullscreen"
-        },
-        {
-          label: "Recarregar Aplicativo",
+          label: "Recarregar",
           accelerator: "Ctrl+R",
           click: () => {
-            mainWindow.loadFile(
-              path.join(__dirname, "dist/Angular_Electron/browser/index.html")
-            );
-          }
-        }
-      ]
+            mainWindow.loadURL("http://localhost:4200");
+          },
+        },
+      ],
     },
-    {
-      label: "Ajuda",
-      submenu: [
-        {
-          label: "Manual do Usuário",
-          click: () => {
-            const { shell } = require("electron");
-            const docPath = path.join(__dirname, "documentacao.pdf");
-            shell.openPath(docPath);
-          }
-        }
-      ]
-    }
-  ];
+  ]);
 
-  const menu = Menu.buildFromTemplate(template);
   Menu.setApplicationMenu(menu);
-
   mainWindow.maximize();
 
   const indexPath = url.format({
-    pathname: path.join(__dirname, "dist/Angular_Electron/browser/index.html"),
+    pathname: path.join(
+      __dirname +
+      "/dist/Angular_Electron/browser/index.html"
+    ),
     protocol: "file:",
     slashes: true,
   });
@@ -67,19 +63,5 @@ async function createWindow() {
       : indexPath;
 
   mainWindow.loadURL(startUrl);
-
-  if (process.env.NODE_ENV === "development")
-    mainWindow.webContents.openDevTools();
-
-  mainWindow.on("closed", () => {
-    mainWindow = null;
-  });
 }
-
 electronApp.whenReady().then(createWindow);
-
-electronApp.on("window-all-closed", () => {
-  if (process.platform !== "darwin") electronApp.quit();
-});
-
-electronApp.on("before-quit", () => db.close());

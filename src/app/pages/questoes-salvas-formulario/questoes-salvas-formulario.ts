@@ -86,7 +86,7 @@ export class QuestoesSalvasFormulario {
     this.load_questions = true;
     this.formService.findAllQuestionsFavorites().subscribe({
       next: (response: any) => {
-        this.listOfSavedQuestions = response.questions || [];
+        this.listOfSavedQuestions = response || [];
         this.load_questions = false;
       },
       error: (err) => {
@@ -148,7 +148,6 @@ export class QuestoesSalvasFormulario {
 
   public toggleVisibilityDialogEditQuestion(questao: any): void {
     this.dialogMode = 'edit';
-    console.log(questao);
 
     this.visibleDialogAddQuestion = !this.visibleDialogAddQuestion;
     if (this.visibleDialogAddQuestion) {
@@ -161,7 +160,6 @@ export class QuestoesSalvasFormulario {
         titulo: questao.titulo,
         tipo: questao.tipo,
       };
-      console.log(this.newQuestion);
     } else this.newQuestion = {};
   }
 

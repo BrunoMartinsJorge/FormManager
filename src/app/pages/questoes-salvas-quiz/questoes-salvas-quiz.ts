@@ -131,7 +131,6 @@ export class QuestoesSalvasQuiz {
         questao.respostasCorretas.push(indexOpcao);
       }
     }
-    console.log(this.newQuestion);
   }
 
   public toogleOpcaoCorretaVerdadeiroFalso(
@@ -190,7 +189,6 @@ export class QuestoesSalvasQuiz {
 
   public toggleVisibilityDialogEditQuestion(questao: any): void {
     this.dialogMode = 'edit';
-    console.log(questao);
 
     this.visibleDialogAddQuestion = !this.visibleDialogAddQuestion;
     if (this.visibleDialogAddQuestion) {
@@ -203,7 +201,6 @@ export class QuestoesSalvasQuiz {
         titulo: questao.titulo,
         tipo: questao.tipo,
       };
-      console.log(this.newQuestion);
     } else this.newQuestion = {};
   }
 

@@ -51,6 +51,7 @@ main {
     flex: 1;
     display: flex;
     min-height: 0;
+    overflow: hidden;
 
     div.forms-list {
       display: flex;
@@ -60,6 +61,7 @@ main {
       width: 50%;
       border-right: 1px solid #ccc;
       min-height: 0;
+      overflow: auto;
 
       div.fillter-form {
         border-bottom: 1px solid #ccc;
@@ -140,6 +142,9 @@ main {
       flex: 1;
       min-height: 0;
       display: flex;
+      overflow: hidden;
+      overflow-y: scroll;
+      max-height: 100vh;
       flex-direction: column;
 
       div.info-form-select {
@@ -159,6 +164,7 @@ main {
         gap: 0.5em;
       }
 
+      div.header-info-api,
       div.header-form-selected {
         display: flex;
         flex-direction: column;
@@ -217,9 +223,22 @@ main {
         }
       }
 
+      div.header-info-api {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        grid-gap: 0.5em;
+        span {
+          color: #333;
+          font-size: 14px;
+          text-align: center;
+        }
+      }
+
       div.body-form-selected {
         flex: 1;
-        overflow-y: auto;
+        overflow-y: scroll;
         padding: 0.5em;
         display: flex;
         flex-direction: column;

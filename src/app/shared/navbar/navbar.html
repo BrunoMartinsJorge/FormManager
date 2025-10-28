@@ -27,13 +27,21 @@
       </a>
       <ul class="submenu">
         <li>
-          <a [routerLink]="'/adicionar-formulario'">➕ Adicionar Formulário</a>
+          <a
+            [routerLinkActive]="'active'"
+            [routerLink]="'/adicionar-formulario'"
+            >➕ Adicionar Formulário</a
+          >
         </li>
         <li>
-          <a [routerLink]="'/listar-formularios'">📋 Listar Formulários</a>
+          <a [routerLinkActive]="'active'" [routerLink]="'/listar-formularios'"
+            >📋 Listar Formulários</a
+          >
         </li>
         <li>
-          <a [routerLink]="'/questoes-salvas-formularios'"
+          <a
+            [routerLinkActive]="'active'"
+            [routerLink]="'/questoes-salvas-formularios'"
             >📝 Questões Salvas</a
           >
         </li>
@@ -46,10 +54,23 @@
         <span>Quiz</span>
       </a>
       <ul class="submenu">
-        <li><a [routerLink]="'/adicionar-quiz'">➕ Adicionar Quiz</a></li>
-        <li><a [routerLink]="'/listar-quiz'">📋 Listar Quiz</a></li>
         <li>
-          <a [routerLink]="'/questoes-salvas-quiz'" [routerLinkActive]="'active'">📝 Perguntas Salvas</a>
+          <a [routerLinkActive]="'active'" [routerLink]="'/adicionar-quiz'"
+            >➕ Adicionar Quiz</a
+          >
+        </li>
+        <li>
+          <a [routerLinkActive]="'active'" [routerLink]="'/listar-quiz'"
+            >📋 Listar Quiz</a
+          >
+        </li>
+        <li>
+          <a
+            [routerLinkActive]="'active'"
+            [routerLink]="'/questoes-salvas-quiz'"
+            [routerLinkActive]="'active'"
+            >📝 Perguntas Salvas</a
+          >
         </li>
       </ul>
     </li>

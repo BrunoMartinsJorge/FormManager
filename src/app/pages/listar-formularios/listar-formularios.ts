@@ -62,7 +62,6 @@ export class ListarFormularios {
   public toogleGeneratePDF(event: any): boolean {
     this.visibilityOfGeneratePDF = !this.visibilityOfGeneratePDF;
     this.convertFormByDataPdf();
-    console.log(this.visibilityOfGeneratePDF);
 
     return this.visibilityOfGeneratePDF;
   }
@@ -192,6 +191,7 @@ export class ListarFormularios {
   private loadAllForms(): void {
     this.formulariosService.listarFormularios().subscribe({
       next: (res) => {
+        
         this.forms = res;
         this.formsList = res.sort(
           (a: any, b: any) => b.idFormulario - a.idFormulario
@@ -250,7 +250,6 @@ export class ListarFormularios {
       .subscribe({
         next: (res) => {
           this.formSelected = this.convertQuestionData(res);
-          console.log(this.formSelected);
 
           this.responsesByUser = this.mapResponsesByUser(res);
           this.loadingFormSelected = false;

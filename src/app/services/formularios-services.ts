@@ -14,23 +14,23 @@ export class FormulariosServices {
   constructor(private http: HttpClient) {}
 
   public criarFormulario(formulario: any): Observable<any> {
-    return this.http.post<any>(`${this.baseUrl}/api/forms`, formulario);
+    return this.http.post<any>(`${this.baseUrl}/formularios`, formulario);
   }
 
   public findAllQuestionsFavorites(): Observable<any[]> {
-    return this.http.get<any[]>(`${this.baseUrl}/forms/find-favorite-questions`);
+    return this.http.get<any[]>(`${this.baseUrl}/formularios/questoes-salvas`);
   }
 
   public addQuestionToFavorites(question: any): Observable<any> {
-    return this.http.post<any>(`${this.baseUrl}/forms/add-question-favorite`, question);
+    return this.http.post<any>(`${this.baseUrl}/formularios/questoes`, question);
   }
 
   public criarQuiz(quiz: any): Observable<any> {
-    return this.http.post<any>(`${this.baseUrl}/api/quiz`, quiz);
+    return this.http.post<any>(`${this.baseUrl}/quiz`, quiz);
   }
 
   public listarFormularios(): Observable<Formulario[]> {
-    return this.http.get<Formulario[]>(`${this.baseUrl}/api/forms`);
+    return this.http.get<Formulario[]>(`${this.baseUrl}/formularios`);
   }
 
   public deletarFormulario(formId: number) {
@@ -39,7 +39,7 @@ export class FormulariosServices {
     });
   }
   public buscarRespostasDeFormularioPorIdForm(formId: string): Observable<any> {
-    return this.http.get<any>(`${this.baseUrl}/forms/google/${formId}/responses`);
+    return this.http.get<any>(`${this.baseUrl}/formularios/${formId}/responses`);
   }
 
   public buscarQuestoesDeFormularioPorIdForm(formId: string): Observable<any> {

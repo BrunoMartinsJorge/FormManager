@@ -20,8 +20,8 @@ section.container {
   div.form-info {
     width: 80%;
     padding: 1em;
-    border: 2px solid #ccc;
-    border-radius: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
     display: flex;
     flex-direction: column;
     grid-gap: 1em;
