@@ -227,7 +227,7 @@ export class QuestoesSalvasFormulario {
   public addSavedQuestion(): void {
     if (!this.questIsValid()) return;
     this.formService.addQuestionToFavorites(this.newQuestion).subscribe({
-      next: (response: any) => {
+      next: (response) => {
         this.toast.add({
           severity: 'success',
           summary: 'Sucesso',

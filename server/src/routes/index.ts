@@ -79,12 +79,11 @@ router.get('/formularios/questoes-salvas', async (req, res) => {
 
 router.post('/formularios/questoes', async (req, res) => {
   const auth = await getAuthClient();
-  const oauth2 = google.oauth2({ auth, version: 'v2' });
-  const userInfo = await oauth2.userinfo.get();
+  if (!auth) return res.status(403).send('Usuário não autenticado.');
   const form = req.body;
   if (!form) res.status(400).send('Formulário inválido.');
   await salvarPergunta(form);
-  res.status(201).send('Pergunta salva com sucesso!');
+  res.status(201).send();
 });
 
 router.delete(
@@ -105,6 +104,7 @@ router.delete(
 router.post('/formularios', async (req, res) => {
   try {
     const auth = await getAuthClient();
+    if (!auth) return res.status(403).send('Usuário não autenticado.');
     const oauth2 = google.oauth2({ auth, version: 'v2' });
     const userInfo = await oauth2.userinfo.get();
     const userEmail = userInfo.data.email;

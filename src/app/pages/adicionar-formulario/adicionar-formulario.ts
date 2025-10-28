@@ -106,7 +106,7 @@ export class AdicionarFormulario {
       },
     },
   ];
-  questsSaved: any = {};
+  questsSaved: any[] = [];
 
   tipoDeCampo: any[] = [
     { nome: 'Texto', value: TypeQuestEnum.TEXTO },

@@ -18,54 +18,105 @@ const Alternativa_1 = require("../models/Alternativa");
 const ListaPerguntasDto_1 = require("../models/dto/ListaPerguntasDto");
 async function salvarFormularioCompleto(dadosForm, userEmail) {
     const auth = await (0, googleAuth_1.getAuthClient)();
-    const formsApi = googleapis_1.google.forms({ version: "v1", auth });
+    const formsApi = googleapis_1.google.forms({ version: 'v1', auth });
     const createRes = await formsApi.forms.create({
         requestBody: {
-            info: { title: dadosForm.titulo }
-        }
+            info: { title: dadosForm.titulo },
+        },
     });
     const formId = createRes.data.formId;
-    const requests = (dadosForm.questoes || []).map((questao, index) => {
-        const item = { title: questao.titulo, questionItem: { question: {} } };
+    let requests = [];
+    (dadosForm.questoes || []).forEach((questao, index) => {
+        // 1️⃣ Se tiver imagem, adiciona item de imagem antes
+        if (questao.imagemUrl) {
+            requests.push({
+                createItem: {
+                    item: {
+                        title: questao.descricaoImagem || '',
+                        imageItem: {
+                            image: {
+                                sourceUri: questao.imagemUrl,
+                            },
+                        },
+                    },
+                    location: { index: requests.length },
+                },
+            });
+        }
+        // 2️⃣ Depois adiciona a pergunta
+        const item = {
+            title: questao.titulo,
+            questionItem: { question: {} },
+        };
         switch (questao.tipo) {
-            case "TEXTO":
+            case 'TEXTO':
                 item.questionItem.question = { textQuestion: { paragraph: false } };
                 break;
-            case "PARAGRAFO":
+            case 'PARAGRAFO':
                 item.questionItem.question = { textQuestion: { paragraph: true } };
                 break;
-            case "NUMERO":
+            case 'NUMERO':
                 item.questionItem.question = { textQuestion: {} };
                 break;
-            case "UNICA":
-                item.questionItem.question = { choiceQuestion: { type: "RADIO", options: (questao.opcoes || []).map((v) => ({ value: v })) } };
+            case 'UNICA':
+                item.questionItem.question = {
+                    choiceQuestion: {
+                        type: 'RADIO',
+                        options: (questao.opcoes || []).map((v) => ({ value: v })),
+                    },
+                };
                 break;
-            case "MULTIPLA":
-                item.questionItem.question = { choiceQuestion: { type: "CHECKBOX", options: (questao.opcoes || []).map((v) => ({ value: v })) } };
+            case 'MULTIPLA':
+                item.questionItem.question = {
+                    choiceQuestion: {
+                        type: 'CHECKBOX',
+                        options: (questao.opcoes || []).map((v) => ({ value: v })),
+                    },
+                };
                 break;
-            case "DATA":
+            case 'DATA':
                 item.questionItem.question = { dateQuestion: {} };
                 break;
-            case "DATAHORA":
+            case 'DATAHORA':
                 item.questionItem.question = { dateTimeQuestion: {} };
                 break;
-            case "ESCALA":
-                item.questionItem.question = { scaleQuestion: { low: questao.low || 1, high: questao.high || 5 } };
+            case 'ESCALA':
+                item.questionItem.question = {
+                    scaleQuestion: { low: questao.low || 1, high: questao.high || 5 },
+                };
                 break;
-            case "VERDADEIRO_FALSO":
-                item.questionItem.question = { choiceQuestion: { type: "RADIO", options: [{ value: "Verdadeiro" }, { value: "Falso" }] } };
+            case 'VERDADEIRO_FALSO':
+                item.questionItem.question = {
+                    choiceQuestion: {
+                        type: 'RADIO',
+                        options: [{ value: 'Verdadeiro' }, { value: 'Falso' }],
+                    },
+                };
                 break;
-            case "UPLOAD":
-                item.questionItem.question = { fileUploadQuestion: { maxFiles: questao.maxFiles || 1, maxFileSize: questao.maxFileSize || 10 } };
+            case 'UPLOAD':
+                item.questionItem.question = {
+                    fileUploadQuestion: {
+                        maxFiles: questao.maxFiles || 1,
+                        maxFileSize: questao.maxFileSize || 10,
+                    },
+                };
                 break;
         }
-        return { createItem: { item, location: { index } } };
+        requests.push({
+            createItem: {
+                item,
+                location: { index: requests.length },
+            },
+        });
     });
     requests.push({
-        updateFormInfo: { info: { description: dadosForm.descricao || "" }, updateMask: "description" }
+        updateFormInfo: {
+            info: { description: dadosForm.descricao || '' },
+            updateMask: 'description',
+        },
     });
     if (!formId)
-        throw new Error("formId inválido");
+        throw new Error('formId inválido');
     await formsApi.forms.batchUpdate({ formId, requestBody: { requests } });
     return await data_source_1.AppDataSource.transaction(async (manager) => {
         const formRepo = manager.getRepository(Formulario_1.Formulario);
@@ -73,15 +124,14 @@ async function salvarFormularioCompleto(dadosForm, userEmail) {
         const perguntaRepo = manager.getRepository(Pergunta_1.Pergunta);
         const altRepo = manager.getRepository(Alternativa_1.Alternativa);
         if (!createRes)
-            throw new Error("Erro ao criar formulário");
-        console.log(createRes);
+            throw new Error('Erro ao criar formulário');
         const form = formRepo.create({
             Titulo: dadosForm.titulo,
             Descricao: dadosForm.descricao,
-            Link_Url: createRes.data.responderUri ?? "",
-            formId: formId ?? "",
+            Link_Url: createRes.data.responderUri ?? '',
+            formId: formId ?? '',
             email: userEmail ?? 'sem_email',
-            publicado: dadosForm.false
+            publicado: dadosForm.false,
         });
         await formRepo.save(form);
         console.log(form);
@@ -116,28 +166,33 @@ async function listarFormularios(userEmail) {
     if (!userEmail)
         return [];
     const repo = data_source_1.AppDataSource.getRepository(Formulario_1.Formulario);
-    return await repo.find({ where: { email: userEmail }, relations: ["Perguntas", "Perguntas.Alternativas"] });
+    return await repo.find({
+        where: { email: userEmail },
+        relations: ['Perguntas', 'Perguntas.Alternativas'],
+    });
 }
 async function listarQuestoesPorFormulario(idForm) {
     const repo = data_source_1.AppDataSource.getRepository(Pergunta_1.Pergunta);
     return await repo.find({
         where: { Formulario: { idFormulario: idForm } },
-        relations: ["Alternativas"],
+        relations: ['Alternativas'],
     });
 }
 async function buscarFormularioPorId(idFormulario) {
     const repo = data_source_1.AppDataSource.getRepository(Formulario_1.Formulario);
     return await repo.findOne({
         where: { idFormulario },
-        relations: ["Perguntas", "Perguntas.Alternativas"],
+        relations: ['Perguntas', 'Perguntas.Alternativas'],
     });
 }
 async function salvarPergunta(form) {
     const repo = data_source_1.AppDataSource.getRepository(Pergunta_1.Pergunta);
-    const tipo = await data_source_1.AppDataSource.getRepository(Tipo_Pergunta_1.Tipo_Pergunta).findOneBy({ Descricao: form.tipo });
+    const tipo = await data_source_1.AppDataSource.getRepository(Tipo_Pergunta_1.Tipo_Pergunta).findOneBy({
+        Descricao: form.tipo,
+    });
     let alternativas = [];
     if (form.opcoes && form.opcoes.length > 0) {
-        alternativas = form.opcoes.map(opt => {
+        alternativas = form.opcoes.map((opt) => {
             const alt = new Alternativa_1.Alternativa();
             alt.Texto = opt;
             return alt;
@@ -160,6 +215,9 @@ async function buscarQuestoesSalvas(email) {
     if (!email)
         return [];
     const repo = data_source_1.AppDataSource.getRepository(Pergunta_1.Pergunta);
-    const questoes = await repo.find({ where: { Favorita: true }, relations: ["Alternativas", "Tipo_Pergunta"] });
+    const questoes = await repo.find({
+        where: { Favorita: true },
+        relations: ['Alternativas', 'Tipo_Pergunta'],
+    });
     return questoes.map((pergunta) => ListaPerguntasDto_1.ListaPerguntasDto.convert(pergunta));
 }

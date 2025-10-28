@@ -22,6 +22,10 @@ import { TextareaModule } from 'primeng/textarea';
 import { ToggleSwitchModule } from 'primeng/toggleswitch';
 import { TooltipModule } from 'primeng/tooltip';
 import { VisualizarQuestao } from '../../shared/visualizar-questao/visualizar-questao';
+import { SplitButton } from 'primeng/splitbutton';
+import { MenuItem } from 'primeng/api';
+import { TableModule } from 'primeng/table';
+import { Checkbox } from 'primeng/checkbox';
 
 @Component({
   selector: 'app-adicionar-quiz',
@@ -43,6 +47,9 @@ import { VisualizarQuestao } from '../../shared/visualizar-questao/visualizar-qu
     TooltipModule,
     InputGroupModule,
     InputGroupAddonModule,
+    SplitButton,
+    TableModule,
+    Checkbox,
   ],
   templateUrl: './adicionar-quiz.html',
   styleUrl: './adicionar-quiz.css',
@@ -58,7 +65,19 @@ export class AdicionarQuiz {
     descricao: '',
     questoes: [],
   };
-  opcao: Opcao[] = [];
+  public questionsSelecteds: any[] = [];
+  public questsSaved: any[] = [];
+  public opcao: Opcao[] = [];
+  public visibilityQuestsSaved: boolean = false;
+
+  buttonOptions: MenuItem[] = [
+    {
+      label: 'Utilizar Questão Existente',
+      command: () => {
+        this.getQuestSaved();
+      },
+    },
+  ];
 
   tipoDeCampo: any[] = [
     { nome: 'Texto', value: TypeQuestEnum.TEXTO },
@@ -77,6 +96,35 @@ export class AdicionarQuiz {
   }
 
   constructor(private formulariosService: FormulariosServices) {}
+
+  public useQuestionsSelecteds(): void {
+    if (this.questionsSelecteds.length === 0) return;
+    this.questionsSelecteds.forEach((question) => {
+      const novaQuestao: NewQuest = {
+        titulo: question.titulo,
+        tipo: question.tipo,
+        opcoes: question.opcoes,
+        imagemUrl: question.imagem,
+        descricaoImagem: question.descricaoImagem,
+      };
+      this.quiz.questoes.push(novaQuestao);
+    });
+    this.visibilityQuestsSaved = false;
+  }
+
+  private getQuestSaved(): void {
+    this.formulariosService.findAllQuestionsFavorites().subscribe({
+      next: (res) => {
+        this.visibilityQuestsSaved = true;
+        this.questsSaved = res;
+        console.log(this.questsSaved);
+        
+      },
+      error: (error: Error) => {
+        console.error(error);
+      },
+    });
+  }
 
   public adicionarQuestaoQuiz() {
     const novaQuestao: NewQuestQuiz = {
@@ -114,8 +162,7 @@ export class AdicionarQuiz {
   ): boolean {
     const questao = this.quiz.questoes[indexQuestao];
     if (!questao.respostasCorretas) questao.respostasCorretas = [];
-    if (!questao.valorCorreto)
-      return false;
+    if (!questao.valorCorreto) return false;
     return questao.valorCorreto.includes(opcao);
   }
 
@@ -225,5 +272,9 @@ export class AdicionarQuiz {
       questao.opcoes[i] = questao.opcoes[i + 1];
     }
     questao.opcoes.pop();
+  }
+
+  public copyLink(): void {
+    navigator.clipboard.writeText(this.urlForm);
   }
 }
