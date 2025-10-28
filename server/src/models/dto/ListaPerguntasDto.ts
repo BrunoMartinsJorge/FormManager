@@ -25,7 +25,6 @@ export class ListaPerguntasDto {
     }
 
     static convert(pergunta: Pergunta): ListaPerguntasDto {
-        console.log(pergunta);
         return new ListaPerguntasDto(
             pergunta.idPergunta,
             pergunta.Titulo,

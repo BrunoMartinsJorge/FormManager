@@ -33,6 +33,14 @@ export class FormulariosServices {
     return this.http.get<Formulario[]>(`${this.baseUrl}/formularios`);
   }
 
+  public apagarPerguntaSalva(idPergunta: number): Observable<any> {
+    return this.http.delete<any>(`${this.baseUrl}/formularios/questoes/${idPergunta}`);
+  }
+
+  public editarQuestao(questao: any): Observable<any> {
+    return this.http.put<any>(`${this.baseUrl}/formularios/questoes-salvas/edit`, questao);
+  }
+
   public deletarFormulario(formId: number) {
     return this.http.delete(`${this.baseUrl}/api/forms/${formId}`, {
       responseType: 'text',

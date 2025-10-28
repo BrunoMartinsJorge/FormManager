@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.salvarFormularioCompleto = salvarFormularioCompleto;
+exports.editarQuestaoSalva = editarQuestaoSalva;
 exports.apagarFormulario = apagarFormulario;
 exports.listarFormularios = listarFormularios;
 exports.listarQuestoesPorFormulario = listarQuestoesPorFormulario;
@@ -134,7 +135,6 @@ async function salvarFormularioCompleto(dadosForm, userEmail) {
             publicado: dadosForm.false,
         });
         await formRepo.save(form);
-        console.log(form);
         for (const q of dadosForm.questoes) {
             let tipo = await tipoRepo.findOne({ where: { Descricao: q.tipo } });
             if (!tipo) {
@@ -157,6 +157,40 @@ async function salvarFormularioCompleto(dadosForm, userEmail) {
         }
         return createRes.data.responderUri;
     });
+}
+async function editarQuestaoSalva(dados) {
+    const repoPergunta = data_source_1.AppDataSource.getRepository(Pergunta_1.Pergunta);
+    const repoTipo = data_source_1.AppDataSource.getRepository(Tipo_Pergunta_1.Tipo_Pergunta);
+    const repoAlt = data_source_1.AppDataSource.getRepository(Alternativa_1.Alternativa);
+    const questao = await repoPergunta.findOne({
+        where: { idPergunta: dados.idPergunta },
+        relations: ['Alternativas', 'Tipo_Pergunta'],
+    });
+    if (!questao)
+        throw new Error('Questão não encontrada!');
+    const tipo = await repoTipo.findOneBy({
+        Descricao: questao.Tipo_Pergunta.Descricao,
+    });
+    questao.Titulo = dados.titulo;
+    questao.Tipo_Pergunta = tipo ?? questao.Tipo_Pergunta;
+    questao.Favorita = true;
+    if (dados.opcoes && dados.opcoes.length > 0) {
+        questao.Alternativas = await Promise.all(dados.opcoes.map(async (opt) => {
+            const alt = new Alternativa_1.Alternativa();
+            alt.Pergunta = questao;
+            alt.Texto = opt;
+            await repoAlt.save(alt);
+            return alt;
+        }));
+    }
+    await repoPergunta.save(questao);
+    // Remove referência circular
+    questao.Alternativas?.forEach((a) => {
+        if ('Pergunta' in a) {
+            delete a.Pergunta;
+        }
+    });
+    return questao;
 }
 async function apagarFormulario(idFormulario) {
     const repo = data_source_1.AppDataSource.getRepository(Formulario_1.Formulario);
@@ -190,6 +224,7 @@ async function salvarPergunta(form) {
     const tipo = await data_source_1.AppDataSource.getRepository(Tipo_Pergunta_1.Tipo_Pergunta).findOneBy({
         Descricao: form.tipo,
     });
+    const repoAlt = data_source_1.AppDataSource.getRepository(Alternativa_1.Alternativa);
     let alternativas = [];
     if (form.opcoes && form.opcoes.length > 0) {
         alternativas = form.opcoes.map((opt) => {
@@ -205,7 +240,12 @@ async function salvarPergunta(form) {
         Tipo_Pergunta: tipo,
         Favorita: true,
     });
-    return await repo.save(pergunta);
+    const saved = await repo.save(pergunta);
+    saved.Alternativas.forEach((alt) => {
+        alt.Pergunta = saved;
+        repoAlt.save(alt);
+    });
+    return saved;
 }
 async function apagarPergunta(idPergunta) {
     const repo = data_source_1.AppDataSource.getRepository(Pergunta_1.Pergunta);

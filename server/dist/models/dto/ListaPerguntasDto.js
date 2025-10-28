@@ -11,7 +11,6 @@ class ListaPerguntasDto {
         this.descricaoImagem = descricaoImagem;
     }
     static convert(pergunta) {
-        console.log(pergunta);
         return new ListaPerguntasDto(pergunta.idPergunta, pergunta.Titulo, pergunta.Tipo_Pergunta.Descricao ?? "", pergunta.Alternativas.map(alt => alt.Texto), pergunta.UrlImagem, pergunta.DescricaoImagem);
     }
 }

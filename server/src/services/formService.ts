@@ -7,6 +7,7 @@ import { Tipo_Pergunta } from '../models/Tipo_Pergunta';
 import { Alternativa } from '../models/Alternativa';
 import { NewQuestFormSaved } from '../forms/NewQuestFormSaved';
 import { ListaPerguntasDto } from '../models/dto/ListaPerguntasDto';
+import { EditQuest } from '../forms/EditQuestao';
 
 export async function salvarFormularioCompleto(
   dadosForm: any,
@@ -139,7 +140,6 @@ export async function salvarFormularioCompleto(
       publicado: dadosForm.false,
     });
     await formRepo.save(form);
-    console.log(form);
 
     for (const q of dadosForm.questoes) {
       let tipo = await tipoRepo.findOne({ where: { Descricao: q.tipo } });
@@ -166,6 +166,50 @@ export async function salvarFormularioCompleto(
 
     return createRes.data.responderUri;
   });
+}
+
+export async function editarQuestaoSalva(dados: EditQuest) {
+  const repoPergunta = AppDataSource.getRepository(Pergunta);
+  const repoTipo = AppDataSource.getRepository(Tipo_Pergunta);
+  const repoAlt = AppDataSource.getRepository(Alternativa);
+
+  const questao = await repoPergunta.findOne({
+    where: { idPergunta: dados.idPergunta },
+    relations: ['Alternativas', 'Tipo_Pergunta'],
+  });
+
+  if (!questao) throw new Error('Questão não encontrada!');
+
+  const tipo = await repoTipo.findOneBy({
+    Descricao: questao.Tipo_Pergunta.Descricao,
+  });
+
+  questao.Titulo = dados.titulo;
+  questao.Tipo_Pergunta = tipo ?? questao.Tipo_Pergunta;
+  questao.Favorita = true;
+
+  if (dados.opcoes && dados.opcoes.length > 0) {
+    questao.Alternativas = await Promise.all(
+      dados.opcoes.map(async (opt) => {
+        const alt = new Alternativa();
+        alt.Pergunta = questao;
+        alt.Texto = opt;
+        await repoAlt.save(alt);
+        return alt;
+      })
+    );
+  }
+
+  await repoPergunta.save(questao);
+
+  // Remove referência circular
+  questao.Alternativas?.forEach((a) => {
+    if ('Pergunta' in a) {
+      delete (a as any).Pergunta;
+    }
+  });
+
+  return questao;
 }
 
 export async function apagarFormulario(idFormulario: number) {
@@ -203,6 +247,7 @@ export async function salvarPergunta(form: NewQuestFormSaved) {
   const tipo = await AppDataSource.getRepository(Tipo_Pergunta).findOneBy({
     Descricao: form.tipo,
   });
+  const repoAlt = AppDataSource.getRepository(Alternativa);
 
   let alternativas: Alternativa[] = [];
 
@@ -222,7 +267,14 @@ export async function salvarPergunta(form: NewQuestFormSaved) {
     Favorita: true,
   });
 
-  return await repo.save(pergunta);
+  const saved = await repo.save(pergunta);
+
+  saved.Alternativas.forEach((alt) => {
+    alt.Pergunta = saved;
+    repoAlt.save(alt);
+  });
+
+  return saved;
 }
 
 export async function apagarPergunta(idPergunta: number) {

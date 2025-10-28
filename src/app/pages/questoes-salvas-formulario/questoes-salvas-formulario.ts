@@ -46,6 +46,7 @@ export class QuestoesSalvasFormulario {
   public dialogMode: 'add' | 'edit' = 'add';
   public newQuestion: any = {};
   public load_questions: boolean = false;
+  private idPerguntaSelecionada: number = 0;
   public tipoDeCampo: any[] = [
     { nome: 'Texto', value: TypeQuestEnum.TEXTO },
     { nome: 'Parágrafo', value: TypeQuestEnum.PARAGRAFO },
@@ -66,10 +67,10 @@ export class QuestoesSalvasFormulario {
     },
     { separator: true },
     {
-      label: 'Apagar Questão',
+      label: 'Apagar Pergunta',
       icon: 'pi pi-trash',
       command: () => {
-        //this.gerarPDF(this.formularioSelecionado);
+        this.apagarPergunta();
       },
     },
   ];
@@ -79,6 +80,29 @@ export class QuestoesSalvasFormulario {
     private toast: MessageService
   ) {
     this.getSavedQuestions();
+  }
+
+  public apagarPergunta(): void {    
+    if (!this.idPerguntaSelecionada) return;
+    this.formService.apagarPerguntaSalva(this.idPerguntaSelecionada).subscribe({
+      next: (response: any) => {
+        this.toast.add({
+          severity: 'success',
+          summary: 'Sucesso',
+          detail: 'Questão apagada com sucesso.',
+        });
+        this.getSavedQuestions();
+        this.visibleDialogAddQuestion = false;
+      },
+      error: (err) => {
+        console.error('Erro ao apagar questão:', err);
+        this.toast.add({
+          severity: 'error',
+          summary: 'Erro',
+          detail: 'Erro ao apagar questão.',
+        });
+      },
+    });
   }
 
   private getSavedQuestions(): void {
@@ -102,13 +126,14 @@ export class QuestoesSalvasFormulario {
   }
 
   public selectQuestion(event: any, quest: any): void {
+    this.idPerguntaSelecionada = quest.idPergunta;
     if (quest.imagem == null || quest.imagem == '') {
       this.menuOptions = [
         {
-          label: 'Apagar Questão',
+          label: 'Apagar Pergunta',
           icon: 'pi pi-trash',
           command: () => {
-            //this.gerarPDF(this.formularioSelecionado);
+            this.apagarPergunta();
           },
         },
       ];
@@ -123,10 +148,10 @@ export class QuestoesSalvasFormulario {
         },
         { separator: true },
         {
-          label: 'Apagar Questão',
+          label: 'Apagar Pergunta',
           icon: 'pi pi-trash',
           command: () => {
-            //this.gerarPDF(this.formularioSelecionado);
+            this.apagarPergunta();
           },
         },
       ];
@@ -144,7 +169,37 @@ export class QuestoesSalvasFormulario {
     };
   }
 
-  public editSavedQuestion(): void {}
+  public editSavedQuestion(): void {
+    const quest: any = {
+      idPergunta: this.newQuestion.id,
+      descricaoImagem: this.newQuestion.descricaoImagem,
+      favorita: this.newQuestion.favorito,
+      id: this.newQuestion.idPergunta,
+      imagem: this.newQuestion.imagem,
+      opcoes: this.newQuestion.opcoes,
+      titulo: this.newQuestion.titulo,
+      tipo: this.newQuestion.tipo,
+    };
+    this.formService.editarQuestao(quest).subscribe({
+      next: (response: any) => {
+        this.toast.add({
+          severity: 'success',
+          summary: 'Sucesso',
+          detail: 'Questão editada com sucesso.',
+        });
+        this.getSavedQuestions();
+        this.visibleDialogAddQuestion = false;
+      },
+      error: (err) => {
+        console.error('Erro ao editar questão:', err);
+        this.toast.add({
+          severity: 'error',
+          summary: 'Erro',
+          detail: 'Erro ao editar questão.',
+        });
+      },
+    });
+  }
 
   public toggleVisibilityDialogEditQuestion(questao: any): void {
     this.dialogMode = 'edit';
@@ -154,7 +209,7 @@ export class QuestoesSalvasFormulario {
       this.newQuestion = {
         descricaoImagem: questao.descricaoImagem,
         favorita: questao.favorito,
-        id: questao.id,
+        id: questao.idPergunta,
         imagem: questao.imagem,
         opcoes: questao.opcoes,
         titulo: questao.titulo,
