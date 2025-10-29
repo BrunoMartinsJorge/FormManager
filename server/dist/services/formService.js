@@ -15,8 +15,8 @@ const data_source_1 = require("../database/data-source");
 const Formulario_1 = require("../models/Formulario");
 const Pergunta_1 = require("../models/Pergunta");
 const Tipo_Pergunta_1 = require("../models/Tipo_Pergunta");
-const Alternativa_1 = require("../models/Alternativa");
 const ListaPerguntasDto_1 = require("../models/dto/ListaPerguntasDto");
+const Alternativa_Pergunta_1 = require("../models/Alternativa_Pergunta");
 async function salvarFormularioCompleto(dadosForm, userEmail) {
     const auth = await (0, googleAuth_1.getAuthClient)();
     const formsApi = googleapis_1.google.forms({ version: 'v1', auth });
@@ -123,7 +123,7 @@ async function salvarFormularioCompleto(dadosForm, userEmail) {
         const formRepo = manager.getRepository(Formulario_1.Formulario);
         const tipoRepo = manager.getRepository(Tipo_Pergunta_1.Tipo_Pergunta);
         const perguntaRepo = manager.getRepository(Pergunta_1.Pergunta);
-        const altRepo = manager.getRepository(Alternativa_1.Alternativa);
+        const altRepo = manager.getRepository(Alternativa_Pergunta_1.Alternativa_Pergunta);
         if (!createRes)
             throw new Error('Erro ao criar formulário');
         const form = formRepo.create({
@@ -161,7 +161,7 @@ async function salvarFormularioCompleto(dadosForm, userEmail) {
 async function editarQuestaoSalva(dados) {
     const repoPergunta = data_source_1.AppDataSource.getRepository(Pergunta_1.Pergunta);
     const repoTipo = data_source_1.AppDataSource.getRepository(Tipo_Pergunta_1.Tipo_Pergunta);
-    const repoAlt = data_source_1.AppDataSource.getRepository(Alternativa_1.Alternativa);
+    const repoAlt = data_source_1.AppDataSource.getRepository(Alternativa_Pergunta_1.Alternativa_Pergunta);
     const questao = await repoPergunta.findOne({
         where: { idPergunta: dados.idPergunta },
         relations: ['Alternativas', 'Tipo_Pergunta'],
@@ -176,7 +176,7 @@ async function editarQuestaoSalva(dados) {
     questao.Favorita = true;
     if (dados.opcoes && dados.opcoes.length > 0) {
         questao.Alternativas = await Promise.all(dados.opcoes.map(async (opt) => {
-            const alt = new Alternativa_1.Alternativa();
+            const alt = new Alternativa_Pergunta_1.Alternativa_Pergunta();
             alt.Pergunta = questao;
             alt.Texto = opt;
             await repoAlt.save(alt);
@@ -224,11 +224,11 @@ async function salvarPergunta(form) {
     const tipo = await data_source_1.AppDataSource.getRepository(Tipo_Pergunta_1.Tipo_Pergunta).findOneBy({
         Descricao: form.tipo,
     });
-    const repoAlt = data_source_1.AppDataSource.getRepository(Alternativa_1.Alternativa);
+    const repoAlt = data_source_1.AppDataSource.getRepository(Alternativa_Pergunta_1.Alternativa_Pergunta);
     let alternativas = [];
     if (form.opcoes && form.opcoes.length > 0) {
         alternativas = form.opcoes.map((opt) => {
-            const alt = new Alternativa_1.Alternativa();
+            const alt = new Alternativa_Pergunta_1.Alternativa_Pergunta();
             alt.Texto = opt;
             return alt;
         });

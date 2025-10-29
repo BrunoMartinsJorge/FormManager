@@ -1,7 +1,7 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, OneToMany, JoinColumn } from "typeorm";
 import { Tipo_Pergunta } from "./Tipo_Pergunta";
 import { Formulario } from "./Formulario";
-import { Alternativa } from "./Alternativa";
+import { Alternativa_Pergunta } from "./Alternativa_Pergunta";
 
 @Entity()
 export class Pergunta {
@@ -21,8 +21,8 @@ export class Pergunta {
   @Column({ default: false })
   Favorita!: boolean;
 
-  @OneToMany(() => Alternativa, (alt) => alt.Pergunta)
-  Alternativas!: Alternativa[];
+  @OneToMany(() => Alternativa_Pergunta, (alt) => alt.Pergunta)
+  Alternativas!: Alternativa_Pergunta[];
 
   @Column({ type: "text", nullable: true })
   UrlImagem!: string;

@@ -11,9 +11,9 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Questao = void 0;
 const typeorm_1 = require("typeorm");
-const Alternativa_1 = require("./Alternativa");
 const Tipo_Pergunta_1 = require("./Tipo_Pergunta");
 const Quiz_1 = require("./Quiz");
+const Alternativa_Questao_1 = require("./Alternativa_Questao");
 let Questao = class Questao {
 };
 exports.Questao = Questao;
@@ -26,25 +26,51 @@ __decorate([
     __metadata("design:type", Tipo_Pergunta_1.Tipo_Pergunta)
 ], Questao.prototype, "Tipo_Pergunta", void 0);
 __decorate([
-    (0, typeorm_1.ManyToOne)(() => Quiz_1.Quiz, (form) => form.Perguntas),
-    __metadata("design:type", Quiz_1.Quiz)
+    (0, typeorm_1.ManyToOne)(() => Quiz_1.Quiz, (form) => form.Questoes),
+    (0, typeorm_1.JoinColumn)({ name: 'idQuiz' }),
+    __metadata("design:type", Object)
 ], Questao.prototype, "Quiz", void 0);
 __decorate([
     (0, typeorm_1.Column)({ length: 255 }),
     __metadata("design:type", String)
 ], Questao.prototype, "Titulo", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: "text", nullable: true }),
-    __metadata("design:type", String)
-], Questao.prototype, "Descricao", void 0);
-__decorate([
-    (0, typeorm_1.OneToMany)(() => Alternativa_1.Alternativa, (alt) => alt.Pergunta),
+    (0, typeorm_1.OneToMany)(() => Alternativa_Questao_1.Alternativa_Questao, (alt) => alt.Questao, { cascade: true }),
     __metadata("design:type", Array)
 ], Questao.prototype, "Alternativas", void 0);
 __decorate([
-    (0, typeorm_1.ManyToOne)(() => Alternativa_1.Alternativa, (alt) => alt.Pergunta),
-    __metadata("design:type", Alternativa_1.Alternativa)
-], Questao.prototype, "Correta", void 0);
+    (0, typeorm_1.ManyToMany)(() => Alternativa_Questao_1.Alternativa_Questao),
+    (0, typeorm_1.JoinTable)({
+        name: 'questao_alternativas_corretas', // tabela separada
+        joinColumn: { name: 'questaoId', referencedColumnName: 'idPergunta' },
+        inverseJoinColumn: { name: 'alternativaId', referencedColumnName: 'idAlternativa' },
+    }),
+    __metadata("design:type", Array)
+], Questao.prototype, "AlternativasCorretas", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ default: false }),
+    __metadata("design:type", Boolean)
+], Questao.prototype, "Favorita", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: 'text', nullable: true }),
+    __metadata("design:type", String)
+], Questao.prototype, "UrlImagem", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: 'text', nullable: true }),
+    __metadata("design:type", String)
+], Questao.prototype, "DescricaoImagem", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ default: 0, nullable: true, type: 'int' }),
+    __metadata("design:type", Number)
+], Questao.prototype, "Pontuacao", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: 'text', nullable: true }),
+    __metadata("design:type", String)
+], Questao.prototype, "FeedbackCorreto", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: 'text', nullable: true }),
+    __metadata("design:type", String)
+], Questao.prototype, "FeedbackErrado", void 0);
 exports.Questao = Questao = __decorate([
     (0, typeorm_1.Entity)()
 ], Questao);

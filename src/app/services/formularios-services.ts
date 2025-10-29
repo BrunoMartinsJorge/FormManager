@@ -29,6 +29,14 @@ export class FormulariosServices {
     return this.http.post<any>(`${this.baseUrl}/quiz`, quiz);
   }
 
+  public listarQuestoesQuiz(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.baseUrl}/quiz/questoes-salvas`);
+  }
+
+  public cadastrarNovaQuestao(form: any): Observable<any> {
+    return this.http.post<any>(`${this.baseUrl}/quiz/questoes-salvas`, form);
+  }
+
   public listarFormularios(): Observable<Formulario[]> {
     return this.http.get<Formulario[]>(`${this.baseUrl}/formularios`);
   }

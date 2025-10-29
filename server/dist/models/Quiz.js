@@ -18,7 +18,7 @@ exports.Quiz = Quiz;
 __decorate([
     (0, typeorm_1.PrimaryGeneratedColumn)(),
     __metadata("design:type", Number)
-], Quiz.prototype, "idFormulario", void 0);
+], Quiz.prototype, "idQuiz", void 0);
 __decorate([
     (0, typeorm_1.Column)({ length: 75 }),
     __metadata("design:type", String)
@@ -38,11 +38,11 @@ __decorate([
 __decorate([
     (0, typeorm_1.Column)({ nullable: true }),
     __metadata("design:type", String)
-], Quiz.prototype, "formId", void 0);
+], Quiz.prototype, "quizId", void 0);
 __decorate([
     (0, typeorm_1.OneToMany)(() => Pergunta_1.Pergunta, (pergunta) => pergunta.Formulario),
     __metadata("design:type", Array)
-], Quiz.prototype, "Perguntas", void 0);
+], Quiz.prototype, "Questoes", void 0);
 __decorate([
     (0, typeorm_1.Column)({ type: "text", nullable: true }),
     __metadata("design:type", String)

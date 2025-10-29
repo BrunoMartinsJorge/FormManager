@@ -1,10 +1,11 @@
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import { Pergunta } from "./Pergunta";
+import { Questao } from "./Questao";
 
 @Entity()
 export class Quiz {
   @PrimaryGeneratedColumn()
-  idFormulario!: number;
+  idQuiz!: number;
 
   @Column({ length: 75 })
   Titulo!: string;
@@ -19,10 +20,10 @@ export class Quiz {
   Link_Url!: string;
 
   @Column({ nullable: true })
-  formId!: string;
+  quizId!: string;
 
   @OneToMany(() => Pergunta, (pergunta) => pergunta.Formulario)
-  Perguntas!: Pergunta[];
+  Questoes!: Questao[];
 
   @Column({ type: "text", nullable: true })
   email!: string;

@@ -13,7 +13,7 @@ exports.Pergunta = void 0;
 const typeorm_1 = require("typeorm");
 const Tipo_Pergunta_1 = require("./Tipo_Pergunta");
 const Formulario_1 = require("./Formulario");
-const Alternativa_1 = require("./Alternativa");
+const Alternativa_Pergunta_1 = require("./Alternativa_Pergunta");
 let Pergunta = class Pergunta {
 };
 exports.Pergunta = Pergunta;
@@ -39,7 +39,7 @@ __decorate([
     __metadata("design:type", Boolean)
 ], Pergunta.prototype, "Favorita", void 0);
 __decorate([
-    (0, typeorm_1.OneToMany)(() => Alternativa_1.Alternativa, (alt) => alt.Pergunta),
+    (0, typeorm_1.OneToMany)(() => Alternativa_Pergunta_1.Alternativa_Pergunta, (alt) => alt.Pergunta),
     __metadata("design:type", Array)
 ], Pergunta.prototype, "Alternativas", void 0);
 __decorate([

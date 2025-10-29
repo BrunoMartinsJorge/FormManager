@@ -17,6 +17,7 @@ import { TypeQuestEnumTransformPipe } from '../../shared/pipes/type-quest-enum-t
 import { SplitButton } from 'primeng/splitbutton';
 import { ProgressSpinner } from 'primeng/progressspinner';
 import { InputGroupAddon } from 'primeng/inputgroupaddon';
+import { Textarea } from 'primeng/textarea';
 
 @Component({
   selector: 'app-questoes-salvas-quiz',
@@ -37,6 +38,7 @@ import { InputGroupAddon } from 'primeng/inputgroupaddon';
     SplitButton,
     ProgressSpinner,
     InputGroupAddon,
+    Textarea,
   ],
   templateUrl: './questoes-salvas-quiz.html',
   styleUrl: './questoes-salvas-quiz.css',
@@ -86,9 +88,11 @@ export class QuestoesSalvasQuiz {
   private getSavedQuestions(): void {
     this.listOfSavedQuestions = [];
     this.load_questions = true;
-    this.formService.findAllQuestionsFavorites().subscribe({
+    this.formService.listarQuestoesQuiz().subscribe({
       next: (response: any) => {
-        this.listOfSavedQuestions = response.questions || [];
+        this.listOfSavedQuestions = response || [];
+        console.log(this.listOfSavedQuestions);
+
         this.load_questions = false;
       },
       error: (err) => {
@@ -111,26 +115,27 @@ export class QuestoesSalvasQuiz {
 
   public opcaoCorretaVerdadeiroFalse(opcao: 'Verdadeiro' | 'Falso'): boolean {
     const questao = this.newQuestion;
-    if (!questao.respostasCorretas) questao.respostasCorretas = [];
-    if (!questao.valorCorreto) return false;
-    return questao.valorCorreto.includes(opcao);
+    if (!questao.correto) questao.correto = [];
+    return questao.correto.includes(opcao);
   }
 
   public toggleOpcaoCorreta(indexOpcao: number): void {
     const questao = this.newQuestion;
-    if (!questao.respostasCorretas) questao.respostasCorretas = [];
+    const idx = Number(indexOpcao);
 
-    if (questao.respostasCorretas.includes(indexOpcao)) {
-      questao.respostasCorretas = questao.respostasCorretas.filter(
-        (i: number) => i !== indexOpcao
-      );
-    } else {
-      if (questao.tipo === 'UNICA') {
-        questao.respostasCorretas = [indexOpcao];
-      } else {
-        questao.respostasCorretas.push(indexOpcao);
-      }
+    if (!Array.isArray(questao.respostasCorretas)) {
+      questao.respostasCorretas = [];
     }
+
+    if (questao.respostasCorretas.includes(idx)) {
+      questao.respostasCorretas = questao.respostasCorretas.filter((i: any) => i !== idx);
+    } else {
+      questao.respostasCorretas =
+        questao.tipo === 'UNICA' ? [idx] : [...questao.respostasCorretas, idx];
+    }
+
+    // força o Angular a ver a mudança
+    this.newQuestion = { ...questao };
   }
 
   public toogleOpcaoCorretaVerdadeiroFalso(
@@ -197,10 +202,12 @@ export class QuestoesSalvasQuiz {
         favorita: questao.favorito,
         id: questao.id,
         imagem: questao.imagem,
-        opcoes: questao.opcoes,
+        opcoes: questao.alternativas.map((alt: any) => alt.texto) || [],
+        correta: questao.correta,
         titulo: questao.titulo,
         tipo: questao.tipo,
       };
+      console.log(this.newQuestion);
     } else this.newQuestion = {};
   }
 
@@ -257,6 +264,7 @@ export class QuestoesSalvasQuiz {
         }
       }
     }
+
     for (let opcao of this.newQuestion.opcoes) {
       if (!opcao || opcao.trim() === '') {
         return false;
@@ -267,7 +275,7 @@ export class QuestoesSalvasQuiz {
 
   public addSavedQuestion(): void {
     if (!this.questIsValid()) return;
-    this.formService.addQuestionToFavorites(this.newQuestion).subscribe({
+    this.formService.cadastrarNovaQuestao(this.newQuestion).subscribe({
       next: (response: any) => {
         this.toast.add({
           severity: 'success',

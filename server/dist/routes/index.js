@@ -148,6 +148,23 @@ router.get('/formularios/:formId/responses', async (req, res) => {
     }
 });
 /* QUIZZES */
+router.get('/quiz/questoes-salvas', async (req, res) => {
+    const forms = await (0, quizService_1.listarTodasQuestoesFavoritas)();
+    res.json(forms);
+});
+router.post('/quiz/questoes-salvas', async (req, res) => {
+    try {
+        const form = req.body;
+        if (!form)
+            return res.status(400).send('Formulário inválido.');
+        const forms = await (0, quizService_1.salvarQuestao)(form);
+        res.json(forms);
+    }
+    catch (err) {
+        console.error(err);
+        res.status(500).send('Erro ao salvar formulário');
+    }
+});
 router.post('/quiz', async (req, res) => {
     try {
         const auth = await (0, googleAuth_1.getAuthClient)();

@@ -86,7 +86,7 @@
   [modal]="true"
   [draggable]="false"
   [(visible)]="visibleDialogAddQuestion"
-  [style]="{'maxWidth': '500px', 'width': '100%'}"
+  [style]="{'maxWidth': '550px', 'width': '100%'}"
 >
   <div class="quests-form">
     <div class="input-group">
@@ -119,6 +119,41 @@
         (click)="adicionarOpcao()"
       />
     </div>
+    <ng-container
+      *ngIf="newQuestion.tipo == 'UNICA' || newQuestion.tipo == 'MULTIPLA' || newQuestion.tipo == 'VERDADEIRO_FALSO'"
+    >
+      <div class="pontos-questao">
+        <div class="input-group">
+          <label for="pontos-quest">Pontos:</label>
+          <p-input-number
+            id="pontos-quest"
+            type="number"
+            [(ngModel)]="newQuestion.pontos"
+            placeholder="Pontos"
+          />
+        </div>
+      </div>
+      <div class="feedback">
+        <div class="input-group">
+          <label for="feedback-quest">Caso acerte:</label>
+          <textarea
+            id="feedback-quest"
+            pInputTextarea
+            [(ngModel)]="newQuestion.feedbackCorreto"
+            placeholder="Feedback"
+          ></textarea>
+        </div>
+        <div class="input-group">
+          <label for="feedback-quest">Caso erre:</label>
+          <textarea
+            id="feedback-quest"
+            pInputTextarea
+            [(ngModel)]="newQuestion.feedbackErrado"
+            placeholder="Feedback"
+          ></textarea>
+        </div>
+      </div>
+    </ng-container>
     <div class="image-group">
       <div class="input-group">
         <label for="titulo-quest">Imagem da Pergunta:</label>

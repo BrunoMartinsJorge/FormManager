@@ -5,7 +5,8 @@ import { app as electronApp } from "electron";
 import { Formulario } from "../models/Formulario";
 import { Tipo_Pergunta } from "../models/Tipo_Pergunta";
 import { Pergunta } from "../models/Pergunta";
-import { Alternativa } from "../models/Alternativa";
+import { Alternativa_Questao } from "../models/Alternativa_Questao";
+import { Alternativa_Pergunta } from "../models/Alternativa_Pergunta";
 import { Token } from "../models/Token";
 import { Quiz } from "../models/Quiz";
 import { Questao } from "../models/Questao";
@@ -21,7 +22,8 @@ export const AppDataSource = new DataSource({
     Formulario,
     Tipo_Pergunta,
     Pergunta,
-    Alternativa,
+    Alternativa_Pergunta,
+    Alternativa_Questao,
     Token,
     Quiz,
     Questao,

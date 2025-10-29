@@ -21,8 +21,11 @@ import {
   buscarQuizPorId,
   createQuiz,
   listAllQuizzes,
+  listarTodasQuestoesFavoritas,
+  salvarQuestao,
 } from '../services/quizService';
 import { QuizDto } from '../models/dto/QuizDto';
+import { NewQuestQuizSaved } from '../forms/NewQuestQuizSaved';
 
 const router = Router();
 
@@ -100,7 +103,7 @@ router.delete('/formularios/questoes-salvas/:questId', async (req, res) => {
     console.error(err);
     res.status(500).send('Erro ao apagar pergunta');
   }
-})
+});
 
 router.post('/formularios/questoes', async (req, res) => {
   const auth = await getAuthClient();
@@ -174,6 +177,23 @@ router.get('/formularios/:formId/responses', async (req, res) => {
 });
 
 /* QUIZZES */
+
+router.get('/quiz/questoes-salvas', async (req, res) => {
+  const forms = await listarTodasQuestoesFavoritas();
+  res.json(forms);
+});
+
+router.post('/quiz/questoes-salvas', async (req, res) => {
+  try {
+    const form: NewQuestQuizSaved = req.body;
+    if (!form) return res.status(400).send('Formulário inválido.');
+    const forms = await salvarQuestao(form);
+    res.json(forms);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Erro ao salvar formulário');
+  }
+});
 
 router.post('/quiz', async (req, res) => {
   try {

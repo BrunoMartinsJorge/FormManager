@@ -4,10 +4,10 @@ import { AppDataSource } from '../database/data-source';
 import { Formulario } from '../models/Formulario';
 import { Pergunta } from '../models/Pergunta';
 import { Tipo_Pergunta } from '../models/Tipo_Pergunta';
-import { Alternativa } from '../models/Alternativa';
 import { NewQuestFormSaved } from '../forms/NewQuestFormSaved';
 import { ListaPerguntasDto } from '../models/dto/ListaPerguntasDto';
 import { EditQuest } from '../forms/EditQuestao';
+import { Alternativa_Pergunta } from '../models/Alternativa_Pergunta';
 
 export async function salvarFormularioCompleto(
   dadosForm: any,
@@ -127,7 +127,7 @@ export async function salvarFormularioCompleto(
     const formRepo = manager.getRepository(Formulario);
     const tipoRepo = manager.getRepository(Tipo_Pergunta);
     const perguntaRepo = manager.getRepository(Pergunta);
-    const altRepo = manager.getRepository(Alternativa);
+    const altRepo = manager.getRepository(Alternativa_Pergunta);
 
     if (!createRes) throw new Error('Erro ao criar formulário');
 
@@ -171,7 +171,7 @@ export async function salvarFormularioCompleto(
 export async function editarQuestaoSalva(dados: EditQuest) {
   const repoPergunta = AppDataSource.getRepository(Pergunta);
   const repoTipo = AppDataSource.getRepository(Tipo_Pergunta);
-  const repoAlt = AppDataSource.getRepository(Alternativa);
+  const repoAlt = AppDataSource.getRepository(Alternativa_Pergunta);
 
   const questao = await repoPergunta.findOne({
     where: { idPergunta: dados.idPergunta },
@@ -191,7 +191,7 @@ export async function editarQuestaoSalva(dados: EditQuest) {
   if (dados.opcoes && dados.opcoes.length > 0) {
     questao.Alternativas = await Promise.all(
       dados.opcoes.map(async (opt) => {
-        const alt = new Alternativa();
+        const alt = new Alternativa_Pergunta();
         alt.Pergunta = questao;
         alt.Texto = opt;
         await repoAlt.save(alt);
@@ -247,13 +247,13 @@ export async function salvarPergunta(form: NewQuestFormSaved) {
   const tipo = await AppDataSource.getRepository(Tipo_Pergunta).findOneBy({
     Descricao: form.tipo,
   });
-  const repoAlt = AppDataSource.getRepository(Alternativa);
+  const repoAlt = AppDataSource.getRepository(Alternativa_Pergunta);
 
-  let alternativas: Alternativa[] = [];
+  let alternativas: Alternativa_Pergunta[] = [];
 
   if (form.opcoes && form.opcoes.length > 0) {
     alternativas = form.opcoes.map((opt) => {
-      const alt = new Alternativa();
+      const alt = new Alternativa_Pergunta();
       alt.Texto = opt;
       return alt;
     });

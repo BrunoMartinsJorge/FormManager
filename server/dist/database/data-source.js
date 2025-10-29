@@ -11,7 +11,8 @@ const electron_1 = require("electron");
 const Formulario_1 = require("../models/Formulario");
 const Tipo_Pergunta_1 = require("../models/Tipo_Pergunta");
 const Pergunta_1 = require("../models/Pergunta");
-const Alternativa_1 = require("../models/Alternativa");
+const Alternativa_Questao_1 = require("../models/Alternativa_Questao");
+const Alternativa_Pergunta_1 = require("../models/Alternativa_Pergunta");
 const Token_1 = require("../models/Token");
 const Quiz_1 = require("../models/Quiz");
 const Questao_1 = require("../models/Questao");
@@ -25,7 +26,8 @@ exports.AppDataSource = new typeorm_1.DataSource({
         Formulario_1.Formulario,
         Tipo_Pergunta_1.Tipo_Pergunta,
         Pergunta_1.Pergunta,
-        Alternativa_1.Alternativa,
+        Alternativa_Pergunta_1.Alternativa_Pergunta,
+        Alternativa_Questao_1.Alternativa_Questao,
         Token_1.Token,
         Quiz_1.Quiz,
         Questao_1.Questao,

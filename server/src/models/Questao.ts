@@ -1,8 +1,16 @@
-import { Entity, PrimaryGeneratedColumn, ManyToOne, Column, OneToMany } from "typeorm";
-import { Alternativa } from "./Alternativa";
-import { Formulario } from "./Formulario";
-import { Tipo_Pergunta } from "./Tipo_Pergunta";
-import { Quiz } from "./Quiz";
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  ManyToOne,
+  Column,
+  OneToMany,
+  ManyToMany,
+  JoinTable,
+  JoinColumn,
+} from 'typeorm';
+import { Tipo_Pergunta } from './Tipo_Pergunta';
+import { Quiz } from './Quiz';
+import { Alternativa_Questao } from './Alternativa_Questao';
 
 @Entity()
 export class Questao {
@@ -12,18 +20,39 @@ export class Questao {
   @ManyToOne(() => Tipo_Pergunta, (tipo) => tipo.Perguntas)
   Tipo_Pergunta!: Tipo_Pergunta;
 
-  @ManyToOne(() => Quiz, (form) => form.Perguntas)
-  Quiz!: Quiz;
+  @ManyToOne(() => Quiz, (form) => form.Questoes)
+  @JoinColumn({ name: 'idQuiz' })
+  Quiz!: Quiz | null;
 
   @Column({ length: 255 })
   Titulo!: string;
 
-  @Column({ type: "text", nullable: true })
-  Descricao!: string;
+  @OneToMany(() => Alternativa_Questao, (alt) => alt.Questao, { cascade: true })
+  Alternativas!: Alternativa_Questao[];
 
-  @OneToMany(() => Alternativa, (alt) => alt.Pergunta)
-  Alternativas!: Alternativa[];
+  @ManyToMany(() => Alternativa_Questao)
+  @JoinTable({
+    name: 'questao_alternativas_corretas',
+    joinColumn: { name: 'questaoId', referencedColumnName: 'idPergunta' },
+    inverseJoinColumn: { name: 'alternativaId', referencedColumnName: 'idAlternativa' },
+  })
+  AlternativasCorretas!: Alternativa_Questao[];
 
-  @ManyToOne(() => Alternativa, (alt) => alt.Pergunta)
-  Correta!: Alternativa;
+  @Column({ default: false })
+  Favorita!: boolean;
+
+  @Column({ type: 'text', nullable: true })
+  UrlImagem!: string;
+
+  @Column({ type: 'text', nullable: true })
+  DescricaoImagem!: string;
+
+  @Column({ default: 0, nullable: true, type: 'int' })
+  Pontuacao!: number;
+
+  @Column({ type: 'text', nullable: true })
+  FeedbackCorreto!: string;
+
+  @Column({ type: 'text', nullable: true })
+  FeedbackErrado!: string;
 }

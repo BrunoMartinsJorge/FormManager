@@ -1,18 +1,19 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from "typeorm";
 import { Pergunta } from "./Pergunta";
-import { Questao } from "./Questao";
 
 @Entity()
-export class Alternativa {
+export class Alternativa_Pergunta {
   @PrimaryGeneratedColumn()
   idAlternativa!: number;
 
-  @ManyToOne(() => Pergunta, (pergunta) => pergunta.Alternativas)
+  @ManyToOne(() => Pergunta, (pergunta) => pergunta.Alternativas, {
+    onDelete: "CASCADE",
+  })
   Pergunta!: Pergunta;
-
-  @ManyToOne(() => Questao, (questao) => questao.Alternativas)
-  Questao!: Questao;
 
   @Column({ type: "text" })
   Texto!: string;
+
+  @Column({ default: false })
+  Correta!: boolean; // se essa alternativa foi marcada como correta
 }
