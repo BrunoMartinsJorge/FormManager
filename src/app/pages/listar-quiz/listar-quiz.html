@@ -62,7 +62,7 @@
           flex: 1;
         "
       >
-        Problemas ao carregar quiz
+        {{listaQuizzes.length === 0 ? 'Nenhum quiz encontrado' : 'Problemas ao carregar quiz'}}
       </p>
       }
       <div *ngIf="quizSelecionado && !carregandoQuiz">

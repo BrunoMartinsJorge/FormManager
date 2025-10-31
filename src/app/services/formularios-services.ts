@@ -45,7 +45,7 @@ export class FormulariosServices {
     return this.http.delete<any>(`${this.baseUrl}/formularios/questoes/${idPergunta}`);
   }
 
-  public editarQuestao(questao: any): Observable<any> {
+  public editarPergunta(questao: any): Observable<any> {
     return this.http.put<any>(`${this.baseUrl}/formularios/questoes-salvas/edit`, questao);
   }
 

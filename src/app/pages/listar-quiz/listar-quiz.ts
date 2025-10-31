@@ -60,7 +60,6 @@ export class ListarQuiz {
     this.carregarQuizzes();
   }
 
-  // --- HTML Helpers ---
   trackByQuizId(index: number, quiz: any): number {
     return quiz.idFormulario;
   }

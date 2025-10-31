@@ -7,7 +7,7 @@ import {
   buscarQuestoesSalvas,
   salvarPergunta,
   apagarPergunta,
-  editarQuestaoSalva,
+  editarPerguntaSalva,
 } from '../services/formService';
 import { google } from 'googleapis';
 import {
@@ -20,6 +20,7 @@ import {
 import {
   buscarQuizPorId,
   createQuiz,
+  editarQuestaoSalva,
   listAllQuizzes,
   listarTodasQuestoesFavoritas,
   salvarQuestao,
@@ -85,7 +86,7 @@ router.put('/formularios/questoes-salvas/edit', async (req, res) => {
   try {
     const bodyEdit = req.body;
     if (!bodyEdit) return res.status(400).send('Formulário inválido.');
-    const quest = await editarQuestaoSalva(bodyEdit);
+    const quest = await editarPerguntaSalva(bodyEdit);
     res.json(quest);
   } catch (err) {
     res.status(500).send('Erro ao editar pergunta');
@@ -177,6 +178,18 @@ router.get('/formularios/:formId/responses', async (req, res) => {
 });
 
 /* QUIZZES */
+
+router.put('/quiz/questoes-salvas', async (req, res) => {
+  try {
+    const bodyEdit = req.body;
+    if (!bodyEdit) return res.status(400).send('Formulário inválido.');
+    const quest = await editarQuestaoSalva(bodyEdit);
+    res.json(quest);
+  } catch (err) {
+    res.status(500).send('Erro ao editar pergunta');
+    console.error(err);
+  }
+});
 
 router.get('/quiz/questoes-salvas', async (req, res) => {
   const forms = await listarTodasQuestoesFavoritas();

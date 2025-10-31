@@ -57,7 +57,7 @@ router.put('/formularios/questoes-salvas/edit', async (req, res) => {
         const bodyEdit = req.body;
         if (!bodyEdit)
             return res.status(400).send('Formulário inválido.');
-        const quest = await (0, formService_1.editarQuestaoSalva)(bodyEdit);
+        const quest = await (0, formService_1.editarPerguntaSalva)(bodyEdit);
         res.json(quest);
     }
     catch (err) {
@@ -148,6 +148,19 @@ router.get('/formularios/:formId/responses', async (req, res) => {
     }
 });
 /* QUIZZES */
+router.put('/quiz/questoes-salvas', async (req, res) => {
+    try {
+        const bodyEdit = req.body;
+        if (!bodyEdit)
+            return res.status(400).send('Formulário inválido.');
+        const quest = await (0, quizService_1.editarQuestaoSalva)(bodyEdit);
+        res.json(quest);
+    }
+    catch (err) {
+        res.status(500).send('Erro ao editar pergunta');
+        console.error(err);
+    }
+});
 router.get('/quiz/questoes-salvas', async (req, res) => {
     const forms = await (0, quizService_1.listarTodasQuestoesFavoritas)();
     res.json(forms);

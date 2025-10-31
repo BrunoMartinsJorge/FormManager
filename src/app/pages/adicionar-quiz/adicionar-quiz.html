@@ -80,7 +80,7 @@
         <input
           pInputText
           placeholder="Opção..."
-          [(ngModel)]="questao.opcoes![index]"
+          [(ngModel)]="questao.opcoes![index].texto"
         />
         <p-inputgroup-addon>
           <p-button
@@ -146,7 +146,7 @@
           <p-input-number
             id="pontos-quest"
             type="number"
-            [(ngModel)]="questao.pontos"
+            [(ngModel)]="questao.pontuacao"
             placeholder="Pontos"
           />
         </div>
@@ -166,7 +166,7 @@
           <textarea
             id="feedback-quest"
             pInputTextarea
-            [(ngModel)]="questao.feedbackErrado"
+            [(ngModel)]="questao.feedbackErro"
             placeholder="Feedback"
           ></textarea>
         </div>

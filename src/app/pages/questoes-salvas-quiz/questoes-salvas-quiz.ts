@@ -18,6 +18,8 @@ import { SplitButton } from 'primeng/splitbutton';
 import { ProgressSpinner } from 'primeng/progressspinner';
 import { InputGroupAddon } from 'primeng/inputgroupaddon';
 import { Textarea } from 'primeng/textarea';
+import { QuestaoSalva } from './model/QuestaoSalva';
+import { QuizService } from '../../services/quiz-service';
 
 @Component({
   selector: 'app-questoes-salvas-quiz',
@@ -45,10 +47,10 @@ import { Textarea } from 'primeng/textarea';
   providers: [FormulariosServices, MessageService],
 })
 export class QuestoesSalvasQuiz {
-  public listOfSavedQuestions: any[] = [];
+  public listOfSavedQuestions: QuestaoSalva[] = [];
   public visibleDialogAddQuestion: boolean = false;
   public dialogMode: 'add' | 'edit' = 'add';
-  public newQuestion: any = {};
+  public newQuestion: QuestaoSalva | any = {};
   public load_questions: boolean = false;
   public tipoDeCampo: any[] = [
     { nome: 'Texto', value: TypeQuestEnum.TEXTO },
@@ -80,7 +82,8 @@ export class QuestoesSalvasQuiz {
 
   constructor(
     private formService: FormulariosServices,
-    private toast: MessageService
+    private toast: MessageService,
+    private service: QuizService
   ) {
     this.getSavedQuestions();
   }
@@ -91,8 +94,6 @@ export class QuestoesSalvasQuiz {
     this.formService.listarQuestoesQuiz().subscribe({
       next: (response: any) => {
         this.listOfSavedQuestions = response || [];
-        console.log(this.listOfSavedQuestions);
-
         this.load_questions = false;
       },
       error: (err) => {
@@ -108,33 +109,59 @@ export class QuestoesSalvasQuiz {
   }
 
   public opcaoCorreta(indexOpcao: number): boolean {
-    const questao = this.newQuestion;
-    if (!questao.respostasCorretas) questao.respostasCorretas = [];
-    return questao.respostasCorretas.includes(indexOpcao);
+    const questao: QuestaoSalva = this.newQuestion;
+    if (!questao.opcoes || !questao.correta) return false;
+    const alternativa = questao.opcoes[indexOpcao];
+    if (!alternativa) return false;
+    for (let i = 0; i < questao.correta.length; i++) {
+      if (questao.correta[i].texto === alternativa.texto) {
+        return true;
+      }
+    }
+    return false;
   }
 
   public opcaoCorretaVerdadeiroFalse(opcao: 'Verdadeiro' | 'Falso'): boolean {
     const questao = this.newQuestion;
-    if (!questao.correto) questao.correto = [];
-    return questao.correto.includes(opcao);
+    const op = questao.opcoes.find((o: any) => o.texto === opcao);
+    let res = false;
+    if (!questao.correta || !op) return false;
+    questao.correta.forEach((c: any) => {
+      if (c.texto === opcao) {
+        res = true;
+      } else res = false;
+    });
+    return res;
   }
 
   public toggleOpcaoCorreta(indexOpcao: number): void {
-    const questao = this.newQuestion;
+    const questao: QuestaoSalva = this.newQuestion;
     const idx = Number(indexOpcao);
 
-    if (!Array.isArray(questao.respostasCorretas)) {
-      questao.respostasCorretas = [];
+    if (!questao.opcoes) return; // segurança
+
+    if (!Array.isArray(questao.correta)) {
+      questao.correta = [];
     }
 
-    if (questao.respostasCorretas.includes(idx)) {
-      questao.respostasCorretas = questao.respostasCorretas.filter((i: any) => i !== idx);
+    const alternativaSelecionada = questao.opcoes[idx];
+
+    if (!alternativaSelecionada) return;
+
+    const indexNaCorreta = questao.correta.findIndex(
+      (a) => a.idAlternativa === alternativaSelecionada.idAlternativa
+    );
+
+    if (indexNaCorreta > -1) {
+      questao.correta.splice(indexNaCorreta, 1);
     } else {
-      questao.respostasCorretas =
-        questao.tipo === 'UNICA' ? [idx] : [...questao.respostasCorretas, idx];
+      if (questao.tipo === 'UNICA') {
+        questao.correta = [alternativaSelecionada];
+      } else {
+        questao.correta.push(alternativaSelecionada);
+      }
     }
 
-    // força o Angular a ver a mudança
     this.newQuestion = { ...questao };
   }
 
@@ -142,9 +169,20 @@ export class QuestoesSalvasQuiz {
     opcao: 'Verdadeiro' | 'Falso'
   ): void {
     const questao = this.newQuestion;
-    if (!questao.valorCorreto) questao.valorCorreto = [];
-    if (questao.valorCorreto.length > 0) questao.valorCorreto = [];
-    questao.valorCorreto.push(opcao);
+    questao.opcoes = [
+      {
+        idAlternativa: null,
+        texto: 'Verdadeiro',
+      },
+      {
+        idAlternativa: null,
+        texto: 'Falso',
+      },
+    ];
+    const alternativa = questao.opcoes.find((a: any) => a.texto === opcao);
+    if (!alternativa) return;
+    questao.correta = [];
+    questao.correta.push(alternativa);
   }
 
   public selectQuestion(event: any, quest: any): void {
@@ -190,7 +228,26 @@ export class QuestoesSalvasQuiz {
     };
   }
 
-  public editSavedQuestion(): void {}
+  public editSavedQuestion(): void {
+    this.service.editarQuestao(this.newQuestion).subscribe({
+      next: (response: any) => {
+        this.toast.add({
+          severity: 'success',
+          summary: 'Sucesso',
+          detail: 'Questão editada com sucesso.',
+        });
+        this.getSavedQuestions();
+      },
+      error: (err) => {
+        console.error('Erro ao editar questão:', err);
+        this.toast.add({
+          severity: 'error',
+          summary: 'Erro',
+          detail: 'Erro ao editar questão.',
+        });
+      },
+    });
+  }
 
   public toggleVisibilityDialogEditQuestion(questao: any): void {
     this.dialogMode = 'edit';
@@ -202,12 +259,14 @@ export class QuestoesSalvasQuiz {
         favorita: questao.favorito,
         id: questao.id,
         imagem: questao.imagem,
-        opcoes: questao.alternativas.map((alt: any) => alt.texto) || [],
+        opcoes: questao.opcoes || [],
         correta: questao.correta,
         titulo: questao.titulo,
+        pontuacao: questao.pontuacao,
+        feedbackCorreto: questao.feedbackCorreto,
+        feedbackErro: questao.feedbackErro,
         tipo: questao.tipo,
       };
-      console.log(this.newQuestion);
     } else this.newQuestion = {};
   }
 
@@ -217,7 +276,7 @@ export class QuestoesSalvasQuiz {
 
   public adicionarOpcao(): void {
     if (!this.newQuestion.opcoes) this.newQuestion.opcoes = [];
-    this.newQuestion.opcoes.push('');
+    this.newQuestion.opcoes.push({ idAlternativa: null, texto: '' });
   }
 
   public trackByIndex(index: number): number {
@@ -259,14 +318,14 @@ export class QuestoesSalvasQuiz {
       this.newQuestion.tipo === TypeQuestEnum.UNICA
     ) {
       for (let opcao of this.newQuestion.opcoes ?? []) {
-        if (!opcao || opcao.trim() === '') {
+        if (!opcao || opcao.texto.trim() === '') {
           return false;
         }
       }
     }
 
     for (let opcao of this.newQuestion.opcoes) {
-      if (!opcao || opcao.trim() === '') {
+      if (!opcao || opcao.texto.trim() === '') {
         return false;
       }
     }

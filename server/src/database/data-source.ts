@@ -10,6 +10,7 @@ import { Alternativa_Pergunta } from "../models/Alternativa_Pergunta";
 import { Token } from "../models/Token";
 import { Quiz } from "../models/Quiz";
 import { Questao } from "../models/Questao";
+import { Tipo_Questao } from "../models/Tipo_Questao";
 
 const userDataPath = electronApp.getPath("userData");
 const dbPath = path.join(userDataPath, "banco_dados.db");
@@ -21,6 +22,7 @@ export const AppDataSource = new DataSource({
   entities: [
     Formulario,
     Tipo_Pergunta,
+    Tipo_Questao,
     Pergunta,
     Alternativa_Pergunta,
     Alternativa_Questao,
@@ -29,3 +31,5 @@ export const AppDataSource = new DataSource({
     Questao,
   ],
 });
+
+console.log("Uso: ", AppDataSource.options.database);

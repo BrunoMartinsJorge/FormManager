@@ -11,20 +11,20 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Questao = void 0;
 const typeorm_1 = require("typeorm");
-const Tipo_Pergunta_1 = require("./Tipo_Pergunta");
 const Quiz_1 = require("./Quiz");
 const Alternativa_Questao_1 = require("./Alternativa_Questao");
+const Tipo_Questao_1 = require("./Tipo_Questao");
 let Questao = class Questao {
 };
 exports.Questao = Questao;
 __decorate([
     (0, typeorm_1.PrimaryGeneratedColumn)(),
     __metadata("design:type", Number)
-], Questao.prototype, "idPergunta", void 0);
+], Questao.prototype, "idQuestao", void 0);
 __decorate([
-    (0, typeorm_1.ManyToOne)(() => Tipo_Pergunta_1.Tipo_Pergunta, (tipo) => tipo.Perguntas),
-    __metadata("design:type", Tipo_Pergunta_1.Tipo_Pergunta)
-], Questao.prototype, "Tipo_Pergunta", void 0);
+    (0, typeorm_1.ManyToOne)(() => Tipo_Questao_1.Tipo_Questao, (tipo) => tipo.Questoes),
+    __metadata("design:type", Tipo_Questao_1.Tipo_Questao)
+], Questao.prototype, "Tipo_Questao", void 0);
 __decorate([
     (0, typeorm_1.ManyToOne)(() => Quiz_1.Quiz, (form) => form.Questoes),
     (0, typeorm_1.JoinColumn)({ name: 'idQuiz' }),
@@ -41,9 +41,12 @@ __decorate([
 __decorate([
     (0, typeorm_1.ManyToMany)(() => Alternativa_Questao_1.Alternativa_Questao),
     (0, typeorm_1.JoinTable)({
-        name: 'questao_alternativas_corretas', // tabela separada
-        joinColumn: { name: 'questaoId', referencedColumnName: 'idPergunta' },
-        inverseJoinColumn: { name: 'alternativaId', referencedColumnName: 'idAlternativa' },
+        name: 'questao_alternativas_corretas',
+        joinColumn: { name: 'questaoId', referencedColumnName: 'idQuestao' },
+        inverseJoinColumn: {
+            name: 'alternativaId',
+            referencedColumnName: 'idAlternativa',
+        },
     }),
     __metadata("design:type", Array)
 ], Questao.prototype, "AlternativasCorretas", void 0);
@@ -71,6 +74,14 @@ __decorate([
     (0, typeorm_1.Column)({ type: 'text', nullable: true }),
     __metadata("design:type", String)
 ], Questao.prototype, "FeedbackErrado", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: 'int', nullable: true }),
+    __metadata("design:type", Number)
+], Questao.prototype, "low", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: 'int', nullable: true }),
+    __metadata("design:type", Number)
+], Questao.prototype, "high", void 0);
 exports.Questao = Questao = __decorate([
     (0, typeorm_1.Entity)()
 ], Questao);

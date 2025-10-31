@@ -26,6 +26,7 @@ import { SplitButton } from 'primeng/splitbutton';
 import { MenuItem } from 'primeng/api';
 import { TableModule } from 'primeng/table';
 import { Checkbox } from 'primeng/checkbox';
+import { QuestaoSalva } from '../questoes-salvas-quiz/model/QuestaoSalva';
 
 @Component({
   selector: 'app-adicionar-quiz',
@@ -100,12 +101,22 @@ export class AdicionarQuiz {
   public useQuestionsSelecteds(): void {
     if (this.questionsSelecteds.length === 0) return;
     this.questionsSelecteds.forEach((question) => {
-      const novaQuestao: NewQuest = {
+      console.log(question);
+      
+      const novaQuestao: QuestaoSalva = {
         titulo: question.titulo,
         tipo: question.tipo,
+        correta: question.correta,
         opcoes: question.opcoes,
-        imagemUrl: question.imagem,
+        urlImagem: question.imagem,
         descricaoImagem: question.descricaoImagem,
+        id: question.id,
+        low: question.low,
+        high: question.high,
+        favorita: question.favorita,
+        feedbackCorreto: question.feedbackCorreto,
+        feedbackErro: question.feedbackErro,
+        pontuacao: question.pontuacao,
       };
       this.quiz.questoes.push(novaQuestao);
     });
@@ -113,7 +124,7 @@ export class AdicionarQuiz {
   }
 
   private getQuestSaved(): void {
-    this.formulariosService.findAllQuestionsFavorites().subscribe({
+    this.formulariosService.listarQuestoesQuiz().subscribe({
       next: (res) => {
         this.visibilityQuestsSaved = true;
         this.questsSaved = res;
@@ -172,7 +183,7 @@ export class AdicionarQuiz {
 
     if (questao.respostasCorretas.includes(indexOpcao)) {
       questao.respostasCorretas = questao.respostasCorretas.filter(
-        (i) => i !== indexOpcao
+        (i: any) => i !== indexOpcao
       );
     } else {
       if (questao.tipo === 'UNICA') {
@@ -197,6 +208,8 @@ export class AdicionarQuiz {
     this.carregando = true;
     this.erroAoCriarFormulario = false;
     this.mostrarTelaAcao = false;
+    console.log(this.quiz);
+    
     this.formulariosService.criarQuiz(this.quiz).subscribe(
       (response) => {
         this.urlForm = response.formUrl;
@@ -240,7 +253,7 @@ export class AdicionarQuiz {
       ) {
         if (!questao.opcoes || questao.opcoes.length === 0) return false;
 
-        if (questao.opcoes.some((opcao) => !opcao || opcao.trim() === '')) {
+        if (questao.opcoes.some((opcao: any) => !opcao || opcao.texto.trim() === '')) {
           return false;
         }
         if (

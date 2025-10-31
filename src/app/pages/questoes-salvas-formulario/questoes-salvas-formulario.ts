@@ -180,7 +180,7 @@ export class QuestoesSalvasFormulario {
       titulo: this.newQuestion.titulo,
       tipo: this.newQuestion.tipo,
     };
-    this.formService.editarQuestao(quest).subscribe({
+    this.formService.editarPergunta(quest).subscribe({
       next: (response: any) => {
         this.toast.add({
           severity: 'success',

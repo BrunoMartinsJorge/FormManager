@@ -3,7 +3,6 @@ import { getAuthClient, oAuth2Client } from './googleAuth';
 import { AppDataSource } from '../database/data-source';
 import { Formulario } from '../models/Formulario';
 import { Pergunta } from '../models/Pergunta';
-import { Tipo_Pergunta } from '../models/Tipo_Pergunta';
 import { NewQuiz } from '../forms/NewForm';
 import { Quiz } from '../models/Quiz';
 import { Questao } from '../models/Questao';
@@ -15,6 +14,7 @@ import {
 import { ListaQuestoesDto } from '../models/dto/ListaQuestoesDto';
 import { NewQuestQuizSaved } from '../forms/NewQuestQuizSaved';
 import { Alternativa_Questao } from '../models/Alternativa_Questao';
+import { Tipo_Questao } from '../models/Tipo_Questao';
 
 export async function createQuiz(quizForm: NewQuiz, userEmail: string | null) {
   const auth = await getAuthClient();
@@ -115,7 +115,7 @@ export async function createQuiz(quizForm: NewQuiz, userEmail: string | null) {
 
   return await AppDataSource.transaction(async (manager) => {
     const quizRepo = manager.getRepository(Quiz);
-    const tipoRepo = manager.getRepository(Tipo_Pergunta);
+    const tipoRepo = manager.getRepository(Tipo_Questao);
     const questaoRepo = manager.getRepository(Questao);
     const altRepo = manager.getRepository(Alternativa_Questao);
 
@@ -139,7 +139,7 @@ export async function createQuiz(quizForm: NewQuiz, userEmail: string | null) {
       }
 
       const questao = questaoRepo.create({
-        Tipo_Pergunta: tipo,
+        Tipo_Questao: tipo,
         Quiz: form,
         Titulo: q.titulo,
       });
@@ -167,7 +167,7 @@ export async function listAllQuizzes(email: string | null) {
   const repo = AppDataSource.getRepository(Quiz);
   return await repo.find({
     where: { email: email },
-    relations: ['Perguntas', 'Perguntas.Alternativas'],
+    relations: ['Questoes', 'Questoes.Alternativas'],
   });
 }
 
@@ -190,10 +190,14 @@ export async function buscarQuizPorId(quizId: string) {
 export async function salvarQuestao(form: NewQuestQuizSaved) {
   const repo = AppDataSource.getRepository(Questao);
   const repoAlt = AppDataSource.getRepository(Alternativa_Questao);
-  const repoTipo = AppDataSource.getRepository(Tipo_Pergunta);
+  const repoTipo = AppDataSource.getRepository(Tipo_Questao);
 
-  const tipo = await repoTipo.findOneBy({ Descricao: form.tipo });
-  if (!tipo) throw new Error(`Tipo de pergunta '${form.tipo}' não encontrado`);
+  let tipo = await repoTipo.findOneBy({ Descricao: form.tipo });
+  if (!tipo) {
+    const newTipo = repoTipo.create({ Descricao: form.tipo });
+    await repoTipo.save(newTipo);
+    tipo = newTipo;
+  }
 
   const alternativas = form.opcoes
     ? form.opcoes.map((texto) => {
@@ -205,7 +209,7 @@ export async function salvarQuestao(form: NewQuestQuizSaved) {
 
   const questao = repo.create({
     Titulo: form.titulo,
-    Tipo_Pergunta: tipo,
+    Tipo_Questao: tipo,
     Favorita: form.favorita ?? false,
     Pontuacao: form.pontos ?? 0,
     FeedbackCorreto: form.feedbackCorreto ?? '',
@@ -223,7 +227,7 @@ export async function salvarQuestao(form: NewQuestQuizSaved) {
 
   if (form.respostasCorretas?.length) {
     const alternativasSalvas = await repoAlt.findBy({
-      Questao: { idPergunta: savedQuestao.idPergunta },
+      Questao: { idQuestao: savedQuestao.idQuestao },
     });
 
     const corretas = form.respostasCorretas
@@ -237,18 +241,93 @@ export async function salvarQuestao(form: NewQuestQuizSaved) {
   return savedQuestao;
 }
 
-export async function listarTodasQuestoesFavoritas(): Promise<
-  any[]
-> {
+export async function editarQuestaoSalva(dados: ListaQuestoesDto) {
+  const repoPergunta = AppDataSource.getRepository(Questao);
+  const repoTipo = AppDataSource.getRepository(Tipo_Questao);
+  const repoAlt = AppDataSource.getRepository(Alternativa_Questao);
+
+  const questao = await repoPergunta.findOne({
+    where: { idQuestao: dados.id },
+    relations: ['Alternativas', 'Tipo_Questao'],
+  });
+
+  if (!questao) throw new Error('Questão não encontrada!');
+
+  console.log(dados.tipo);
+
+  const tipo = await repoTipo.findOneBy({
+    Descricao: dados.tipo,
+  });
+
+  console.log(tipo);
+
+  questao.Titulo = dados.titulo;
+  questao.Tipo_Questao = tipo ?? questao.Tipo_Questao;
+  questao.Favorita = true;
+  questao.DescricaoImagem = dados.descricaoImagem;
+  questao.UrlImagem = dados.urlImagem;
+  questao.Pontuacao = dados.pontuacao ?? 0;
+  questao.FeedbackCorreto = dados.feedbackCorreto ?? '';
+  questao.FeedbackErrado = dados.feedbackErro ?? '';
+  questao.AlternativasCorretas = [];
+  questao.Alternativas = [];
+
+  console.log('Passou 4!');
+
+  if (dados.opcoes && dados.opcoes.length > 0) {
+    questao.Alternativas = await Promise.all(
+      dados.opcoes.map(async (opt) => {
+        const alt = new Alternativa_Questao();
+        alt.Questao = questao;
+        alt.Texto = opt.texto;
+        await repoAlt.save(alt);
+        return alt;
+      })
+    );
+  }
+
+  console.log('Passou 5!');
+
+  const savedQuest = await repoPergunta.save(questao);
+
+  console.log('Passou 6!');
+  for (const alt of questao.Alternativas) {
+    alt.Questao = savedQuest;
+    await repoAlt.save(alt);
+  }
+
+  console.log('Passou 7!');
+  if (dados.correta?.length) {
+    const alternativasSalvas = await repoAlt.findBy({
+      Questao: { idQuestao: savedQuest.idQuestao },
+    });
+
+    const corretas = alternativasSalvas.filter((alt) =>
+      dados.correta?.some(
+        (c) =>
+          (c?.idAlternativa && c.idAlternativa === alt.idAlternativa) ||
+          c?.texto?.trim().toLowerCase() === alt.Texto.trim().toLowerCase()
+      )
+    );
+
+    savedQuest.AlternativasCorretas = corretas;
+    await repoPergunta.save(savedQuest);
+  }
+
+  console.log('Passou 9!');
+  return ListaQuestoesDto.convert(questao);
+}
+
+export async function listarTodasQuestoesFavoritas() {
   let response: ListaQuestoesDto[] = [];
   const questoesRepo = AppDataSource.getRepository(Questao);
   const questoes = await questoesRepo.find({
     where: { Favorita: true },
-    relations: ['Alternativas', 'Tipo_Pergunta', 'AlternativasCorretas'],
+    relations: ['Alternativas', 'Tipo_Questao', 'AlternativasCorretas'],
   });
 
   if (!questoes) return response;
-  
+
   response = questoes.map((q: Questao) => ListaQuestoesDto.convert(q));
   return response;
 }

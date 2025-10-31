@@ -9,44 +9,24 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.Quiz = void 0;
+exports.Tipo_Questao = void 0;
 const typeorm_1 = require("typeorm");
 const Questao_1 = require("./Questao");
-let Quiz = class Quiz {
+let Tipo_Questao = class Tipo_Questao {
 };
-exports.Quiz = Quiz;
+exports.Tipo_Questao = Tipo_Questao;
 __decorate([
     (0, typeorm_1.PrimaryGeneratedColumn)(),
     __metadata("design:type", Number)
-], Quiz.prototype, "idQuiz", void 0);
+], Tipo_Questao.prototype, "idTipo_Pergunta", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ length: 75 }),
+    (0, typeorm_1.Column)({ type: 'text' }),
     __metadata("design:type", String)
-], Quiz.prototype, "Titulo", void 0);
+], Tipo_Questao.prototype, "Descricao", void 0);
 __decorate([
-    (0, typeorm_1.Column)({ type: 'text', nullable: true }),
-    __metadata("design:type", String)
-], Quiz.prototype, "Descricao", void 0);
-__decorate([
-    (0, typeorm_1.Column)({ type: 'datetime', default: () => 'CURRENT_TIMESTAMP' }),
-    __metadata("design:type", Date)
-], Quiz.prototype, "Data_Criacao", void 0);
-__decorate([
-    (0, typeorm_1.Column)({ nullable: true }),
-    __metadata("design:type", String)
-], Quiz.prototype, "Link_Url", void 0);
-__decorate([
-    (0, typeorm_1.Column)({ nullable: true }),
-    __metadata("design:type", String)
-], Quiz.prototype, "quizId", void 0);
-__decorate([
-    (0, typeorm_1.OneToMany)(() => Questao_1.Questao, (questao) => questao.Quiz, { cascade: true }),
+    (0, typeorm_1.OneToMany)(() => Questao_1.Questao, (questao) => questao.Tipo_Questao),
     __metadata("design:type", Array)
-], Quiz.prototype, "Questoes", void 0);
-__decorate([
-    (0, typeorm_1.Column)({ type: 'text', nullable: true }),
-    __metadata("design:type", String)
-], Quiz.prototype, "email", void 0);
-exports.Quiz = Quiz = __decorate([
+], Tipo_Questao.prototype, "Questoes", void 0);
+exports.Tipo_Questao = Tipo_Questao = __decorate([
     (0, typeorm_1.Entity)()
-], Quiz);
+], Tipo_Questao);

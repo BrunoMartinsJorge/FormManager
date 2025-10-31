@@ -11,14 +11,15 @@ import {
 import { Tipo_Pergunta } from './Tipo_Pergunta';
 import { Quiz } from './Quiz';
 import { Alternativa_Questao } from './Alternativa_Questao';
+import { Tipo_Questao } from './Tipo_Questao';
 
 @Entity()
 export class Questao {
   @PrimaryGeneratedColumn()
-  idPergunta!: number;
+  idQuestao!: number;
 
-  @ManyToOne(() => Tipo_Pergunta, (tipo) => tipo.Perguntas)
-  Tipo_Pergunta!: Tipo_Pergunta;
+  @ManyToOne(() => Tipo_Questao, (tipo) => tipo.Questoes)
+  Tipo_Questao!: Tipo_Questao;
 
   @ManyToOne(() => Quiz, (form) => form.Questoes)
   @JoinColumn({ name: 'idQuiz' })
@@ -33,8 +34,11 @@ export class Questao {
   @ManyToMany(() => Alternativa_Questao)
   @JoinTable({
     name: 'questao_alternativas_corretas',
-    joinColumn: { name: 'questaoId', referencedColumnName: 'idPergunta' },
-    inverseJoinColumn: { name: 'alternativaId', referencedColumnName: 'idAlternativa' },
+    joinColumn: { name: 'questaoId', referencedColumnName: 'idQuestao' },
+    inverseJoinColumn: {
+      name: 'alternativaId',
+      referencedColumnName: 'idAlternativa',
+    },
   })
   AlternativasCorretas!: Alternativa_Questao[];
 
@@ -55,4 +59,10 @@ export class Questao {
 
   @Column({ type: 'text', nullable: true })
   FeedbackErrado!: string;
+
+  @Column({ type: 'int', nullable: true })
+  low!: number;
+
+  @Column({ type: 'int', nullable: true })
+  high!: number;
 }

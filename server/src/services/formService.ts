@@ -168,7 +168,7 @@ export async function salvarFormularioCompleto(
   });
 }
 
-export async function editarQuestaoSalva(dados: EditQuest) {
+export async function editarPerguntaSalva(dados: EditQuest) {
   const repoPergunta = AppDataSource.getRepository(Pergunta);
   const repoTipo = AppDataSource.getRepository(Tipo_Pergunta);
   const repoAlt = AppDataSource.getRepository(Alternativa_Pergunta);

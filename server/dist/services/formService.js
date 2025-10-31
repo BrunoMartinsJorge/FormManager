@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.salvarFormularioCompleto = salvarFormularioCompleto;
-exports.editarQuestaoSalva = editarQuestaoSalva;
+exports.editarPerguntaSalva = editarPerguntaSalva;
 exports.apagarFormulario = apagarFormulario;
 exports.listarFormularios = listarFormularios;
 exports.listarQuestoesPorFormulario = listarQuestoesPorFormulario;
@@ -158,7 +158,7 @@ async function salvarFormularioCompleto(dadosForm, userEmail) {
         return createRes.data.responderUri;
     });
 }
-async function editarQuestaoSalva(dados) {
+async function editarPerguntaSalva(dados) {
     const repoPergunta = data_source_1.AppDataSource.getRepository(Pergunta_1.Pergunta);
     const repoTipo = data_source_1.AppDataSource.getRepository(Tipo_Pergunta_1.Tipo_Pergunta);
     const repoAlt = data_source_1.AppDataSource.getRepository(Alternativa_Pergunta_1.Alternativa_Pergunta);

@@ -20,7 +20,12 @@
         />
         <br />
       </div>
-      <p-button label="Enviar" icon="pi pi-send" (click)="simularResposta()" *ngIf="buttonSendIsVisible"/>
+      <p-button
+        label="Enviar"
+        icon="pi pi-send"
+        (click)="simularResposta()"
+        *ngIf="buttonSendIsVisible"
+      />
     </div>
     <span [ngClass]="'mensagem-resposta ' + (disabled ? 'disabled' : '')"
       >{{ mensagemResposta }}</span
@@ -63,7 +68,12 @@
         />
         <br />
       </div>
-      <p-button label="Enviar" icon="pi pi-send" (click)="simularResposta()" *ngIf="buttonSendIsVisible"/>
+      <p-button
+        label="Enviar"
+        icon="pi pi-send"
+        (click)="simularResposta()"
+        *ngIf="buttonSendIsVisible"
+      />
     </div>
     <span [ngClass]="'mensagem-resposta ' + (disabled ? 'disabled' : '')"
       >{{ mensagemResposta }}</span
@@ -87,7 +97,12 @@
           </div>
         </div>
       </div>
-      <p-button label="Enviar" icon="pi pi-send" (click)="simularResposta()" *ngIf="buttonSendIsVisible"/>
+      <p-button
+        label="Enviar"
+        icon="pi pi-send"
+        (click)="simularResposta()"
+        *ngIf="buttonSendIsVisible"
+      />
     </div>
     <span [ngClass]="'mensagem-resposta ' + (disabled ? 'disabled' : '')"
       >{{ mensagemResposta }}</span
@@ -107,34 +122,16 @@
               [(ngModel)]="resposta"
               [value]="'opcao-'+i"
             />
-            <label for="opcao-{{i}}">{{opcao}}</label>
+            <label for="opcao-{{i}}">{{opcao.texto}}</label>
           </div>
         </div>
       </div>
-      <p-button label="Enviar" icon="pi pi-send" (click)="simularResposta()" *ngIf="buttonSendIsVisible"/>
-    </div>
-    <span [ngClass]="'mensagem-resposta ' + (disabled ? 'disabled' : '')"
-      >{{ mensagemResposta }}</span
-    >
-  </ng-container>
-  <ng-container *ngSwitchCase="'MULTIPLA'">
-    <div class="questao-element">
-      <div class="questao-body">
-        <h4>{{ questao?.titulo != '' ? questao?.titulo : 'Sem título' }}</h4>
-        <div
-          *ngFor="let opcao of questao?.opcoes; let i = index"
-          class="flex items-center"
-        >
-          <p-checkbox
-            [inputId]="'opcao' + i"
-            [value]="'opcao' + i"
-            [(ngModel)]="resposta"
-            binary="false"
-          ></p-checkbox>
-          <label [for]="'opcao' + i" class="ml-2"> {{ opcao }} </label>
-        </div>
-      </div>
-      <p-button label="Enviar" icon="pi pi-send" (click)="simularResposta()" *ngIf="buttonSendIsVisible"/>
+      <p-button
+        label="Enviar"
+        icon="pi pi-send"
+        (click)="simularResposta()"
+        *ngIf="buttonSendIsVisible"
+      />
     </div>
     <span [ngClass]="'mensagem-resposta ' + (disabled ? 'disabled' : '')"
       >{{ mensagemResposta }}</span
@@ -147,7 +144,12 @@
         <p-datepicker [(ngModel)]="resposta" />
         <br />
       </div>
-      <p-button label="Enviar" icon="pi pi-send" (click)="simularResposta()" *ngIf="buttonSendIsVisible"/>
+      <p-button
+        label="Enviar"
+        icon="pi pi-send"
+        (click)="simularResposta()"
+        *ngIf="buttonSendIsVisible"
+      />
     </div>
     <span [ngClass]="'mensagem-resposta ' + (disabled ? 'disabled' : '')"
       >{{ mensagemResposta }}</span
@@ -173,7 +175,12 @@
           <br />
         </div>
       </div>
-      <p-button label="Enviar" icon="pi pi-send" (click)="simularResposta()" *ngIf="buttonSendIsVisible"/>
+      <p-button
+        label="Enviar"
+        icon="pi pi-send"
+        (click)="simularResposta()"
+        *ngIf="buttonSendIsVisible"
+      />
     </div>
     <span [ngClass]="'mensagem-resposta ' + (disabled ? 'disabled' : '')"
       >{{ mensagemResposta }}</span
@@ -193,10 +200,15 @@
             [(ngModel)]="resposta"
             binary="false"
           ></p-checkbox>
-          <label [for]="'opcao' + i" class="ml-2"> {{ opcao }} </label>
+          <label [for]="'opcao' + i" class="ml-2"> {{ opcao.texto }} </label>
         </div>
       </div>
-      <p-button label="Enviar" icon="pi pi-send" (click)="simularResposta()" *ngIf="buttonSendIsVisible"/>
+      <p-button
+        label="Enviar"
+        icon="pi pi-send"
+        (click)="simularResposta()"
+        *ngIf="buttonSendIsVisible"
+      />
     </div>
     <span [ngClass]="'mensagem-resposta ' + (disabled ? 'disabled' : '')"
       >{{ mensagemResposta }}</span

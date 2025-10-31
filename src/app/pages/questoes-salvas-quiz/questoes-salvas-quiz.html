@@ -7,7 +7,7 @@
     style="border: 1px solid #ccc; border-top: none"
     [value]="listOfSavedQuestions"
     stripedRows
-    [rows]="10"
+    [rows]="5"
     [paginator]="true"
   >
     <ng-template pTemplate="caption">
@@ -86,7 +86,7 @@
   [modal]="true"
   [draggable]="false"
   [(visible)]="visibleDialogAddQuestion"
-  [style]="{'maxWidth': '550px', 'width': '100%'}"
+  [style]="{'maxWidth': '600px', 'width': '100%'}"
 >
   <div class="quests-form">
     <div class="input-group">
@@ -101,16 +101,16 @@
     </div>
     <div class="opcao-quest">
       <div class="input-group">
-        <label for="tipo-quest">Qual o tipo da Pergunta:</label>
+        <label for="tipo-quest">Qual o tipo da Questão:</label>
         <p-select
           id="tipo-quest"
           [options]="tipoDeCampo"
           [(ngModel)]="newQuestion.tipo"
           optionLabel="nome"
           optionValue="value"
-          placeholder="Selecione o tipo de Pergunta"
-          class="w-full md:w-56"
-        />
+          placeholder="Selecione o tipo de Questão"
+          />
+          <!-- (onChange)="mudancaTipoQuestao($event)" -->
       </div>
       <p-button
         *ngIf="newQuestion.tipo === 'MULTIPLA' || newQuestion.tipo === 'UNICA'"
@@ -118,6 +118,78 @@
         icon="pi pi-plus"
         (click)="adicionarOpcao()"
       />
+    </div>
+    <div
+      class="inputs-list"
+      *ngIf="newQuestion.tipo && (newQuestion.tipo === 'VERDADEIRO_FALSO')"
+    >
+      <p-inputgroup pSize="small">
+        <input pInputText value="Verdadeiro" [disabled]="true" />
+        <p-inputgroup-addon>
+          <p-button
+            [icon]="opcaoCorretaVerdadeiroFalse('Verdadeiro') ? 'pi pi-check' : 'pi pi-times'"
+            (click)="toogleOpcaoCorretaVerdadeiroFalso('Verdadeiro')"
+          />
+        </p-inputgroup-addon>
+      </p-inputgroup>
+      <p-inputgroup pSize="small">
+        <input pInputText value="Falso" [disabled]="true" />
+        <p-inputgroup-addon>
+          <p-button
+            [icon]="opcaoCorretaVerdadeiroFalse('Falso') ? 'pi pi-check' : 'pi pi-times'"
+            (click)="toogleOpcaoCorretaVerdadeiroFalso('Falso')"
+          />
+        </p-inputgroup-addon>
+      </p-inputgroup>
+    </div>
+    <div
+      class="inputs-list"
+      *ngIf="newQuestion.tipo && (newQuestion.tipo === 'UNICA' || newQuestion.tipo === 'MULTIPLA')"
+    >
+      <p-inputgroup
+        pSize="small"
+        *ngFor="let opcao of newQuestion.opcoes; let index = index; trackBy: trackByIndex"
+      >
+        <p-button
+          label="Apagar"
+          icon="pi pi-trash"
+          (click)="removerOpcao(index)"
+        />
+        <input
+          pInputText
+          placeholder="Opção..."
+          [(ngModel)]="newQuestion.opcoes![index].texto"
+        />
+        <p-inputgroup-addon>
+          <p-button
+            [icon]="opcaoCorreta(index) ? 'pi pi-check' : 'pi pi-times'"
+            (click)="toggleOpcaoCorreta(index)"
+          />
+        </p-inputgroup-addon>
+      </p-inputgroup>
+    </div>
+    <div class="info-input" *ngIf="newQuestion.tipo === 'ESCALA'">
+      <div class="input-group">
+        <label for="min-quest">Valor mínimo:</label>
+        <p-input-number
+          id="min-quest"
+          type="number"
+          [min]="0"
+          [max]="newQuestion.high ? newQuestion.high : 2"
+          [(ngModel)]="newQuestion.low"
+          placeholder="Valor mínimo"
+        />
+      </div>
+      <div class="input-group">
+        <label for="max-quest">Valor máximo:</label>
+        <p-input-number
+          id="max-quest"
+          type="number"
+          [min]="newQuestion.low ? newQuestion.low : 1"
+          [(ngModel)]="newQuestion.high"
+          placeholder="Valor máximo"
+        />
+      </div>
     </div>
     <ng-container
       *ngIf="newQuestion.tipo == 'UNICA' || newQuestion.tipo == 'MULTIPLA' || newQuestion.tipo == 'VERDADEIRO_FALSO'"
@@ -128,7 +200,7 @@
           <p-input-number
             id="pontos-quest"
             type="number"
-            [(ngModel)]="newQuestion.pontos"
+            [(ngModel)]="newQuestion.pontuacao"
             placeholder="Pontos"
           />
         </div>
@@ -148,7 +220,7 @@
           <textarea
             id="feedback-quest"
             pInputTextarea
-            [(ngModel)]="newQuestion.feedbackErrado"
+            [(ngModel)]="newQuestion.feedbackErro"
             placeholder="Feedback"
           ></textarea>
         </div>
@@ -176,56 +248,6 @@
           [(ngModel)]="newQuestion.descricaoImagem"
           placeholder="Descrição da Imagem"
           [disabled]="!urlImageIsValid(newQuestion.imagemUrl || '')"
-        />
-      </div>
-    </div>
-    <div
-      class="inputs-list"
-      *ngIf="newQuestion.tipo && (newQuestion.tipo === 'UNICA' || newQuestion.tipo === 'MULTIPLA')"
-    >
-      <p-inputgroup
-        pSize="small"
-        *ngFor="let opcao of newQuestion.opcoes; let index = index; trackBy: trackByIndex"
-      >
-        <p-button
-          label="Apagar"
-          icon="pi pi-trash"
-          (click)="removerOpcao(index)"
-        />
-        <input
-          pInputText
-          placeholder="Opção..."
-          [(ngModel)]="newQuestion.opcoes![index]"
-        />
-        <p-inputgroup-addon>
-          <p-button
-            [icon]="opcaoCorreta(index) ? 'pi pi-check' : 'pi pi-times'"
-            (click)="toggleOpcaoCorreta(index)"
-          />
-        </p-inputgroup-addon>
-      </p-inputgroup>
-    </div>
-
-    <div class="info-input" *ngIf="newQuestion.tipo === 'ESCALA'">
-      <div class="input-group">
-        <label for="min-quest">Valor mínimo:</label>
-        <p-input-number
-          id="min-quest"
-          type="number"
-          [min]="0"
-          [max]="newQuestion.high ? newQuestion.high : 2"
-          [(ngModel)]="newQuestion.low"
-          placeholder="Valor mínimo"
-        />
-      </div>
-      <div class="input-group">
-        <label for="max-quest">Valor máximo:</label>
-        <p-input-number
-          id="max-quest"
-          type="number"
-          [min]="newQuestion.low ? newQuestion.low : 1"
-          [(ngModel)]="newQuestion.high"
-          placeholder="Valor máximo"
         />
       </div>
     </div>
