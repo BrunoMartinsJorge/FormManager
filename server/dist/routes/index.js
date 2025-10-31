@@ -134,13 +134,10 @@ router.get('/formularios/:id', async (req, res) => {
 router.get('/formularios/:formId/responses', async (req, res) => {
     const formId = req.params.formId;
     try {
-        const forms = googleapis_1.google.forms({ version: 'v1', auth: googleAuth_1.oAuth2Client });
-        const formRes = await forms.forms.get({ formId });
-        const respostasRes = await forms.forms.responses.list({ formId });
-        res.json({
-            items: formRes.data.items || [],
-            responses: respostasRes.data.responses || [],
-        });
+        const resposta = await (0, formService_1.buscarRespostasDoFormularioPorId)(formId);
+        if (!resposta)
+            return res.status(404).send('Formulário não encontrado');
+        res.json(resposta);
     }
     catch (err) {
         console.error(err);

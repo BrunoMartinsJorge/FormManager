@@ -1,5 +1,5 @@
 import { google } from 'googleapis';
-import { getAuthClient } from './googleAuth';
+import { getAuthClient, oAuth2Client } from './googleAuth';
 import { AppDataSource } from '../database/data-source';
 import { Formulario } from '../models/Formulario';
 import { Pergunta } from '../models/Pergunta';
@@ -8,6 +8,14 @@ import { NewQuestFormSaved } from '../forms/NewQuestFormSaved';
 import { ListaPerguntasDto } from '../models/dto/ListaPerguntasDto';
 import { EditQuest } from '../forms/EditQuestao';
 import { Alternativa_Pergunta } from '../models/Alternativa_Pergunta';
+import {
+  QuestaoUnica,
+  QuestoesFormatadas,
+  Resposta_Questao,
+  RespostasFormDto,
+  RespostaUnica,
+} from '../models/dto/RespostasFormDto';
+import { FormulariosListaDto } from '../models/dto/FormulariosListaDto';
 
 export async function salvarFormularioCompleto(
   dadosForm: any,
@@ -119,6 +127,13 @@ export async function salvarFormularioCompleto(
     },
   });
 
+  requests.push({
+    updateSettings: {
+      settings: { emailCollectionType: 'VERIFIED' },
+      updateMask: 'emailCollectionType',
+    },
+  });
+
   if (!formId) throw new Error('formId inválido');
 
   await formsApi.forms.batchUpdate({ formId, requestBody: { requests } });
@@ -202,7 +217,6 @@ export async function editarPerguntaSalva(dados: EditQuest) {
 
   await repoPergunta.save(questao);
 
-  // Remove referência circular
   questao.Alternativas?.forEach((a) => {
     if ('Pergunta' in a) {
       delete (a as any).Pergunta;
@@ -220,10 +234,11 @@ export async function apagarFormulario(idFormulario: number) {
 export async function listarFormularios(userEmail: string | null) {
   if (!userEmail) return [];
   const repo = AppDataSource.getRepository(Formulario);
-  return await repo.find({
+  const forms = await repo.find({
     where: { email: userEmail },
-    relations: ['Perguntas', 'Perguntas.Alternativas'],
   });
+  if (!forms) return [];
+  return forms.map((form) => FormulariosListaDto.convert(form));
 }
 
 export async function listarQuestoesPorFormulario(idForm: number) {
@@ -280,6 +295,141 @@ export async function salvarPergunta(form: NewQuestFormSaved) {
 export async function apagarPergunta(idPergunta: number) {
   const repo = AppDataSource.getRepository(Pergunta);
   await repo.delete(idPergunta);
+}
+
+export async function buscarRespostasDoFormularioPorId(
+  idForm: string
+): Promise<RespostasFormDto> {
+  const form = google.forms({ version: 'v1', auth: oAuth2Client });
+
+  const formRes = await form.forms.get({ formId: idForm });
+  const respostasRes = await form.forms.responses.list({ formId: idForm });
+
+  const ativo = !!formRes.data.responderUri;
+
+  return convertQuestionData(ativo, {
+    items: formRes.data.items || [],
+    responses: respostasRes.data.responses || [],
+  });
+}
+
+function convertQuestionData(ativo: boolean, data: any): RespostasFormDto {
+  const questoes: any[] = data.items || [];
+  const responses = data.responses || [];
+
+  const questoesFormatadas: QuestaoUnica[] = questoes
+    .filter((quest) => quest.questionItem && quest.questionItem.question)
+    .map((quest) => {
+      const q = quest.questionItem.question;
+      let tipo = 'DESCONHECIDO';
+      let opcoes: string[] | undefined;
+
+      if (q.textQuestion) tipo = 'Texto';
+      if (q.choiceQuestion) {
+        tipo = 'Escolha';
+        opcoes = q.choiceQuestion.options.map((o: any) => o.value);
+      }
+      if (q.scaleQuestion) tipo = 'Escala';
+      if (q.dateQuestion) tipo = 'Data';
+
+      return {
+        id: q.questionId,
+        titulo: quest.title,
+        tipo,
+        opcoes,
+      };
+    });
+
+  const respostasFormatadas: RespostaUnica[] = responses.map((resp: any) => {
+    const respostasQuestao: Resposta_Questao[] = [];
+
+    // Extrair respostas das questões
+    Object.values(resp.answers || {}).forEach((answer: any) => {
+      if (answer.textAnswers) {
+        answer.textAnswers.answers.forEach((a: any) => {
+          respostasQuestao.push({
+            idQuestao: answer.questionId,
+            valor: a.value,
+          });
+        });
+      }
+
+      if (answer.choiceAnswers) {
+        answer.choiceAnswers.answers.forEach((a: any) => {
+          respostasQuestao.push({
+            idQuestao: answer.questionId,
+            valor: a.value,
+          });
+        });
+      }
+    });
+
+    return {
+      idResposta: resp.responseId,
+      dataEnviada: new Date(resp.lastSubmittedTime),
+      usuarioEmail: resp.respondentEmail, // <-- Aqui pegamos o email do respondente
+      respostas: respostasQuestao,
+    };
+  });
+
+  const questoesFormatadasResponse: QuestoesFormatadas = {
+    questoes: questoesFormatadas,
+    respostas: respostasFormatadas,
+  };
+
+  const resposta: RespostasFormDto = {
+    ativo,
+    questoesFormatadas: questoesFormatadasResponse,
+    respostasPorUsuario: mapResponsesByUser(data),
+  };
+
+  return resposta;
+}
+
+function mapResponsesByUser(data: any): any[] {
+  const questoes = data.items || [];
+  const responses = data.responses || [];
+
+  return responses.map((resp: any) => {
+    const respostasUsuario: any[] = [];
+
+    Object.values(resp.answers).forEach((answer: any) => {
+      const questao = questoes.find(
+        (q: any) => q.questionItem?.question?.questionId === answer.questionId
+      );
+
+      if (!questao) return;
+
+      const titulo = questao.title;
+      const idQuestao = answer.questionId;
+
+      if (answer.textAnswers) {
+        answer.textAnswers.answers.forEach((a: any) => {
+          respostasUsuario.push({
+            idQuestao,
+            titulo,
+            valor: a.value,
+          });
+        });
+      }
+
+      if (answer.choiceAnswers) {
+        answer.choiceAnswers.answers.forEach((a: any) => {
+          respostasUsuario.push({
+            idQuestao,
+            titulo,
+            valor: a.value,
+          });
+        });
+      }
+    });
+
+    return {
+      idResposta: resp.responseId,
+      dataEnviada: resp.lastSubmittedTime,
+      respostas: respostasUsuario,
+    };
+  });
 }
 
 export async function buscarQuestoesSalvas(email: string | null) {

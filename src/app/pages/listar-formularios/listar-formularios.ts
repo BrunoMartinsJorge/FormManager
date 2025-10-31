@@ -8,23 +8,19 @@ import { Resposta, Resposta_Questao } from './models/Resposta.model';
 import { Dialog } from 'primeng/dialog';
 import { GerarGraficos } from '../../shared/components/gerar-graficos/gerar-graficos';
 import { GerarPdf } from '../../shared/components/gerar-pdf/gerar-pdf';
-import { FormularioPdfModel } from '../../shared/components/gerar-pdf/models/FormularioPdf.model';
+import {
+  FormularioPdfModel,
+  QuestoesPdfModel,
+} from '../../shared/components/gerar-pdf/models/FormularioPdf.model';
 import { Router } from '@angular/router';
 import * as XLSX from 'xlsx';
 import saveAs from 'file-saver';
-
-export interface Quest {
-  titulo: string;
-  tipoQuestao: any;
-  opcoes?: string[];
-  escala?: { min: number; max: number };
-}
-
-export interface Form {
-  titulo: string;
-  descricaoFormulario: string;
-  questoes: Quest[];
-}
+import {
+  QuestaoUnica,
+  RespostasFormDto,
+  RespostaUnica,
+} from './models/RespostasFormDto';
+import { Formulario } from './models/Formulario';
 
 @Component({
   selector: 'app-listar-formularios',
@@ -40,8 +36,8 @@ export interface Form {
   styleUrl: './listar-formularios.css',
 })
 export class ListarFormularios {
-  private forms: any[] = [];
-  public formsList: any[] = [];
+  private forms: Formulario[] = [];
+  public formsList: Formulario[] = [];
 
   public visibilityOfGraphicCreate: boolean = false;
   public visibilityOfGeneratePDF: boolean = false;
@@ -50,7 +46,7 @@ export class ListarFormularios {
   public loadingFormSelected: boolean = false;
   public responsesOrQuestions: 'quest' | 'responses' = 'quest';
   public indexByResponses: number = 0;
-  public formSelected: any;
+  public formSelected!: RespostasFormDto | null;
   public responsesByUser: any;
   public formPdfData: FormularioPdfModel | null = null;
 
@@ -62,7 +58,6 @@ export class ListarFormularios {
   public toogleGeneratePDF(event: any): boolean {
     this.visibilityOfGeneratePDF = !this.visibilityOfGeneratePDF;
     this.convertFormByDataPdf();
-
     return this.visibilityOfGeneratePDF;
   }
 
@@ -91,30 +86,58 @@ export class ListarFormularios {
   }
 
   public getQuestionByQuestionId(questId: any): any {
-    return this.formSelected?.questoes.find(
+    return this.formSelected?.questoesFormatadas.questoes.find(
       (quest: Questao) => quest.id === questId
     );
   }
 
   public getTypeQuestByIdQuestion(questId: any): any {
-    return this.formSelected?.questoes.find(
-      (quest: Questao) => quest.id === questId
-    ).tipo;
+    if (!this.formSelected) return '';
+    const questoes = this.formSelected.questoesFormatadas.questoes;
+    if (!questoes) return '';
+    const questao = questoes.find(
+      (quest: QuestaoUnica) => quest.id === questId
+    );
+    if (!questao) return '';
+    return questao.tipo;
+  }
+
+  public get buscarLabelBotao(): string {
+    if (this.responsesOrQuestions == 'responses') {
+      return 'Ver Questões';
+    }
+
+    const respostas = this.formSelected?.respostasPorUsuario;
+
+    if (!respostas || respostas.length === 0) {
+      return 'Nenhuma Resposta';
+    }
+
+    return 'Ver Respostas';
   }
 
   public exportFormToExcel(): void {
-    const formFormated = this.formSelected.questoes.map((quest: any) => ({
-      titulo: quest.titulo,
-      tipo: quest.tipo,
-      opcoes: quest.opcoes,
-      respostas: this.formSelected.respostas
-        ? this.formSelected.respostas.map((resposta: any) => {
-            return resposta.respostas.find(
-              (resp: any) => resp.idQuestao === quest.id
-            );
+    if (
+      !this.formSelected ||
+      !this.formSelected.questoesFormatadas ||
+      !this.formSelected.questoesFormatadas.respostas
+    )
+      return;
+    const formFormated = this.formSelected.questoesFormatadas.questoes.map(
+      (quest: any) => ({
+        titulo: quest.titulo,
+        tipo: quest.tipo,
+        opcoes: quest.opcoes,
+        respostas: this.formSelected?.questoesFormatadas.respostas.map(
+          (resp: any) => ({
+            idQuestao: resp.idQuestao,
+            valor: resp.respostas.find((r: any) => r.idQuestao === quest.id)
+              ?.valor,
           })
-        : null,
-    }));
+        ),
+      })
+    );
+    if (!formFormated[0].respostas) return;
     const qtdRespostas = formFormated[0].respostas.length;
     const header = [
       'Questão',
@@ -142,56 +165,9 @@ export class ListarFormularios {
     XLSX.writeFile(wb, 'respostas.xlsx');
   }
 
-  private mapResponsesByUser(data: any): any[] {
-    const questoes = data.items || [];
-    const responses = data.responses || [];
-
-    return responses.map((resp: any) => {
-      const respostasUsuario: any[] = [];
-
-      Object.values(resp.answers).forEach((answer: any) => {
-        const questao = questoes.find(
-          (q: any) => q.questionItem?.question?.questionId === answer.questionId
-        );
-
-        if (!questao) return;
-
-        const titulo = questao.title;
-        const idQuestao = answer.questionId;
-
-        if (answer.textAnswers) {
-          answer.textAnswers.answers.forEach((a: any) => {
-            respostasUsuario.push({
-              idQuestao,
-              titulo,
-              valor: a.value,
-            });
-          });
-        }
-
-        if (answer.choiceAnswers) {
-          answer.choiceAnswers.answers.forEach((a: any) => {
-            respostasUsuario.push({
-              idQuestao,
-              titulo,
-              valor: a.value,
-            });
-          });
-        }
-      });
-
-      return {
-        idResposta: resp.responseId,
-        dataEnviada: resp.lastSubmittedTime,
-        respostas: respostasUsuario,
-      };
-    });
-  }
-
   private loadAllForms(): void {
     this.formulariosService.listarFormularios().subscribe({
       next: (res) => {
-        
         this.forms = res;
         this.formsList = res.sort(
           (a: any, b: any) => b.idFormulario - a.idFormulario
@@ -209,29 +185,36 @@ export class ListarFormularios {
 
   public openForm(): void {
     if (!this.formSelected) return;
-    const form = this.forms.find(
+    const form: Formulario = this.forms.find(
       (form) => form.idFormulario === this.formSelectedId
-    );
+    ) as Formulario;
     if (!form) return;
-    window.open(form.Link_Url, '_blank');
+    window.open(form.linkUrl, '_blank');
   }
 
   private convertFormByDataPdf(): void {
-    const form = this.forms.find(
+    const form: Formulario = this.forms.find(
       (form) => form.idFormulario === this.formSelectedId
-    );
+    ) as Formulario;
     if (!form) return;
+
+    const questoesConvertidas: QuestoesPdfModel[] =
+      this.formSelected?.questoesFormatadas.questoes.map(
+        (questao: QuestaoUnica) => ({
+          id: Number(questao.id),
+          titulo: questao.titulo,
+          tipo: questao.tipo,
+          opcoes: questao.opcoes?.map((opcao) => opcao),
+          escala: undefined,
+        })
+      ) || [];
+
     this.formPdfData = {
       id: form.idFormulario,
-      titulo: form.Titulo,
-      descricao: form.Descricao,
-      dataCriacao: form.Data_Criacao,
-      questoes: this.formSelected?.questoes.map((questao: Questao) => ({
-        id: questao.id,
-        titulo: questao.titulo,
-        tipo: questao.tipo,
-        opcoes: questao.opcoes,
-      })),
+      titulo: form.titulo,
+      descricao: form.descricao,
+      dataCriacao: form.dataCriacao,
+      questoes: questoesConvertidas,
     };
   }
 
@@ -249,9 +232,14 @@ export class ListarFormularios {
       .buscarRespostasDeFormularioPorIdForm(form.formId)
       .subscribe({
         next: (res) => {
-          this.formSelected = this.convertQuestionData(res);
-
-          this.responsesByUser = this.mapResponsesByUser(res);
+          this.formSelected = res;
+          this.formSelected!.dataCriacao = form.dataCriacao;
+          this.formSelected!.formId = form.formId;
+          this.formSelected!.idFormulario = form.idFormulario;
+          this.formSelected!.titulo = form.titulo;
+          console.log(this.formSelected);
+          
+          this.responsesByUser = res.respostasPorUsuario;
           this.loadingFormSelected = false;
         },
         error: (error: Error) => {
@@ -259,6 +247,10 @@ export class ListarFormularios {
           this.loadingFormSelected = false;
         },
       });
+  }
+
+  public get getQuestoes(): any[] {
+    return this.formSelected?.questoesFormatadas?.questoes || [];
   }
 
   public previousResponse(): void {
@@ -274,91 +266,30 @@ export class ListarFormularios {
   }
 
   /**
-   * 
+   *
    * @description Retorna a quantidade de respostas de uma questão
    * @param questId - id da questão
    * @returns quantidade de respostas
    */
   public getNumberOfResponses(questId: string): number {
     let count = 0;
-    if (!this.formSelected || this.formSelected.respostas.length === 0)
+    if (
+      !this.formSelected ||
+      this.formSelected.questoesFormatadas.respostas.length === 0
+    )
       return count;
-    this.formSelected.respostas.forEach((resp: Resposta) => {
-      resp.respostas.forEach((r: Resposta_Questao) => {
-        if (r.idQuestao === questId) count++;
-      });
-    });
+    this.formSelected.questoesFormatadas.respostas.forEach(
+      (resp: RespostaUnica) => {
+        resp.respostas.forEach((r: Resposta_Questao) => {
+          if (r.idQuestao === questId) count++;
+        });
+      }
+    );
     return count;
   }
 
   public get getQuantityOfQuestions(): number {
     return this.forms?.length || 0;
-  }
-
-  private convertQuestionData(data: any): {
-    questoes: Questao[];
-    respostas: Resposta[];
-  } {
-    const questoes: any[] = data.items || [];
-    const responses = data.responses || [];
-
-    const questoesFormatadas: Questao[] = questoes
-      .filter((quest) => quest.questionItem && quest.questionItem.question)
-      .map((quest) => {
-        const q = quest.questionItem.question;
-        let tipo = 'DESCONHECIDO';
-        let opcoes: string[] | undefined;
-
-        if (q.textQuestion) tipo = 'Texto';
-        if (q.choiceQuestion) {
-          tipo = 'Escolha';
-          opcoes = q.choiceQuestion.options.map((o: any) => o.value);
-        }
-        if (q.scaleQuestion) tipo = 'Escala';
-        if (q.dateQuestion) tipo = 'Data';
-
-        return {
-          id: q.questionId,
-          titulo: quest.title,
-          tipo,
-          opcoes,
-        };
-      });
-
-    const respostasFormatadas: Resposta[] = responses.map((resp: any) => {
-      const respostasQuestao: Resposta_Questao[] = [];
-
-      Object.values(resp.answers || {}).forEach((answer: any) => {
-        if (answer.textAnswers) {
-          answer.textAnswers.answers.forEach((a: any) => {
-            respostasQuestao.push({
-              idQuestao: answer.questionId,
-              valor: a.value,
-            });
-          });
-        }
-
-        if (answer.choiceAnswers) {
-          answer.choiceAnswers.answers.forEach((a: any) => {
-            respostasQuestao.push({
-              idQuestao: answer.questionId,
-              valor: a.value,
-            });
-          });
-        }
-      });
-
-      return {
-        idResposta: resp.responseId,
-        dataEnviada: new Date(resp.lastSubmittedTime),
-        respostas: respostasQuestao,
-      };
-    });
-
-    return {
-      questoes: questoesFormatadas,
-      respostas: respostasFormatadas,
-    };
   }
 
   public fillterForm(event: any): void {
@@ -367,9 +298,9 @@ export class ListarFormularios {
       this.formsList = this.forms;
       return;
     }
-    this.formsList = this.forms.filter((form) => {
-      if (form.Titulo === undefined) return false;
-      return form.Titulo.toLowerCase().includes(value.toLowerCase());
+    this.formsList = this.forms.filter((form: Formulario) => {
+      if (form.titulo === undefined) return false;
+      return form.titulo.toLowerCase().includes(value.toLowerCase());
     });
   }
 

@@ -8,6 +8,7 @@ exports.listarQuestoesPorFormulario = listarQuestoesPorFormulario;
 exports.buscarFormularioPorId = buscarFormularioPorId;
 exports.salvarPergunta = salvarPergunta;
 exports.apagarPergunta = apagarPergunta;
+exports.buscarRespostasDoFormularioPorId = buscarRespostasDoFormularioPorId;
 exports.buscarQuestoesSalvas = buscarQuestoesSalvas;
 const googleapis_1 = require("googleapis");
 const googleAuth_1 = require("./googleAuth");
@@ -17,6 +18,7 @@ const Pergunta_1 = require("../models/Pergunta");
 const Tipo_Pergunta_1 = require("../models/Tipo_Pergunta");
 const ListaPerguntasDto_1 = require("../models/dto/ListaPerguntasDto");
 const Alternativa_Pergunta_1 = require("../models/Alternativa_Pergunta");
+const FormulariosListaDto_1 = require("../models/dto/FormulariosListaDto");
 async function salvarFormularioCompleto(dadosForm, userEmail) {
     const auth = await (0, googleAuth_1.getAuthClient)();
     const formsApi = googleapis_1.google.forms({ version: 'v1', auth });
@@ -116,6 +118,12 @@ async function salvarFormularioCompleto(dadosForm, userEmail) {
             updateMask: 'description',
         },
     });
+    requests.push({
+        updateSettings: {
+            settings: { emailCollectionType: 'VERIFIED' },
+            updateMask: 'emailCollectionType',
+        },
+    });
     if (!formId)
         throw new Error('formId inválido');
     await formsApi.forms.batchUpdate({ formId, requestBody: { requests } });
@@ -184,7 +192,6 @@ async function editarPerguntaSalva(dados) {
         }));
     }
     await repoPergunta.save(questao);
-    // Remove referência circular
     questao.Alternativas?.forEach((a) => {
         if ('Pergunta' in a) {
             delete a.Pergunta;
@@ -200,10 +207,12 @@ async function listarFormularios(userEmail) {
     if (!userEmail)
         return [];
     const repo = data_source_1.AppDataSource.getRepository(Formulario_1.Formulario);
-    return await repo.find({
+    const forms = await repo.find({
         where: { email: userEmail },
-        relations: ['Perguntas', 'Perguntas.Alternativas'],
     });
+    if (!forms)
+        return [];
+    return forms.map((form) => FormulariosListaDto_1.FormulariosListaDto.convert(form));
 }
 async function listarQuestoesPorFormulario(idForm) {
     const repo = data_source_1.AppDataSource.getRepository(Pergunta_1.Pergunta);
@@ -250,6 +259,118 @@ async function salvarPergunta(form) {
 async function apagarPergunta(idPergunta) {
     const repo = data_source_1.AppDataSource.getRepository(Pergunta_1.Pergunta);
     await repo.delete(idPergunta);
+}
+async function buscarRespostasDoFormularioPorId(idForm) {
+    const form = googleapis_1.google.forms({ version: 'v1', auth: googleAuth_1.oAuth2Client });
+    const formRes = await form.forms.get({ formId: idForm });
+    const respostasRes = await form.forms.responses.list({ formId: idForm });
+    const ativo = !!formRes.data.responderUri;
+    return convertQuestionData(ativo, {
+        items: formRes.data.items || [],
+        responses: respostasRes.data.responses || [],
+    });
+}
+function convertQuestionData(ativo, data) {
+    const questoes = data.items || [];
+    const responses = data.responses || [];
+    const questoesFormatadas = questoes
+        .filter((quest) => quest.questionItem && quest.questionItem.question)
+        .map((quest) => {
+        const q = quest.questionItem.question;
+        let tipo = 'DESCONHECIDO';
+        let opcoes;
+        if (q.textQuestion)
+            tipo = 'Texto';
+        if (q.choiceQuestion) {
+            tipo = 'Escolha';
+            opcoes = q.choiceQuestion.options.map((o) => o.value);
+        }
+        if (q.scaleQuestion)
+            tipo = 'Escala';
+        if (q.dateQuestion)
+            tipo = 'Data';
+        return {
+            id: q.questionId,
+            titulo: quest.title,
+            tipo,
+            opcoes,
+        };
+    });
+    const respostasFormatadas = responses.map((resp) => {
+        const respostasQuestao = [];
+        // Extrair respostas das questões
+        Object.values(resp.answers || {}).forEach((answer) => {
+            if (answer.textAnswers) {
+                answer.textAnswers.answers.forEach((a) => {
+                    respostasQuestao.push({
+                        idQuestao: answer.questionId,
+                        valor: a.value,
+                    });
+                });
+            }
+            if (answer.choiceAnswers) {
+                answer.choiceAnswers.answers.forEach((a) => {
+                    respostasQuestao.push({
+                        idQuestao: answer.questionId,
+                        valor: a.value,
+                    });
+                });
+            }
+        });
+        return {
+            idResposta: resp.responseId,
+            dataEnviada: new Date(resp.lastSubmittedTime),
+            usuarioEmail: resp.respondentEmail, // <-- Aqui pegamos o email do respondente
+            respostas: respostasQuestao,
+        };
+    });
+    const questoesFormatadasResponse = {
+        questoes: questoesFormatadas,
+        respostas: respostasFormatadas,
+    };
+    const resposta = {
+        ativo,
+        questoesFormatadas: questoesFormatadasResponse,
+        respostasPorUsuario: mapResponsesByUser(data),
+    };
+    return resposta;
+}
+function mapResponsesByUser(data) {
+    const questoes = data.items || [];
+    const responses = data.responses || [];
+    return responses.map((resp) => {
+        const respostasUsuario = [];
+        Object.values(resp.answers).forEach((answer) => {
+            const questao = questoes.find((q) => q.questionItem?.question?.questionId === answer.questionId);
+            if (!questao)
+                return;
+            const titulo = questao.title;
+            const idQuestao = answer.questionId;
+            if (answer.textAnswers) {
+                answer.textAnswers.answers.forEach((a) => {
+                    respostasUsuario.push({
+                        idQuestao,
+                        titulo,
+                        valor: a.value,
+                    });
+                });
+            }
+            if (answer.choiceAnswers) {
+                answer.choiceAnswers.answers.forEach((a) => {
+                    respostasUsuario.push({
+                        idQuestao,
+                        titulo,
+                        valor: a.value,
+                    });
+                });
+            }
+        });
+        return {
+            idResposta: resp.responseId,
+            dataEnviada: resp.lastSubmittedTime,
+            respostas: respostasUsuario,
+        };
+    });
 }
 async function buscarQuestoesSalvas(email) {
     if (!email)

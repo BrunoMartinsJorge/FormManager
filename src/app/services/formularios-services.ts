@@ -3,7 +3,7 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from '../core/environments/environment';
 import { NewForm } from '../pages/adicionar-formulario/forms/NewForm';
-import { Formulario } from '../shared/models/formulario.model';
+import { Formulario } from '../pages/listar-formularios/models/Formulario';
 
 @Injectable({
   providedIn: 'root',

@@ -107,6 +107,22 @@ async function createQuiz(quizForm, userEmail) {
         },
     });
     await formsApi.forms.batchUpdate({ formId, requestBody: { requests } });
+    await formsApi.forms.batchUpdate({
+        formId, // <- precisa estar fora do requestBody
+        requestBody: {
+            requests: [
+                {
+                    updateSettings: {
+                        settings: {
+                            // Campo correto:
+                            emailCollectionType: "VERIFIED", // ou "REQUIRED" para públicos
+                        },
+                        updateMask: "emailCollectionType",
+                    },
+                },
+            ],
+        },
+    });
     return await data_source_1.AppDataSource.transaction(async (manager) => {
         const quizRepo = manager.getRepository(Quiz_1.Quiz);
         const tipoRepo = manager.getRepository(Tipo_Questao_1.Tipo_Questao);

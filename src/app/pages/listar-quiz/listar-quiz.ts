@@ -104,7 +104,7 @@ export class ListarQuiz {
             Titulo: q.titulo,
             Descricao: q.descricao,
             Data_Criacao: new Date(q.data_criacao),
-            Link_Url: q.link_url,
+            Link_Url: q.linkUrl,
             quizId: q.quizId,
           }))
           .sort((a: any, b: any) => b.idFormulario - a.idFormulario);
@@ -116,7 +116,6 @@ export class ListarQuiz {
           this.listaQuizzes.length > 0
             ? this.listaQuizzes[0].idFormulario
             : null;
-
         this.getDataQuizSelecionado();
       },
       error: (err) => console.error(err),

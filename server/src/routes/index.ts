@@ -8,6 +8,7 @@ import {
   salvarPergunta,
   apagarPergunta,
   editarPerguntaSalva,
+  buscarRespostasDoFormularioPorId,
 } from '../services/formService';
 import { google } from 'googleapis';
 import {
@@ -164,13 +165,9 @@ router.get('/formularios/:id', async (req, res) => {
 router.get('/formularios/:formId/responses', async (req, res) => {
   const formId = req.params.formId;
   try {
-    const forms = google.forms({ version: 'v1', auth: oAuth2Client });
-    const formRes = await forms.forms.get({ formId });
-    const respostasRes = await forms.forms.responses.list({ formId });
-    res.json({
-      items: formRes.data.items || [],
-      responses: respostasRes.data.responses || [],
-    });
+    const resposta = await buscarRespostasDoFormularioPorId(formId);
+    if (!resposta) return res.status(404).send('Formulário não encontrado');
+    res.json(resposta);
   } catch (err) {
     console.error(err);
     res.status(500).send('Erro ao buscar dados do formulário.');

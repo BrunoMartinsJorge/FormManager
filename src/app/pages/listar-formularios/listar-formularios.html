@@ -30,12 +30,12 @@
           (click)="selectForm(form.idFormulario)"
         >
           <div class="header-form">
-            <span>{{form.Titulo}}</span>
-            <p>{{form.Descricao}}</p>
+            <span>{{form.titulo}}</span>
+            <p>{{form.descricao}}</p>
           </div>
           <div class="info-form">
             <span
-              >Criado em {{form.Data_Criacao | date : 'dd/MM/yyyy HH:mm'}}</span
+              >Criado em {{form.dataCriacao| date : 'dd/MM/yyyy HH:mm'}}</span
             >
             <span>ID: {{form.idFormulario}}</span>
           </div>
@@ -74,12 +74,17 @@
       </p>
       } @if (formSelected && !loadingFormSelected) {
       <div class="header-form-selected">
-        <h3>{{getFormSelected.Titulo}}</h3>
-        <span>{{getFormSelected.Descricao}}</span>
+        <h3
+          style="display: flex; justify-content: space-between; flex-wrap: wrap"
+        >
+          {{getFormSelected.titulo}}
+          <span id="form-published">{{formSelected.ativo ? 'Publicado' : 'Não Publicado'}}</span>
+        </h3>
+        <span>{{getFormSelected.descricao}}</span>
         <p>
           <span
             ><i class="pi pi-calendar"></i>Criado em
-            {{getFormSelected.Data_Criacao | date : 'dd/MM/yyyy HH:mm'}}</span
+            {{getFormSelected.dataCriacao | date : 'dd/MM/yyyy HH:mm'}}</span
           >
         </p>
         <div class="btn-list">
@@ -111,26 +116,27 @@
             </h3>
             <p-button
               icon="pi pi-eye"
-              [label]="responsesOrQuestions == 'responses' ? 'Ver Questões' : (formSelected.respostas.length > 0 ? 'Ver Respostas' : 'Nenhuma Resposta') "
+              [label]="buscarLabelBotao"
               severity="contrast"
-              [disabled]="formSelected == null || formSelected.respostas.length === 0"
+              [disabled]="!formSelected || formSelected.respostasPorUsuario?.length === 0"
               (click)="toogleResponseOrQuestions()"
             />
           </div>
           @if (responsesOrQuestions == 'quest') { @if (formSelected != null){
-          @for (quest of formSelected.questoes; let i = $index; track quest.id)
-          {
-          <div class="quest-element">
+          <div
+            class="quest-element"
+            *ngFor="let quest of getQuestoes; let i = index"
+          >
             <div class="header-question">
-              <strong>{{i+1}}º Questão - {{quest.titulo}}</strong>
-              <span class="type-quest">{{quest.tipo}}</span>
+              <strong>{{ i + 1 }}º Questão - {{ quest.titulo }}</strong>
+              <span class="type-quest">{{ quest.tipo }}</span>
             </div>
             <span class="responses">
               <i class="pi pi-eye"></i>
-              Respostas - {{getNumberOfResponses(quest.id)}}
+              Respostas - {{ getNumberOfResponses(quest.id) }}
             </span>
           </div>
-          } } } @if (responsesOrQuestions == 'responses') { @if (formSelected !=
+          } } @if (responsesOrQuestions == 'responses') { @if (formSelected !=
           null){
           <section class="response-sends">
             <div class="header-response">
@@ -176,10 +182,10 @@
     </div>
   </section>
 </main>
-<app-gerar-graficos
+<!-- <app-gerar-graficos
   [formSelected]="formSelected"
   [(visibilityOfGenerateGraphic)]="visibilityOfGraphicCreate"
-></app-gerar-graficos>
+></app-gerar-graficos> -->
 <app-gerar-pdf
   [formSelected]="formPdfData"
   [(visibilityOfGeneratePDF)]="visibilityOfGeneratePDF"
