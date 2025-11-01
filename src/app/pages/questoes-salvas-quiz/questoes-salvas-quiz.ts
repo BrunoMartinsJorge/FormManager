@@ -47,11 +47,11 @@ import { QuizService } from '../../services/quiz-service';
   providers: [FormulariosServices, MessageService],
 })
 export class QuestoesSalvasQuiz {
-  public listOfSavedQuestions: QuestaoSalva[] = [];
-  public visibleDialogAddQuestion: boolean = false;
-  public dialogMode: 'add' | 'edit' = 'add';
-  public newQuestion: QuestaoSalva | any = {};
-  public load_questions: boolean = false;
+  public listaQuestoesSalvas: QuestaoSalva[] = [];
+  public visibilidadeDialogAdicionarQuestao: boolean = false;
+  public modoDialog: 'add' | 'edit' = 'add';
+  public novaQuestao: QuestaoSalva | any = {};
+  public carregandoQuestoes: boolean = false;
   public tipoDeCampo: any[] = [
     { nome: 'Texto', value: TypeQuestEnum.TEXTO },
     { nome: 'Parágrafo', value: TypeQuestEnum.PARAGRAFO },
@@ -62,7 +62,7 @@ export class QuestoesSalvasQuiz {
     { nome: 'Escala', value: TypeQuestEnum.ESCALA },
     { nome: 'Verdadeiro / Falso', value: TypeQuestEnum.VERDADEIRO_FALSO },
   ];
-  public menuOptions: any[] = [
+  public opcoesMenu: any[] = [
     {
       label: 'Ver Imagem',
       icon: 'pi pi-image',
@@ -85,16 +85,20 @@ export class QuestoesSalvasQuiz {
     private toast: MessageService,
     private service: QuizService
   ) {
-    this.getSavedQuestions();
+    this.getPerguntasSalvas();
   }
 
-  private getSavedQuestions(): void {
-    this.listOfSavedQuestions = [];
-    this.load_questions = true;
+  /**
+   * 
+   * @description Busca as perguntas salvas
+   */
+  private getPerguntasSalvas(): void {
+    this.listaQuestoesSalvas = [];
+    this.carregandoQuestoes = true;
     this.formService.listarQuestoesQuiz().subscribe({
       next: (response: any) => {
-        this.listOfSavedQuestions = response || [];
-        this.load_questions = false;
+        this.listaQuestoesSalvas = response || [];
+        this.carregandoQuestoes = false;
       },
       error: (err) => {
         console.error('Erro ao buscar questões salvas:', err);
@@ -103,13 +107,19 @@ export class QuestoesSalvasQuiz {
           summary: 'Erro',
           detail: 'Não foi possível carregar as questões salvas.',
         });
-        this.load_questions = false;
+        this.carregandoQuestoes = false;
       },
     });
   }
 
+  /**
+   * 
+   * @param indexOpcao - Indice da opcao
+   * @description Verifica se a opção selecionada eh a correta
+   * @returns - Verdadeiro ou Falso
+   */
   public opcaoCorreta(indexOpcao: number): boolean {
-    const questao: QuestaoSalva = this.newQuestion;
+    const questao: QuestaoSalva = this.novaQuestao;
     if (!questao.opcoes || !questao.correta) return false;
     const alternativa = questao.opcoes[indexOpcao];
     if (!alternativa) return false;
@@ -121,8 +131,14 @@ export class QuestoesSalvasQuiz {
     return false;
   }
 
+  /**
+   * 
+   * @param opcao - Verdadeiro ou Falso
+   * @description Verifica se a opção selecionada eh a correta
+   * @returns - Verdadeiro ou Falso
+   */
   public opcaoCorretaVerdadeiroFalse(opcao: 'Verdadeiro' | 'Falso'): boolean {
-    const questao = this.newQuestion;
+    const questao = this.novaQuestao;
     const op = questao.opcoes.find((o: any) => o.texto === opcao);
     let res = false;
     if (!questao.correta || !op) return false;
@@ -134,8 +150,14 @@ export class QuestoesSalvasQuiz {
     return res;
   }
 
-  public toggleOpcaoCorreta(indexOpcao: number): void {
-    const questao: QuestaoSalva = this.newQuestion;
+  /**
+   * 
+   * @param indexOpcao - Indice da opcao
+   * @description Verifica se a opção selecionada eh a correta
+   * @returns - Verdadeiro ou Falso
+   */
+  public mudarOpcaoCorreta(indexOpcao: number): void {
+    const questao: QuestaoSalva = this.novaQuestao;
     const idx = Number(indexOpcao);
 
     if (!questao.opcoes) return; // segurança
@@ -162,13 +184,19 @@ export class QuestoesSalvasQuiz {
       }
     }
 
-    this.newQuestion = { ...questao };
+    this.novaQuestao = { ...questao };
   }
 
-  public toogleOpcaoCorretaVerdadeiroFalso(
+  /**
+   * 
+   * @param opcao - Verdadeiro ou Falso
+   * @description Verifica se a opção selecionada eh a correta
+   * @returns - Verdadeiro ou Falso
+   */
+  public mudarOpcaoCorretaVerdadeiroFalso(
     opcao: 'Verdadeiro' | 'Falso'
   ): void {
-    const questao = this.newQuestion;
+    const questao = this.novaQuestao;
     questao.opcoes = [
       {
         idAlternativa: null,
@@ -185,9 +213,15 @@ export class QuestoesSalvasQuiz {
     questao.correta.push(alternativa);
   }
 
-  public selectQuestion(event: any, quest: any): void {
+  /**
+   * 
+   * @param event - Evento
+   * @param quest - Objeto da questão
+   * @description Verifica se a opção selecionada eh a correta
+   */
+  public selecionarQuestao(event: any, quest: any): void {
     if (quest.imagem == null || quest.imagem == '') {
-      this.menuOptions = [
+      this.opcoesMenu = [
         {
           label: 'Apagar Pergunta',
           icon: 'pi pi-trash',
@@ -197,12 +231,12 @@ export class QuestoesSalvasQuiz {
         },
       ];
     } else {
-      this.menuOptions = [
+      this.opcoesMenu = [
         {
           label: 'Ver Imagem',
           icon: 'pi pi-image',
           command: () => {
-            this.viewImageQuest(quest.imagem);
+            this.verImagemQuestão(quest.imagem);
           },
         },
         { separator: true },
@@ -217,10 +251,14 @@ export class QuestoesSalvasQuiz {
     }
   }
 
-  public openDialogAddQuestion(): void {
-    this.dialogMode = 'add';
-    this.visibleDialogAddQuestion = true;
-    this.newQuestion = {
+  /**
+   * 
+   * @description Abre o dialog para adicionar uma pergunta
+   */
+  public abrirDialogAdcionarPergunta(): void {
+    this.modoDialog = 'add';
+    this.visibilidadeDialogAdicionarQuestao = true;
+    this.novaQuestao = {
       titulo: '',
       tipo: TypeQuestEnum.TEXTO,
       opcoes: [],
@@ -228,15 +266,19 @@ export class QuestoesSalvasQuiz {
     };
   }
 
-  public editSavedQuestion(): void {
-    this.service.editarQuestao(this.newQuestion).subscribe({
+  /**
+   * 
+   * @description Edita uma pergunta
+   */
+  public editarQuestaoSalva(): void {
+    this.service.editarQuestao(this.novaQuestao).subscribe({
       next: (response: any) => {
         this.toast.add({
           severity: 'success',
           summary: 'Sucesso',
           detail: 'Questão editada com sucesso.',
         });
-        this.getSavedQuestions();
+        this.getPerguntasSalvas();
       },
       error: (err) => {
         console.error('Erro ao editar questão:', err);
@@ -249,12 +291,17 @@ export class QuestoesSalvasQuiz {
     });
   }
 
-  public toggleVisibilityDialogEditQuestion(questao: any): void {
-    this.dialogMode = 'edit';
+  /**
+   * 
+   * @param questao - Objeto da questão
+   * @description Abre o dialog para editar uma pergunta
+   */
+  public mudarVisibilidadeDialogEditarQuestao(questao: any): void {
+    this.modoDialog = 'edit';
 
-    this.visibleDialogAddQuestion = !this.visibleDialogAddQuestion;
-    if (this.visibleDialogAddQuestion) {
-      this.newQuestion = {
+    this.visibilidadeDialogAdicionarQuestao = !this.visibilidadeDialogAdicionarQuestao;
+    if (this.visibilidadeDialogAdicionarQuestao) {
+      this.novaQuestao = {
         descricaoImagem: questao.descricaoImagem,
         favorita: questao.favorito,
         id: questao.id,
@@ -267,33 +314,60 @@ export class QuestoesSalvasQuiz {
         feedbackErro: questao.feedbackErro,
         tipo: questao.tipo,
       };
-    } else this.newQuestion = {};
+    } else this.novaQuestao = {};
   }
 
-  public viewImageQuest(url: string): void {
+  /**
+   * 
+   * @param url - URL da imagem
+   * @description Abre uma nova aba com a imagem
+   */
+  public verImagemQuestão(url: string): void {
     window.open(url, '_blank');
   }
 
+  /**
+   * 
+   * @description Adiciona uma nova opção
+   */
   public adicionarOpcao(): void {
-    if (!this.newQuestion.opcoes) this.newQuestion.opcoes = [];
-    this.newQuestion.opcoes.push({ idAlternativa: null, texto: '' });
+    if (!this.novaQuestao.opcoes) this.novaQuestao.opcoes = [];
+    this.novaQuestao.opcoes.push({ idAlternativa: null, texto: '' });
   }
 
+  /**
+   * 
+   * @param index - Indice da opcao
+   * @description Retorna o indice da opcao
+   * @returns - Indice da opcao
+   */
   public trackByIndex(index: number): number {
     return index;
   }
 
+  /**
+   * 
+   * @param indexOpcao - Indice da opcao
+   * @description Remove uma opcao
+   * @returns - Indice da opcao
+   */
   public removerOpcao(indexOpcao: number): void {
-    if (!this.newQuestion || !this.newQuestion.opcoes) {
+    if (!this.novaQuestao || !this.novaQuestao.opcoes) {
       return;
     }
 
-    for (let i = indexOpcao; i < this.newQuestion.opcoes.length - 1; i++) {
-      this.newQuestion.opcoes[i] = this.newQuestion.opcoes[i + 1];
+    for (let i = indexOpcao; i < this.novaQuestao.opcoes.length - 1; i++) {
+      this.novaQuestao.opcoes[i] = this.novaQuestao.opcoes[i + 1];
     }
-    this.newQuestion.opcoes.pop();
+    this.novaQuestao.opcoes.pop();
   }
 
+  /**
+   * 
+   * @param url - URL da imagem
+   * @description Verifica se a URL da imagem eh valida
+   * @returns - Verdadeiro se a URL da imagem eh valida
+   */
   public urlImagemValida(url: string): boolean {
     if (!url || url.trim() === '') return false;
     const regex =
@@ -301,30 +375,35 @@ export class QuestoesSalvasQuiz {
     return regex.test(url);
   }
 
-  public questIsValid(): boolean {
-    if (!this.newQuestion.titulo || this.newQuestion.titulo.trim() === '') {
+  /**
+   * 
+   * @description Verifica se a questão eh valida
+   * @returns - Verdadeiro se a questão eh valida
+   */
+  public questaoValida(): boolean {
+    if (!this.novaQuestao.titulo || this.novaQuestao.titulo.trim() === '') {
       return false;
     }
-    if (this.newQuestion.imagemUrl && this.newQuestion.imagemUrl.trim() != '') {
+    if (this.novaQuestao.imagemUrl && this.novaQuestao.imagemUrl.trim() != '') {
       if (
-        !this.newQuestion.descricaoImagem ||
-        this.newQuestion.descricaoImagem.trim() === ''
+        !this.novaQuestao.descricaoImagem ||
+        this.novaQuestao.descricaoImagem.trim() === ''
       ) {
         return false;
       }
     }
     if (
-      this.newQuestion.tipo === TypeQuestEnum.MULTIPLA ||
-      this.newQuestion.tipo === TypeQuestEnum.UNICA
+      this.novaQuestao.tipo === TypeQuestEnum.MULTIPLA ||
+      this.novaQuestao.tipo === TypeQuestEnum.UNICA
     ) {
-      for (let opcao of this.newQuestion.opcoes ?? []) {
+      for (let opcao of this.novaQuestao.opcoes ?? []) {
         if (!opcao || opcao.texto.trim() === '') {
           return false;
         }
       }
     }
 
-    for (let opcao of this.newQuestion.opcoes) {
+    for (let opcao of this.novaQuestao.opcoes) {
       if (!opcao || opcao.texto.trim() === '') {
         return false;
       }
@@ -332,17 +411,21 @@ export class QuestoesSalvasQuiz {
     return true;
   }
 
-  public addSavedQuestion(): void {
-    if (!this.questIsValid()) return;
-    this.formService.cadastrarNovaQuestao(this.newQuestion).subscribe({
+  /**
+   * 
+   * @description Adiciona uma nova questão
+   */
+  public adicionarQuestaoSalva(): void {
+    if (!this.questaoValida()) return;
+    this.formService.cadastrarNovaQuestao(this.novaQuestao).subscribe({
       next: (response: any) => {
         this.toast.add({
           severity: 'success',
           summary: 'Sucesso',
           detail: 'Pergunta salva com sucesso!',
         });
-        this.visibleDialogAddQuestion = false;
-        this.getSavedQuestions();
+        this.visibilidadeDialogAdicionarQuestao = false;
+        this.getPerguntasSalvas();
       },
       error: (err) => {
         console.error('Erro ao salvar Pergunta:', err);
