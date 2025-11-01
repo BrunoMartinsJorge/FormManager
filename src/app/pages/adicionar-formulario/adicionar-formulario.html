@@ -57,7 +57,7 @@
           pInputText
           [(ngModel)]="questao.imagemUrl"
           placeholder="Imagem da Questão (URL)"
-          [invalid]="!urlImageIsValid(questao.imagemUrl || '') && (questao.imagemUrl || '').trim() !== ''"
+          [invalid]="!urlImagemValida(questao.imagemUrl || '') && (questao.imagemUrl || '').trim() !== ''"
           pTooltip="Opcional."
         />
       </div>
@@ -69,7 +69,7 @@
           pInputText
           [(ngModel)]="questao.descricaoImagem"
           placeholder="Descrição da Imagem"
-          [disabled]="!urlImageIsValid(questao.imagemUrl || '')"
+          [disabled]="!urlImagemValida(questao.imagemUrl || '')"
         />
       </div>
     </div>
@@ -163,7 +163,7 @@
   <p-button
     label="Criar Formulário"
     (click)="criarFormulario()"
-    [disabled]="!formIsValid()"
+    [disabled]="!formularioValido()"
     icon="pi pi-check"
   ></p-button>
   <p-splitbutton
@@ -195,7 +195,7 @@
       tooltipPosition="top"
       icon="pi pi-copy"
       severity="contrast"
-      (click)="copyLink()"
+      (click)="copiarLink()"
     />
     <input
       pInputText
@@ -207,13 +207,13 @@
 </p-dialog>
 <p-dialog
   [style]="{ width: '50%' }"
-  [(visible)]="visibilityQuestsSaved"
+  [(visible)]="visibilidadePerguntasSalvas"
   header="Questões salvas"
   [modal]="true"
   [draggable]="false"
 >
   <p-table
-    [value]="questsSaved"
+    [value]="perguntasSalvas"
     [rows]="5"
     [paginator]="true"
     [responsiveLayout]="'scroll'"
@@ -238,7 +238,7 @@
           <p-checkbox
             [inputId]="'questao' + questao.id"
             [value]="questao"
-            [(ngModel)]="questionsSelecteds"
+            [(ngModel)]="questoesSelecionadas"
             binary="false"
           ></p-checkbox>
         </td>
@@ -254,9 +254,9 @@
         <td colspan="2">
           <p-button
             icon="pi pi-plus"
-            [label]="questionsSelecteds.length === 0 ? 'Selecione questões' : questionsSelecteds.length > 1 ? 'Adicionar questões' : 'Adicionar questão'"
-            (click)="useQuestionsSelecteds()"
-            [disabled]="questionsSelecteds.length === 0"
+            [label]="questoesSelecionadas.length === 0 ? 'Selecione questões' : questoesSelecionadas.length > 1 ? 'Adicionar questões' : 'Adicionar questão'"
+            (click)="usarPerguntasSelecionadas()"
+            [disabled]="questoesSelecionadas.length === 0"
           ></p-button>
         </td>
       </tr>

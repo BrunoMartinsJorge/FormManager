@@ -83,32 +83,32 @@ export interface Opcao {
   ],
 })
 export class AdicionarFormulario {
-  erroAoCriarFormulario: boolean = false;
-  mostrarTelaAcao: boolean = false;
-  visibilidadeDialog: boolean = false;
-  urlForm: string = '';
-  carregando: boolean = false;
-  questionsSelecteds: any[] = [];
-  formulario: NewForm = {
+  public erroAoCriarFormulario: boolean = false;
+  public mostrarTelaAcao: boolean = false;
+  public visibilidadeDialog: boolean = false;
+  public urlForm: string = '';
+  public carregando: boolean = false;
+  public questoesSelecionadas: any[] = [];
+  public formulario: NewForm = {
     titulo: '',
     descricao: '',
     questoes: [],
     dataAbertura: new Date(),
     dataFechamento: new Date(),
   };
-  visibilityQuestsSaved: boolean = false;
-  opcao: Opcao[] = [];
-  opcoesBotao: MenuItem[] = [
+  public visibilidadePerguntasSalvas: boolean = false;
+  public opcao: Opcao[] = [];
+  public opcoesBotao: MenuItem[] = [
     {
       label: 'Utilizar Questão Existente',
       command: () => {
-        this.getQuestSaved();
+        this.buscarPerguntasSalvas();
       },
     },
   ];
-  questsSaved: any[] = [];
+  public perguntasSalvas: any[] = [];
 
-  tipoDeCampo: any[] = [
+  public tipoDeCampo: any[] = [
     { nome: 'Texto', value: TypeQuestEnum.TEXTO },
     { nome: 'Parágrafo', value: TypeQuestEnum.PARAGRAFO },
     { nome: 'Número', value: TypeQuestEnum.NUMERO },
@@ -119,6 +119,11 @@ export class AdicionarFormulario {
     { nome: 'Verdadeiro / Falso', value: TypeQuestEnum.VERDADEIRO_FALSO },
   ];
 
+  /**
+   * 
+   * @param indexQuestao - Indice da questão
+   * @description Adiciona uma opção na questão
+   */
   public adicionarOpcao(indexQuestao: number): void {
     const questao = this.formulario.questoes[indexQuestao];
 
@@ -126,9 +131,13 @@ export class AdicionarFormulario {
     questao.opcoes.push('');
   }
 
-  public useQuestionsSelecteds(): void {
-    if (this.questionsSelecteds.length === 0) return;
-    this.questionsSelecteds.forEach((question) => {
+  /**
+   * 
+   * @description Adiciona as perguntas selecionadas ao formulário
+   */
+  public usarPerguntasSelecionadas(): void {
+    if (this.questoesSelecionadas.length === 0) return;
+    this.questoesSelecionadas.forEach((question) => {
       const novaQuestao: NewQuest = {
         titulo: question.titulo,
         tipo: question.tipo,
@@ -138,19 +147,16 @@ export class AdicionarFormulario {
       };
       this.formulario.questoes.push(novaQuestao);
     });
-    this.visibilityQuestsSaved = false;
-  }
-
-  public newDataFechamentoMin(): void {
-    let data: Date = new Date(this.formulario.dataAbertura);
-    data.setDate(data.getDate() + 1);
-    this.formulario.dataFechamento = data;
+    this.visibilidadePerguntasSalvas = false;
   }
 
   constructor(private formulariosService: FormulariosServices) {
-    this.newDataFechamentoMin();
   }
 
+  /**
+   * 
+   * @description Adiciona uma nova questão ao formulário
+   */
   public adicionarQuestao(): void {
     const novaQuestao: NewQuest = {
       titulo: '',
@@ -160,11 +166,15 @@ export class AdicionarFormulario {
     this.formulario.questoes.push(novaQuestao);
   }
 
-  private getQuestSaved(): void {
+  /**
+   * 
+   * @description Busca as perguntas salvas do banco
+   */
+  private buscarPerguntasSalvas(): void {
     this.formulariosService.findAllQuestionsFavorites().subscribe({
       next: (res) => {
-        this.visibilityQuestsSaved = true;
-        this.questsSaved = res;
+        this.visibilidadePerguntasSalvas = true;
+        this.perguntasSalvas = res;
       },
       error: (error: Error) => {
         console.error(error);
@@ -172,26 +182,33 @@ export class AdicionarFormulario {
     });
   }
 
-  public urlImageIsValid(url: string): boolean {
+  /**
+   * 
+   * @param url - URL da imagem
+   * @description Verifica se a URL da imagem é valida
+   * @returns - Verifica se a URL da imagem é valida
+   */
+  public urlImagemValida(url: string): boolean {
     if (!url || url.trim() === '') return false;
     const regex =
       /^(https?|ftp|file):\/\/((?!(https?|ftp|file):\/\/[-a-zA-Z\d+&@#/%?=~_|!:,.;]*[-a-zA-Z\d+&@#/%=~_|])[-a-zA-Z\d+&@#/%?=~_|!:,.;])*[-a-zA-Z\d+&@#/%=~_|]$/;
     return regex.test(url);
   }
 
-  public getOpcao(questao: NewQuest, i: number): string {
-    return questao.opcoes?.[i] || '';
-  }
-
-  public setOpcao(questao: NewQuest, i: number, value: string) {
-    if (!questao.opcoes) questao.opcoes = [];
-    questao.opcoes[i] = value;
-  }
-
+  /**
+   * 
+   * @param index - Indice da questão
+   * @description Retorna o indice da questão
+   * @returns - Indice da questão
+   */
   public trackByIndex(index: number): number {
     return index;
   }
 
+  /**
+   * 
+   * @description Cria um novo formulário
+   */
   public criarFormulario(): void {
     this.carregando = true;
     this.erroAoCriarFormulario = false;
@@ -217,11 +234,21 @@ export class AdicionarFormulario {
     );
   }
 
+  /**
+   * 
+   * @description Remove uma questão do formulário
+   * @param index - Indice da questão
+   */
   public removerQuestao(index: number): void {
     this.formulario.questoes.splice(index, 1);
   }
 
-  public formIsValid(): boolean {
+  /**
+   * 
+   * @description Verifica se o formulário esta valido
+   * @returns - Retorna true se o formulário for valido
+   */
+  public formularioValido(): boolean {
     if (!this.formulario.titulo || !this.formulario.descricao) return false;
     if (!this.formulario.dataAbertura || !this.formulario.dataFechamento)
       return false;
@@ -259,6 +286,12 @@ export class AdicionarFormulario {
     return true;
   }
 
+  /**
+   * 
+   * @param indexQuestao - Indice da questão
+   * @param indexOpcao - Indice da opção
+   * @description Remove uma opção da questão
+   */
   public removerOpcao(indexQuestao: number, indexOpcao: number): void {
     const questao = this.formulario.questoes[indexQuestao];
 
@@ -272,7 +305,11 @@ export class AdicionarFormulario {
     questao.opcoes.pop();
   }
 
-  public copyLink(): void {
+  /**
+   * 
+   * @description Copia o link do formulário
+   */
+  public copiarLink(): void {
     navigator.clipboard.writeText(this.urlForm);
   }
 }

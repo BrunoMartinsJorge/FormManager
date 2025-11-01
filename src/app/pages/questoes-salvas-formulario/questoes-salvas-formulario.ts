@@ -242,7 +242,7 @@ export class QuestoesSalvasFormulario {
     this.newQuestion.opcoes.pop();
   }
 
-  public urlImageIsValid(url: string): boolean {
+  public urlImagemValida(url: string): boolean {
     if (!url || url.trim() === '') return false;
     const regex =
       /^(https?|ftp|file):\/\/((?!(https?|ftp|file):\/\/[-a-zA-Z\d+&@#/%?=~_|!:,.;]*[-a-zA-Z\d+&@#/%=~_|])[-a-zA-Z\d+&@#/%?=~_|!:,.;])*[-a-zA-Z\d+&@#/%=~_|]$/;

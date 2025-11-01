@@ -235,7 +235,7 @@
           pInputText
           [(ngModel)]="newQuestion.imagem"
           placeholder="Imagem da Pergunta (URL)"
-          [invalid]="!urlImageIsValid(newQuestion.imagemUrl || '') && (newQuestion.imagemUrl || '').trim() !== ''"
+          [invalid]="!urlImagemValida(newQuestion.imagemUrl || '') && (newQuestion.imagemUrl || '').trim() !== ''"
           pTooltip="Opcional."
         />
       </div>
@@ -247,7 +247,7 @@
           pInputText
           [(ngModel)]="newQuestion.descricaoImagem"
           placeholder="Descrição da Imagem"
-          [disabled]="!urlImageIsValid(newQuestion.imagemUrl || '')"
+          [disabled]="!urlImagemValida(newQuestion.imagemUrl || '')"
         />
       </div>
     </div>
