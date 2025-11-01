@@ -41,11 +41,11 @@ import { ProgressSpinner } from 'primeng/progressspinner';
   styleUrl: './questoes-salvas-formulario.css',
 })
 export class QuestoesSalvasFormulario {
-  public listOfSavedQuestions: any[] = [];
-  public visibleDialogAddQuestion: boolean = false;
-  public dialogMode: 'add' | 'edit' = 'add';
-  public newQuestion: any = {};
-  public load_questions: boolean = false;
+  public listaPerguntasSalvas: any[] = [];
+  public visibilidadeAdicionarPergunta: boolean = false;
+  public modoDialog: 'add' | 'edit' = 'add';
+  public novaPergunta: any = {};
+  public carregandoPergunta: boolean = false;
   private idPerguntaSelecionada: number = 0;
   public tipoDeCampo: any[] = [
     { nome: 'Texto', value: TypeQuestEnum.TEXTO },
@@ -57,12 +57,12 @@ export class QuestoesSalvasFormulario {
     { nome: 'Escala', value: TypeQuestEnum.ESCALA },
     { nome: 'Verdadeiro / Falso', value: TypeQuestEnum.VERDADEIRO_FALSO },
   ];
-  public menuOptions: any[] = [
+  public opcoesMenu: any[] = [
     {
       label: 'Ver Imagem',
       icon: 'pi pi-image',
       command: () => {
-        //this.acessarFormulario(this.formularioSelecionado);
+        this.verImagemPergunta(this.novaPergunta.);
       },
     },
     { separator: true },
@@ -79,9 +79,13 @@ export class QuestoesSalvasFormulario {
     private formService: FormulariosServices,
     private toast: MessageService
   ) {
-    this.getSavedQuestions();
+    this.getPerguntasSalvas();
   }
 
+  /**
+   * 
+   * @description Funcionalidade para apagar uma pergunta
+   */
   public apagarPergunta(): void {    
     if (!this.idPerguntaSelecionada) return;
     this.formService.apagarPerguntaSalva(this.idPerguntaSelecionada).subscribe({
@@ -91,8 +95,8 @@ export class QuestoesSalvasFormulario {
           summary: 'Sucesso',
           detail: 'Questão apagada com sucesso.',
         });
-        this.getSavedQuestions();
-        this.visibleDialogAddQuestion = false;
+        this.getPerguntasSalvas();
+        this.visibilidadeAdicionarPergunta = false;
       },
       error: (err) => {
         console.error('Erro ao apagar questão:', err);
@@ -105,13 +109,17 @@ export class QuestoesSalvasFormulario {
     });
   }
 
-  private getSavedQuestions(): void {
-    this.listOfSavedQuestions = [];
-    this.load_questions = true;
+  /**
+   * 
+   * @description Funcionalidade para buscar as perguntas salvas
+   */
+  private getPerguntasSalvas(): void {
+    this.listaPerguntasSalvas = [];
+    this.carregandoPergunta = true;
     this.formService.findAllQuestionsFavorites().subscribe({
       next: (response: any) => {
-        this.listOfSavedQuestions = response || [];
-        this.load_questions = false;
+        this.listaPerguntasSalvas = response || [];
+        this.carregandoPergunta = false;
       },
       error: (err) => {
         console.error('Erro ao buscar questões salvas:', err);
@@ -120,15 +128,21 @@ export class QuestoesSalvasFormulario {
           summary: 'Erro',
           detail: 'Não foi possível carregar as questões salvas.',
         });
-        this.load_questions = false;
+        this.carregandoPergunta = false;
       },
     });
   }
 
-  public selectQuestion(event: any, quest: any): void {
+  /**
+   * 
+   * @param event - Evento
+   * @param quest - Questão
+   * @description Funcionalidade para selecionar uma pergunta
+   */
+  public selecionarPergunta(event: any, quest: any): void {
     this.idPerguntaSelecionada = quest.idPergunta;
     if (quest.imagem == null || quest.imagem == '') {
-      this.menuOptions = [
+      this.opcoesMenu = [
         {
           label: 'Apagar Pergunta',
           icon: 'pi pi-trash',
@@ -138,12 +152,12 @@ export class QuestoesSalvasFormulario {
         },
       ];
     } else {
-      this.menuOptions = [
+      this.opcoesMenu = [
         {
           label: 'Ver Imagem',
           icon: 'pi pi-image',
           command: () => {
-            this.viewImageQuest(quest.imagem);
+            this.verImagemPergunta(quest.imagem);
           },
         },
         { separator: true },
@@ -158,10 +172,14 @@ export class QuestoesSalvasFormulario {
     }
   }
 
-  public openDialogAddQuestion(): void {
-    this.dialogMode = 'add';
-    this.visibleDialogAddQuestion = true;
-    this.newQuestion = {
+  /**
+   * 
+   * @description Funcionalidade para abrir o dialog de adicionar uma pergunta
+   */
+  public abrirDialogAdcionarPergunta(): void {
+    this.modoDialog = 'add';
+    this.visibilidadeAdicionarPergunta = true;
+    this.novaPergunta = {
       titulo: '',
       tipo: TypeQuestEnum.TEXTO,
       opcoes: [],
@@ -169,16 +187,20 @@ export class QuestoesSalvasFormulario {
     };
   }
 
-  public editSavedQuestion(): void {
+  /**
+   * 
+   * @description Funcionalidade para editar uma pergunta salva
+   */
+  public editarPerguntaSalva(): void {
     const quest: any = {
-      idPergunta: this.newQuestion.id,
-      descricaoImagem: this.newQuestion.descricaoImagem,
-      favorita: this.newQuestion.favorito,
-      id: this.newQuestion.idPergunta,
-      imagem: this.newQuestion.imagem,
-      opcoes: this.newQuestion.opcoes,
-      titulo: this.newQuestion.titulo,
-      tipo: this.newQuestion.tipo,
+      idPergunta: this.novaPergunta.id,
+      descricaoImagem: this.novaPergunta.descricaoImagem,
+      favorita: this.novaPergunta.favorito,
+      id: this.novaPergunta.idPergunta,
+      imagem: this.novaPergunta.imagem,
+      opcoes: this.novaPergunta.opcoes,
+      titulo: this.novaPergunta.titulo,
+      tipo: this.novaPergunta.tipo,
     };
     this.formService.editarPergunta(quest).subscribe({
       next: (response: any) => {
@@ -187,8 +209,8 @@ export class QuestoesSalvasFormulario {
           summary: 'Sucesso',
           detail: 'Questão editada com sucesso.',
         });
-        this.getSavedQuestions();
-        this.visibleDialogAddQuestion = false;
+        this.getPerguntasSalvas();
+        this.visibilidadeAdicionarPergunta = false;
       },
       error: (err) => {
         console.error('Erro ao editar questão:', err);
@@ -201,12 +223,17 @@ export class QuestoesSalvasFormulario {
     });
   }
 
-  public toggleVisibilityDialogEditQuestion(questao: any): void {
-    this.dialogMode = 'edit';
+  /**
+   * 
+   * @param questao - Questão a ser editada
+   * @description Abre o dialog de editar pergunta
+   */
+  public mudarVisibilidadeDialogEditarPergunta(questao: any): void {
+    this.modoDialog = 'edit';
 
-    this.visibleDialogAddQuestion = !this.visibleDialogAddQuestion;
-    if (this.visibleDialogAddQuestion) {
-      this.newQuestion = {
+    this.visibilidadeAdicionarPergunta = !this.visibilidadeAdicionarPergunta;
+    if (this.visibilidadeAdicionarPergunta) {
+      this.novaPergunta = {
         descricaoImagem: questao.descricaoImagem,
         favorita: questao.favorito,
         id: questao.idPergunta,
@@ -215,31 +242,51 @@ export class QuestoesSalvasFormulario {
         titulo: questao.titulo,
         tipo: questao.tipo,
       };
-    } else this.newQuestion = {};
+    } else this.novaPergunta = {};
   }
 
-  public viewImageQuest(url: string): void {
+  /**
+   * 
+   * @param url - URL da imagem
+   * @description Abre uma nova aba com a imagem
+   */
+  public verImagemPergunta(url: string): void {
     window.open(url, '_blank');
   }
 
+  /**
+   * 
+   * @description Adiciona uma opcao na pergunta
+   */
   public adicionarOpcao(): void {
-    if (!this.newQuestion.opcoes) this.newQuestion.opcoes = [];
-    this.newQuestion.opcoes.push('');
+    if (!this.novaPergunta.opcoes) this.novaPergunta.opcoes = [];
+    this.novaPergunta.opcoes.push('');
   }
 
+  /**
+   * 
+   * @param index - Indice da opcao
+   * @description Retorna o indice da opcao
+   * @returns - Indice da opcao
+   */
   public trackByIndex(index: number): number {
     return index;
   }
 
+  /**
+   * 
+   * @param indexOpcao - Indice da opcao
+   * @description Remove uma opcao da pergunta
+   */
   public removerOpcao(indexOpcao: number): void {
-    if (!this.newQuestion || !this.newQuestion.opcoes) {
+    if (!this.novaPergunta || !this.novaPergunta.opcoes) {
       return;
     }
 
-    for (let i = indexOpcao; i < this.newQuestion.opcoes.length - 1; i++) {
-      this.newQuestion.opcoes[i] = this.newQuestion.opcoes[i + 1];
+    for (let i = indexOpcao; i < this.novaPergunta.opcoes.length - 1; i++) {
+      this.novaPergunta.opcoes[i] = this.novaPergunta.opcoes[i + 1];
     }
-    this.newQuestion.opcoes.pop();
+    this.novaPergunta.opcoes.pop();
   }
 
   public urlImagemValida(url: string): boolean {
@@ -249,29 +296,34 @@ export class QuestoesSalvasFormulario {
     return regex.test(url);
   }
 
-  public questIsValid(): boolean {
-    if (!this.newQuestion.titulo || this.newQuestion.titulo.trim() === '') {
+  /**
+   * 
+   * @description Verifica se a pergunta eh valida
+   * @returns - Verifica se a pergunta eh valida
+   */
+  public perguntaValida(): boolean {
+    if (!this.novaPergunta.titulo || this.novaPergunta.titulo.trim() === '') {
       return false;
     }
-    if (this.newQuestion.imagemUrl && this.newQuestion.imagemUrl.trim() != '') {
+    if (this.novaPergunta.imagemUrl && this.novaPergunta.imagemUrl.trim() != '') {
       if (
-        !this.newQuestion.descricaoImagem ||
-        this.newQuestion.descricaoImagem.trim() === ''
+        !this.novaPergunta.descricaoImagem ||
+        this.novaPergunta.descricaoImagem.trim() === ''
       ) {
         return false;
       }
     }
     if (
-      this.newQuestion.tipo === TypeQuestEnum.MULTIPLA ||
-      this.newQuestion.tipo === TypeQuestEnum.UNICA
+      this.novaPergunta.tipo === TypeQuestEnum.MULTIPLA ||
+      this.novaPergunta.tipo === TypeQuestEnum.UNICA
     ) {
-      for (let opcao of this.newQuestion.opcoes ?? []) {
+      for (let opcao of this.novaPergunta.opcoes ?? []) {
         if (!opcao || opcao.trim() === '') {
           return false;
         }
       }
     }
-    for (let opcao of this.newQuestion.opcoes) {
+    for (let opcao of this.novaPergunta.opcoes) {
       if (!opcao || opcao.trim() === '') {
         return false;
       }
@@ -279,17 +331,21 @@ export class QuestoesSalvasFormulario {
     return true;
   }
 
-  public addSavedQuestion(): void {
-    if (!this.questIsValid()) return;
-    this.formService.addQuestionToFavorites(this.newQuestion).subscribe({
+  /**
+   * 
+   * @description Adiciona uma pergunta aos favoritos
+   */
+  public adicionarPergunta(): void {
+    if (!this.perguntaValida()) return;
+    this.formService.addQuestionToFavorites(this.novaPergunta).subscribe({
       next: (response) => {
         this.toast.add({
           severity: 'success',
           summary: 'Sucesso',
           detail: 'Questão salva com sucesso!',
         });
-        this.visibleDialogAddQuestion = false;
-        this.getSavedQuestions();
+        this.visibilidadeAdicionarPergunta = false;
+        this.getPerguntasSalvas();
       },
       error: (err) => {
         console.error('Erro ao salvar questão:', err);

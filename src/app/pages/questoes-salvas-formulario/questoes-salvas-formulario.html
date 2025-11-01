@@ -5,14 +5,14 @@
   </div>
   <p-table
     style="border: 1px solid #ccc; border-top: none;"
-    [value]="listOfSavedQuestions"
+    [value]="listaPerguntasSalvas"
     stripedRows
     [rows]="8"
     [paginator]="true"
   >
     <ng-template pTemplate="caption">
       <p-button
-        (click)="openDialogAddQuestion()"
+        (click)="abrirDialogAdcionarPergunta()"
         label="Adicionar Nova Questão"
       />
     </ng-template>
@@ -46,9 +46,9 @@
           <p-splitbutton
             icon="pi pi-pencil"
             label="Editar"
-            (onClick)="toggleVisibilityDialogEditQuestion(question)"
-            (onDropdownClick)="selectQuestion($event, question)"
-            [model]="menuOptions"
+            (onClick)="mudarVisibilidadeDialogEditarPergunta(question)"
+            (onDropdownClick)="selecionarPergunta($event, question)"
+            [model]="opcoesMenu"
             severity="primary"
           />
         </td>
@@ -57,11 +57,11 @@
     <ng-template pTemplate="emptymessage">
       <tr>
         <td colspan="5">
-          <span *ngIf="!load_questions && listOfSavedQuestions.length === 0">
+          <span *ngIf="!carregandoPergunta && listaPerguntasSalvas.length === 0">
             Nenhuma questão salva
           </span>
           <div
-            *ngIf="load_questions"
+            *ngIf="carregandoPergunta"
             style="display: grid; place-items: center"
           >
             <p-progressSpinner></p-progressSpinner>
@@ -73,7 +73,7 @@
       <tr>
         <td colspan="6">
           <span style="font-size: 14px; color: #333">
-            Você possui {{ listOfSavedQuestions ? listOfSavedQuestions.length :
+            Você possui {{ listaPerguntasSalvas ? listaPerguntasSalvas.length :
             0 }} perguntas salvas!
           </span>
         </td>
@@ -82,11 +82,11 @@
   </p-table>
 </main>
 <p-dialog
-  [header]="dialogMode === 'edit' ? 'Editar Questão' : 'Novo modelo de questão'"
+  [header]="modoDialog === 'edit' ? 'Editar Questão' : 'Novo modelo de questão'"
   [modal]="true"
   [style]="{'maxWidth': '600px', 'width': '100%'}"
   [draggable]="false"
-  [(visible)]="visibleDialogAddQuestion"
+  [(visible)]="visibilidadeAdicionarPergunta"
 >
   <div class="quests-form">
     <div class="input-group">
@@ -95,7 +95,7 @@
         id="titulo-quest"
         type="text"
         pInputText
-        [(ngModel)]="newQuestion.titulo"
+        [(ngModel)]="novaPergunta.titulo"
         placeholder="Título da Questão"
       />
     </div>
@@ -105,7 +105,7 @@
         <p-select
           id="tipo-quest"
           [options]="tipoDeCampo"
-          [(ngModel)]="newQuestion.tipo"
+          [(ngModel)]="novaPergunta.tipo"
           optionLabel="nome"
           optionValue="value"
           placeholder="Selecione o tipo de questão"
@@ -113,7 +113,7 @@
         />
       </div>
       <p-button
-        *ngIf="newQuestion.tipo === 'MULTIPLA' || newQuestion.tipo === 'UNICA'"
+        *ngIf="novaPergunta.tipo === 'MULTIPLA' || novaPergunta.tipo === 'UNICA'"
         label="Adicionar opção"
         icon="pi pi-plus"
         (click)="adicionarOpcao()"
@@ -126,9 +126,9 @@
           id="titulo-quest"
           type="text"
           pInputText
-          [(ngModel)]="newQuestion.imagem"
+          [(ngModel)]="novaPergunta.imagem"
           placeholder="Imagem da Questão (URL)"
-          [invalid]="!urlImagemValida(newQuestion.imagemUrl || '') && (newQuestion.imagemUrl || '').trim() !== ''"
+          [invalid]="!urlImagemValida(novaPergunta.imagemUrl || '') && (novaPergunta.imagemUrl || '').trim() !== ''"
           pTooltip="Opcional."
         />
       </div>
@@ -138,19 +138,19 @@
           id="titulo-quest"
           type="text"
           pInputText
-          [(ngModel)]="newQuestion.descricaoImagem"
+          [(ngModel)]="novaPergunta.descricaoImagem"
           placeholder="Descrição da Imagem"
-          [disabled]="!urlImagemValida(newQuestion.imagemUrl || '')"
+          [disabled]="!urlImagemValida(novaPergunta.imagemUrl || '')"
         />
       </div>
     </div>
     <div
       class="inputs-list"
-      *ngIf="newQuestion.tipo && (newQuestion.tipo === 'UNICA' || newQuestion.tipo === 'MULTIPLA')"
+      *ngIf="novaPergunta.tipo && (novaPergunta.tipo === 'UNICA' || novaPergunta.tipo === 'MULTIPLA')"
     >
       <p-inputgroup
         pSize="small"
-        *ngFor="let opcao of newQuestion.opcoes; let index = index; trackBy: trackByIndex"
+        *ngFor="let opcao of novaPergunta.opcoes; let index = index; trackBy: trackByIndex"
       >
         <p-button
           label="Apagar"
@@ -160,20 +160,20 @@
         <input
           pInputText
           placeholder="Opção..."
-          [(ngModel)]="newQuestion.opcoes![index]"
+          [(ngModel)]="novaPergunta.opcoes![index]"
         />
       </p-inputgroup>
     </div>
 
-    <div class="info-input" *ngIf="newQuestion.tipo === 'ESCALA'">
+    <div class="info-input" *ngIf="novaPergunta.tipo === 'ESCALA'">
       <div class="input-group">
         <label for="min-quest">Valor mínimo:</label>
         <p-input-number
           id="min-quest"
           type="number"
           [min]="0"
-          [max]="newQuestion.high ? newQuestion.high : 2"
-          [(ngModel)]="newQuestion.low"
+          [max]="novaPergunta.high ? novaPergunta.high : 2"
+          [(ngModel)]="novaPergunta.low"
           placeholder="Valor mínimo"
         />
       </div>
@@ -182,8 +182,8 @@
         <p-input-number
           id="max-quest"
           type="number"
-          [min]="newQuestion.low ? newQuestion.low : 1"
-          [(ngModel)]="newQuestion.high"
+          [min]="novaPergunta.low ? novaPergunta.low : 1"
+          [(ngModel)]="novaPergunta.high"
           placeholder="Valor máximo"
         />
       </div>
@@ -193,13 +193,13 @@
       toggleable="true"
       [collapsed]="true"
     >
-      <app-visualizar-questao [questao]="newQuestion"></app-visualizar-questao>
+      <app-visualizar-questao [questao]="novaPergunta"></app-visualizar-questao>
     </p-fieldset>
     <p-button
-      [label]="dialogMode == 'edit' ? 'Editar Questão' : 'Adicionar Questão'"
+      [label]="modoDialog == 'edit' ? 'Editar Questão' : 'Adicionar Questão'"
       [style]="{ marginTop: '10px', width: '100%' }"
       icon="pi pi-check"
-      (click)="dialogMode === 'edit' ? editSavedQuestion() : addSavedQuestion()"
-      [disabled]="!questIsValid()"
+      (click)="modoDialog === 'edit' ? editarPerguntaSalva() : adicionarPergunta()"
+      [disabled]="!perguntaValida()"
     /></div
 ></p-dialog>
