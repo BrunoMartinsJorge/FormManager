@@ -6,7 +6,7 @@
     </div>
     <p-button
       label="Novo Formulário"
-      (click)="createNewForm()"
+      (click)="criarNovoFormulario()"
       icon="pi pi-plus"
       severity="contrast"
     />
@@ -19,15 +19,15 @@
           <input
             type="text"
             placeholder="Filtrar formulários..."
-            (input)="fillterForm($event.target)"
+            (input)="filtrarFormularios($event.target)"
           />
         </div>
       </div>
       <div class="forms-grid">
-        @for (form of formsList; track form.idFormulario) {
+        @for (form of listaFormularios; track form.idFormulario) {
         <div
-          [ngClass]="formSelectedId == form.idFormulario ? 'form-element selected' : 'form-element'"
-          (click)="selectForm(form.idFormulario)"
+          [ngClass]="formularioSelecionadoId == form.idFormulario ? 'form-element selected' : 'form-element'"
+          (click)="selecionarFormularioPorId(form.idFormulario)"
         >
           <div class="header-form">
             <span>{{form.titulo}}</span>
@@ -55,12 +55,12 @@
       </div>
     </div>
     <div class="form-select">
-      @if (loadingFormSelected && !formSelected){
+      @if (carregandoFormularioSelecionado && !formularioSelecionado){
       <div class="loading">
         <p-progressSpinner></p-progressSpinner>
         <span>Carregando formulário...</span>
       </div>
-      } @else if (!formSelected && !loadingFormSelected) {
+      } @else if (!formularioSelecionado && !carregandoFormularioSelecionado) {
       <p
         style="
           display: flex;
@@ -72,35 +72,35 @@
       >
         Problemas ao carregar formulário
       </p>
-      } @if (formSelected && !loadingFormSelected) {
+      } @if (formularioSelecionado && !carregandoFormularioSelecionado) {
       <div class="header-form-selected">
         <h3
           style="display: flex; justify-content: space-between; flex-wrap: wrap"
         >
-          {{getFormSelected.titulo}}
-          <span id="form-published">{{formSelected.ativo ? 'Publicado' : 'Não Publicado'}}</span>
+          {{getFormularioSelecionado.titulo}}
+          <span id="form-published">{{formularioSelecionado.ativo ? 'Publicado' : 'Não Publicado'}}</span>
         </h3>
-        <span>{{getFormSelected.descricao}}</span>
+        <span>{{getFormularioSelecionado.descricao}}</span>
         <p>
           <span
             ><i class="pi pi-calendar"></i>Criado em
-            {{getFormSelected.dataCriacao | date : 'dd/MM/yyyy HH:mm'}}</span
+            {{getFormularioSelecionado.dataCriacao | date : 'dd/MM/yyyy HH:mm'}}</span
           >
         </p>
         <div class="btn-list">
-          <button (click)="toogleGeneratePDF($event)">
+          <button (click)="criarPDF()">
             <i class="pi pi-file-pdf"></i>
             Gerar PDF
           </button>
-          <button (click)="exportFormToExcel()">
+          <button (click)="exportarFormularioParaExcel()">
             <i class="pi pi-file-excel"></i>
             Gerar Excel
           </button>
-          <button (click)="openForm()">
+          <button (click)="abrirFormulario()">
             <i class="pi pi-external-link"></i>
             Acessar Formulário
           </button>
-          <button (click)="toogleCreateGraphics($event)">
+          <button (click)="criarGraficos()">
             <i class="pi pi-chart-line"></i>
             Gerar Gráficos
           </button>
@@ -111,21 +111,21 @@
           <div class="header-question-list">
             <h3>
               <i class="pi pi-list"></i>
-              {{responsesOrQuestions != 'quest' ? 'Respostas do Formulário' :
+              {{respostasOuPerguntas != 'quest' ? 'Respostas do Formulário' :
               'Questões do Formulário'}}
             </h3>
             <p-button
               icon="pi pi-eye"
               [label]="buscarLabelBotao"
               severity="contrast"
-              [disabled]="!formSelected || formSelected.respostasPorUsuario?.length === 0"
-              (click)="toogleResponseOrQuestions()"
+              [disabled]="!formularioSelecionado || formularioSelecionado.respostasPorUsuario?.length === 0"
+              (click)="mudarRespostasOuPerguntas()"
             />
           </div>
-          @if (responsesOrQuestions == 'quest') { @if (formSelected != null){
+          @if (respostasOuPerguntas == 'quest') { @if (formularioSelecionado != null){
           <div
             class="quest-element"
-            *ngFor="let quest of getQuestoes; let i = index"
+            *ngFor="let quest of getPerguntas; let i = index"
           >
             <div class="header-question">
               <strong>{{ i + 1 }}º Questão - {{ quest.titulo }}</strong>
@@ -133,32 +133,32 @@
             </div>
             <span class="responses">
               <i class="pi pi-eye"></i>
-              Respostas - {{ getNumberOfResponses(quest.id) }}
+              Respostas - {{ getQuantidadeRespostas(quest.id) }}
             </span>
           </div>
-          } } @if (responsesOrQuestions == 'responses') { @if (formSelected !=
+          } } @if (respostasOuPerguntas == 'responses') { @if (formularioSelecionado !=
           null){
           <section class="response-sends">
             <div class="header-response">
               <p-button
                 icon="pi pi-angle-left"
                 severity="secondary"
-                [disabled]="indexByResponses === 0"
-                (click)="previousResponse()"
+                [disabled]="indexPorResposta === 0"
+                (click)="voltarResposta()"
               />
               <span
-                ><i class="pi pi-user"></i>{{indexByResponses + 1}}ª - Resposta
+                ><i class="pi pi-user"></i>{{indexPorResposta + 1}}ª - Resposta
                 Individual</span
               >
               <p-button
                 icon="pi pi-angle-right"
                 severity="secondary"
-                [disabled]="indexByResponses === responsesByUser.length - 1"
-                (click)="nextResponse()"
+                [disabled]="indexPorResposta === responsesByUser.length - 1"
+                (click)="avancarResposta()"
               />
             </div>
             <div class="questions-list">
-              @for(response of getResponseSelectedByIndex.respostas; let i =
+              @for(response of getRespostaSelecionadaPorIndex.respostas; let i =
               $index; track response.idResposta){
               <div class="response-quest-element">
                 <div class="header-quest">
@@ -167,7 +167,7 @@
                     {{response.titulo}}</strong
                   >
                   <div class="type-quest">
-                    {{getTypeQuestByIdQuestion(response.idQuestao)}}
+                    {{getTipoPerguntaPorIdPergunta(response.idQuestao)}}
                   </div>
                 </div>
                 <p>Resposta - {{response.valor}}</p>
@@ -183,10 +183,10 @@
   </section>
 </main>
 <!-- <app-gerar-graficos
-  [formSelected]="formSelected"
+  [formularioSelecionado]="formularioSelecionado"
   [(visibilityOfGenerateGraphic)]="visibilityOfGraphicCreate"
 ></app-gerar-graficos> -->
-<app-gerar-pdf
-  [formSelected]="formPdfData"
+<!-- <app-gerar-pdf
+  [formularioSelecionado]="formPdfData"
   [(visibilityOfGeneratePDF)]="visibilityOfGeneratePDF"
-></app-gerar-pdf>
+></app-gerar-pdf> -->
