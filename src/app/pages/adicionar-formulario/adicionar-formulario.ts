@@ -98,7 +98,7 @@ export class AdicionarFormulario {
   };
   visibilityQuestsSaved: boolean = false;
   opcao: Opcao[] = [];
-  buttonOptions: MenuItem[] = [
+  opcoesBotao: MenuItem[] = [
     {
       label: 'Utilizar Questão Existente',
       command: () => {

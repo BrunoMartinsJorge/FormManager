@@ -85,7 +85,7 @@
         <p-inputgroup-addon>
           <p-button
             [icon]="opcaoCorreta(i, index) ? 'pi pi-check' : 'pi pi-times'"
-            (click)="toggleOpcaoCorreta(i, index)"
+            (click)="alterarOpcaoCorreta(i, index)"
           />
         </p-inputgroup-addon>
       </p-inputgroup>
@@ -123,7 +123,7 @@
         <p-inputgroup-addon>
           <p-button
             [icon]="opcaoCorretaVerdadeiroFalse(i, 'Verdadeiro') ? 'pi pi-check' : 'pi pi-times'"
-            (click)="toogleOpcaoCorretaVerdadeiroFalso(i, 'Verdadeiro')"
+            (click)="alterarOpcaoCorretaVerdadeiroFalso(i, 'Verdadeiro')"
           />
         </p-inputgroup-addon>
       </p-inputgroup>
@@ -132,7 +132,7 @@
         <p-inputgroup-addon>
           <p-button
             [icon]="opcaoCorretaVerdadeiroFalse(i, 'Falso') ? 'pi pi-check' : 'pi pi-times'"
-            (click)="toogleOpcaoCorretaVerdadeiroFalso(i, 'Falso')"
+            (click)="alterarOpcaoCorretaVerdadeiroFalso(i, 'Falso')"
           />
         </p-inputgroup-addon>
       </p-inputgroup>
@@ -176,7 +176,6 @@
       legend="Vizualizar questão"
       toggleable="true"
       [collapsed]="true"
-      to
     >
       <app-visualizar-questao [questao]="questao"></app-visualizar-questao>
     </p-fieldset>
@@ -198,7 +197,7 @@
   <p-button
     label="Criar Quiz"
     (click)="criarQuiz()"
-    [disabled]="!quizIsValid()"
+    [disabled]="!quizValido()"
     icon="pi pi-check"
   ></p-button>
   <p-splitbutton
@@ -206,7 +205,7 @@
     class="ml-2"
     icon="pi pi-plus"
     (onClick)="adicionarQuestaoQuiz()"
-    [model]="buttonOptions"
+    [model]="opcoesBotao"
   />
 </footer>
 <section *ngIf="mostrarTelaAcao" class="tela-acao erro">
@@ -230,25 +229,25 @@
       tooltipPosition="top"
       icon="pi pi-copy"
       severity="contrast"
-      (click)="copyLink()"
+      (click)="copiarLink()"
     />
     <input
       pInputText
       placeholder="Link do formulário"
-      [(ngModel)]="urlForm"
+      [(ngModel)]="urlQuiz"
       [disabled]="true"
     />
   </p-inputgroup>
 </p-dialog>
 <p-dialog
   [style]="{ width: '50%' }"
-  [(visible)]="visibilityQuestsSaved"
+  [(visible)]="visibilidadesQuestoesSalvas"
   header="Questões salvas"
   [modal]="true"
   [draggable]="false"
 >
   <p-table
-    [value]="questsSaved"
+    [value]="questoesSalvas"
     [rows]="5"
     [paginator]="true"
     [responsiveLayout]="'scroll'"
@@ -273,7 +272,7 @@
           <p-checkbox
             [inputId]="'questao' + questao.id"
             [value]="questao"
-            [(ngModel)]="questionsSelecteds"
+            [(ngModel)]="questoesSelecionadas"
             binary="false"
           ></p-checkbox>
         </td>
@@ -289,9 +288,9 @@
         <td colspan="2">
           <p-button
             icon="pi pi-plus"
-            [label]="questionsSelecteds.length === 0 ? 'Selecione questões' : questionsSelecteds.length > 1 ? 'Adicionar questões' : 'Adicionar questão'"
-            (click)="useQuestionsSelecteds()"
-            [disabled]="questionsSelecteds.length === 0"
+            [label]="questoesSelecionadas.length === 0 ? 'Selecione questões' : questoesSelecionadas.length > 1 ? 'Adicionar questões' : 'Adicionar questão'"
+            (click)="usarQuestoesSelecionadas()"
+            [disabled]="questoesSelecionadas.length === 0"
           ></p-button>
         </td>
       </tr>

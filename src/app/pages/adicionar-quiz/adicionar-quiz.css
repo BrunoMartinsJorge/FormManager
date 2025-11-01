@@ -186,7 +186,7 @@ section.tela-acao.carregando {
   backdrop-filter: blur(5px);
 }
 
-span#urlForm{
+span#urlQuiz{
   font-size: 1.2em;
   color: #333;
   margin-top: 1em;

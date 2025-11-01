@@ -56,31 +56,31 @@ import { QuestaoSalva } from '../questoes-salvas-quiz/model/QuestaoSalva';
   styleUrl: './adicionar-quiz.css',
 })
 export class AdicionarQuiz {
-  erroAoCriarFormulario: boolean = false;
-  mostrarTelaAcao: boolean = false;
-  visibilidadeDialog: boolean = false;
-  urlForm: string = '';
-  carregando: boolean = false;
-  quiz: NewQuiz = {
+  public erroAoCriarFormulario: boolean = false;
+  public mostrarTelaAcao: boolean = false;
+  public visibilidadeDialog: boolean = false;
+  public urlQuiz: string = '';
+  public carregando: boolean = false;
+  public quiz: NewQuiz = {
     titulo: '',
     descricao: '',
     questoes: [],
   };
-  public questionsSelecteds: any[] = [];
-  public questsSaved: any[] = [];
+  public questoesSelecionadas: any[] = [];
+  public questoesSalvas: any[] = [];
   public opcao: Opcao[] = [];
-  public visibilityQuestsSaved: boolean = false;
+  public visibilidadesQuestoesSalvas: boolean = false;
 
-  buttonOptions: MenuItem[] = [
+  public opcoesBotao: MenuItem[] = [
     {
       label: 'Utilizar Questão Existente',
       command: () => {
-        this.getQuestSaved();
+        this.buscarQuestoesSalvas();
       },
     },
   ];
 
-  tipoDeCampo: any[] = [
+  public tipoDeCampo: any[] = [
     { nome: 'Texto', value: TypeQuestEnum.TEXTO },
     { nome: 'Parágrafo', value: TypeQuestEnum.PARAGRAFO },
     { nome: 'Número', value: TypeQuestEnum.NUMERO },
@@ -92,17 +92,17 @@ export class AdicionarQuiz {
     { nome: 'Verdadeiro / Falso', value: TypeQuestEnum.VERDADEIRO_FALSO },
   ];
 
-  public changeForm(): void {
-    this.quiz.questoes = this.quiz.questoes;
-  }
-
   constructor(private formulariosService: FormulariosServices) {}
 
-  public useQuestionsSelecteds(): void {
-    if (this.questionsSelecteds.length === 0) return;
-    this.questionsSelecteds.forEach((question) => {
+  /**
+   *
+   * @description Adiciona as questões salvas que foram selecionadas ao quiz
+   */
+  public usarQuestoesSelecionadas(): void {
+    if (this.questoesSelecionadas.length === 0) return;
+    this.questoesSelecionadas.forEach((question) => {
       console.log(question);
-      
+
       const novaQuestao: QuestaoSalva = {
         titulo: question.titulo,
         tipo: question.tipo,
@@ -120,16 +120,18 @@ export class AdicionarQuiz {
       };
       this.quiz.questoes.push(novaQuestao);
     });
-    this.visibilityQuestsSaved = false;
+    this.visibilidadesQuestoesSalvas = false;
   }
 
-  private getQuestSaved(): void {
+  /**
+   *
+   * @description Busca as questões salvas do banco
+   */
+  private buscarQuestoesSalvas(): void {
     this.formulariosService.listarQuestoesQuiz().subscribe({
       next: (res) => {
-        this.visibilityQuestsSaved = true;
-        this.questsSaved = res;
-        console.log(this.questsSaved);
-        
+        this.visibilidadesQuestoesSalvas = true;
+        this.questoesSalvas = res;
       },
       error: (error: Error) => {
         console.error(error);
@@ -137,6 +139,10 @@ export class AdicionarQuiz {
     });
   }
 
+  /**
+   *
+   * @description Adiciona uma nova questão ao quiz
+   */
   public adicionarQuestaoQuiz() {
     const novaQuestao: NewQuestQuiz = {
       titulo: '',
@@ -148,25 +154,36 @@ export class AdicionarQuiz {
     this.quiz.questoes.push(novaQuestao);
   }
 
-  public getOpcao(questao: NewQuest, i: number): string {
-    return questao.opcoes?.[i] || '';
-  }
-
-  public setOpcao(questao: NewQuest, i: number, value: string) {
-    if (!questao.opcoes) questao.opcoes = [];
-    questao.opcoes[i] = value;
-  }
-
+  /**
+   * 
+   * @param index - Indice da questão
+   * @description Retorna o indice da questão
+   * @returns - Indice da questão
+   */
   public trackByIndex(index: number): number {
     return index;
   }
 
+  /**
+   * 
+   * @param indexQuestao - Indice da questão
+   * @param indexOpcao - Indice da opção
+   * @description Verifica se a opção for correta
+   * @returns - Verdadeiro se a opção for correta
+   */
   public opcaoCorreta(indexQuestao: number, indexOpcao: number): boolean {
     const questao = this.quiz.questoes[indexQuestao];
     if (!questao.respostasCorretas) questao.respostasCorretas = [];
     return questao.respostasCorretas.includes(indexOpcao);
   }
 
+  /**
+   * 
+   * @param indexQuestao - Indice da questão
+   * @param opcao - Opção Verdadeiro ou Falso
+   * @description Verifica se a opção for correta
+   * @returns - Verdadeiro se a opção for correta
+   */
   public opcaoCorretaVerdadeiroFalse(
     indexQuestao: number,
     opcao: 'Verdadeiro' | 'Falso'
@@ -177,7 +194,13 @@ export class AdicionarQuiz {
     return questao.valorCorreto.includes(opcao);
   }
 
-  public toggleOpcaoCorreta(indexQuestao: number, indexOpcao: number): void {
+  /**
+   * 
+   * @param indexQuestao - Indice da questão
+   * @param indexOpcao - Indice da opção
+   * @description Altera a opção correta para a selecionada
+   */
+  public alterarOpcaoCorreta(indexQuestao: number, indexOpcao: number): void {
     const questao = this.quiz.questoes[indexQuestao];
     if (!questao.respostasCorretas) questao.respostasCorretas = [];
 
@@ -194,7 +217,13 @@ export class AdicionarQuiz {
     }
   }
 
-  public toogleOpcaoCorretaVerdadeiroFalso(
+  /**
+   * 
+   * @param indexQuestao - Indice da questão
+   * @param opcao - Opção Verdadeiro ou Falso
+   * @description Altera a opção correta para a selecionada
+   */
+  public alterarOpcaoCorretaVerdadeiroFalso(
     indexQuestao: number,
     opcao: 'Verdadeiro' | 'Falso'
   ): void {
@@ -204,15 +233,19 @@ export class AdicionarQuiz {
     questao.valorCorreto.push(opcao);
   }
 
+  /**
+   * 
+   * @description Cria o quiz
+   */
   public criarQuiz(): void {
     this.carregando = true;
     this.erroAoCriarFormulario = false;
     this.mostrarTelaAcao = false;
     console.log(this.quiz);
-    
+
     this.formulariosService.criarQuiz(this.quiz).subscribe(
       (response) => {
-        this.urlForm = response.formUrl;
+        this.urlQuiz = response.formUrl;
         this.visibilidadeDialog = true;
         this.carregando = false;
       },
@@ -229,10 +262,20 @@ export class AdicionarQuiz {
     );
   }
 
+  /**
+   * 
+   * @param index - Indice da questão
+   * @description Remove a questão do quiz
+   */
   public removerQuestao(index: number): void {
     this.quiz.questoes.splice(index, 1);
   }
 
+  /**
+   * 
+   * @param indexQuestao - Indice da questão
+   * @description Adiciona uma opção na questão
+   */
   public adicionarOpcao(indexQuestao: number): void {
     const questao = this.quiz.questoes[indexQuestao];
     if (!questao.opcoes) questao.opcoes = [];
@@ -243,7 +286,12 @@ export class AdicionarQuiz {
     console.log(questao);
   }
 
-  public quizIsValid(): boolean {
+  /**
+   * 
+   * @description Verifica se o quiz for valido
+   * @returns - Verdadeiro se o quiz for valido
+   */
+  public quizValido(): boolean {
     if (!this.quiz.titulo || !this.quiz.descricao) return false;
     if (!this.quiz.questoes || this.quiz.questoes.length === 0) return false;
 
@@ -256,7 +304,11 @@ export class AdicionarQuiz {
       ) {
         if (!questao.opcoes || questao.opcoes.length === 0) return false;
 
-        if (questao.opcoes.some((opcao: any) => !opcao || opcao.texto.trim() === '')) {
+        if (
+          questao.opcoes.some(
+            (opcao: any) => !opcao || opcao.texto.trim() === ''
+          )
+        ) {
           return false;
         }
         if (
@@ -277,6 +329,13 @@ export class AdicionarQuiz {
     return true;
   }
 
+  /**
+   * 
+   * @param indexQuestao - Indice da questão
+   * @param indexOpcao - Indice da opção
+   * @description Remove uma opção da questão
+   * @returns - Verdadeiro se o quiz for valido
+   */
   public removerOpcao(indexQuestao: number, indexOpcao: number): void {
     const questao = this.quiz.questoes[indexQuestao];
 
@@ -290,7 +349,11 @@ export class AdicionarQuiz {
     questao.opcoes.pop();
   }
 
-  public copyLink(): void {
-    navigator.clipboard.writeText(this.urlForm);
+  /**
+   * 
+   * @description Copia o link do quiz
+   */
+  public copiarLink(): void {
+    navigator.clipboard.writeText(this.urlQuiz);
   }
 }
