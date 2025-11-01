@@ -13,7 +13,11 @@ import { Router } from '@angular/router';
 export class Autenticacao {
   constructor(private http: Auth, private router: Router) {}
 
-  authenticateGoogle() {
+  /**
+   * 
+   * @description Autentica o usuário com o Google e redireciona para a tela de adicionar formulários
+   */
+  public autenticarComGoogle(): void {
     this.http.loginWithGoogle()
       .then(() => {
         this.router.navigate(['/adicionar-formulario']);
