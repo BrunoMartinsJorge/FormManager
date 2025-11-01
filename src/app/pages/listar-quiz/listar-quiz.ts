@@ -44,48 +44,74 @@ export interface Form {
 })
 export class ListarQuiz {
   public listaQuizzes: any[] = [];
-  public quizList: any[] = [];
+  public listarQuizzes: any[] = [];
   public carregandoQuiz: boolean = false;
   public quizSelecionado: QuizSelected | null = null;
   public quizSelectedId: number | null = null;
   public questoes: QuestaoModel[] = [];
   public respostasPorUsuario: any[] = [];
-  public visibilityOfGraphicCreate: boolean = false;
-  public visibilityOfGeneratePDF: boolean = false;
+  public visibilidadeDeCriarGraficos: boolean = false;
+  public visibilidadeDeGerarPDF: boolean = false;
   public quizPdfData: Form | null = null;
-  public responsesOrQuestions: 'quest' | 'responses' = 'quest';
+  public respostasOuQuestoes: 'quest' | 'responses' = 'quest';
   public indexByRespostas: number = 0;
 
   constructor(private service: QuizService, private router: Router) {
     this.carregarQuizzes();
   }
 
-  trackByQuizId(index: number, quiz: any): number {
+  /**
+   *
+   * @param index - Indice da questão
+   * @param quiz - Objeto da questão
+   * @description Retorna o indice da questão
+   * @returns - Indice da questão
+   */
+  public trackByQuizId(index: number, quiz: any): number {
     return quiz.idFormulario;
   }
 
-  criarNovoQuiz(): void {
+  /**
+   *
+   * @description Função para criar um novo quiz
+   */
+  public criarNovoQuiz(): void {
     this.router.navigate(['/adicionar-quiz']);
   }
 
-  fillterQuiz(event: any): void {
+  /**
+   *
+   * @param event - Evento do filtro
+   * @description Função para filtrar os quizzes
+   * @returns - Objeto da questão
+   */
+  public filtarQuiz(event: any): void {
     const value: string = event.value;
     if (value === '') {
-      this.quizList = this.listaQuizzes;
+      this.listarQuizzes = this.listaQuizzes;
       return;
     }
-    this.quizList = this.listaQuizzes.filter((quiz) =>
+    this.listarQuizzes = this.listaQuizzes.filter((quiz) =>
       quiz.Titulo?.toLowerCase().includes(value.toLowerCase())
     );
   }
 
-  selectForm(id: number): void {
+  /**
+   *
+   * @param id - ID do quiz
+   * @description Função para selecionar um quiz
+   */
+  public selecionarQuiz(id: number): void {
     this.quizSelectedId = id;
-    this.responsesOrQuestions = 'quest';
-    this.getDataQuizSelecionado();
+    this.respostasOuQuestoes = 'quest';
+    this.getDadosQuizSelecionado();
   }
 
-  public getLinkByManualForm(): void {
+  /**
+   *
+   * @description Função para abrir o link do manual do quiz
+   */
+  public getLinkManualQuiz(): void {
     if (!this.quizSelecionado) return;
     const quiz = this.listaQuizzes.find(
       (q) => q.idFormulario === this.quizSelectedId
@@ -95,6 +121,10 @@ export class ListarQuiz {
     window.open(urlPadrao, '_blank');
   }
 
+  /**
+   *
+   * @description Função para carregar os quizzes
+   */
   private carregarQuizzes(): void {
     this.service.getAllQuizzes().subscribe({
       next: (data: any[]) => {
@@ -108,7 +138,7 @@ export class ListarQuiz {
             quizId: q.quizId,
           }))
           .sort((a: any, b: any) => b.idFormulario - a.idFormulario);
-        this.quizList = [...this.listaQuizzes];
+        this.listarQuizzes = [...this.listaQuizzes];
         this.quizSelecionado =
           this.listaQuizzes.length > 0 ? this.listaQuizzes[0] : null;
 
@@ -116,13 +146,17 @@ export class ListarQuiz {
           this.listaQuizzes.length > 0
             ? this.listaQuizzes[0].idFormulario
             : null;
-        this.getDataQuizSelecionado();
+        this.getDadosQuizSelecionado();
       },
       error: (err) => console.error(err),
     });
   }
 
-  private getDataQuizSelecionado(): void {
+  /**
+   *
+   * @description Função para carregar os quizzes
+   */
+  private getDadosQuizSelecionado(): void {
     console.log(this.quizSelecionado!.quizId);
 
     const quiz = this.listaQuizzes.find(
@@ -139,7 +173,7 @@ export class ListarQuiz {
       next: (res: QuizSelected) => {
         this.quizSelecionado = res;
 
-        this.respostasPorUsuario = this.mapResponsesByUser(res);
+        this.respostasPorUsuario = this.mapearRespostasPorRespondente(res);
 
         this.carregandoQuiz = false;
       },
@@ -150,7 +184,7 @@ export class ListarQuiz {
     });
   }
 
-  private mapResponsesByUser(data: QuizSelected): any[] {
+  private mapearRespostasPorRespondente(data: QuizSelected): any[] {
     const questoes = data.questoes || [];
     const respostas = data.respostas || [];
 
@@ -174,62 +208,12 @@ export class ListarQuiz {
     });
   }
 
-  private convertQuizData(data: any): any {
-    const questoes = data.items || [];
-    const responses = data.responses || [];
-
-    const questoesFormatadas = questoes.map((q: any) => {
-      const question = q.questionItem?.question;
-      let tipo = 'DESCONHECIDO';
-      let opcoes: string[] | undefined;
-
-      if (question.textQuestion) tipo = 'Texto';
-      if (question.choiceQuestion) {
-        tipo = 'Escolha';
-        opcoes = question.choiceQuestion.options.map((o: any) => o.value);
-      }
-      if (question.scaleQuestion) tipo = 'Escala';
-      if (question.dateQuestion) tipo = 'Data';
-
-      const grading = question.grading || {};
-      const valor = grading.pointValue || 0;
-      const opcaoCorreta = grading.correctAnswers?.answers?.[0]?.value || null;
-
-      return {
-        id: question.questionId,
-        titulo: q.title,
-        tipo,
-        opcoes,
-        opcaoCorreta,
-        valor,
-      };
-    });
-
-    const respostasFormatadas = responses.map((resp: any) => {
-      const respostasQuestao: any[] = [];
-
-      Object.values(resp.answers).forEach((answer: any) => {
-        const valor = answer.textAnswers?.answers?.[0]?.value ?? null;
-        respostasQuestao.push({
-          idQuestao: answer.questionId,
-          valor,
-          score: answer.grade?.score ?? 0,
-          correta: answer.grade?.correct ?? false,
-        });
-      });
-
-      return {
-        idResposta: resp.responseId,
-        dataEnviada: new Date(resp.lastSubmittedTime),
-        respostas: respostasQuestao,
-        totalScore: resp.totalScore ?? 0,
-      };
-    });
-
-    return { questoes: questoesFormatadas, respostas: respostasFormatadas };
-  }
-
-  public getPontuacaoByResponse(respostaUsuario: any): {
+  /**
+   *
+   * @param respostaUsuario - Resposta do usuário
+   * @description Função para calcular a pontuação do usuário
+   */
+  public getPontuacaoPorResposta(respostaUsuario: any): {
     total: number;
     max: number;
   } {
@@ -258,12 +242,21 @@ export class ListarQuiz {
     return { total, max };
   }
 
-  public openDialogByGraphic(): void {
-    this.visibilityOfGraphicCreate = true;
+  /**
+   *
+   * @description Função para abrir o dialog de criação de gráficos
+   */
+  public abrirDialogDeGrafico(): void {
+    this.visibilidadeDeCriarGraficos = true;
   }
 
-  public openDialogByPdf(quiz: any): void {
-    this.visibilityOfGeneratePDF = true;
+  /**
+   *
+   * @param quiz - Quiz
+   * @description Função para abrir o dialog de criação de gráficos
+   */
+  public abrirDialogDePDF(quiz: any): void {
+    this.visibilidadeDeGerarPDF = true;
     this.quizPdfData = {
       titulo: quiz.Titulo,
       descricaoFormulario: quiz.Descricao,
@@ -271,41 +264,80 @@ export class ListarQuiz {
     };
   }
 
-  public exportFormToExcel(): void {}
+  /**
+   *
+   * @description Função para exportar o quiz para excel
+   */
+  public exportarQuizParaExcel(): void {}
 
-  public toogleResponseOrQuestions(): void {
-    this.responsesOrQuestions =
-      this.responsesOrQuestions === 'quest' ? 'responses' : 'quest';
+  /**
+   *
+   * @description Função para mudar entre perguntas e respostas
+   */
+  public mudarRespostasOuQuestoes(): void {
+    this.respostasOuQuestoes =
+      this.respostasOuQuestoes === 'quest' ? 'responses' : 'quest';
   }
 
-  public previousResponse(): void {
+  /**
+   *
+   * @description Função para voltar uma resposta
+   */
+  public voltarResposta(): void {
     if (this.indexByRespostas > 0) this.indexByRespostas--;
   }
 
-  public nextResponse(): void {
+  /**
+   *
+   * @description Função para avançar uma resposta
+   */
+  public avancarResposta(): void {
     if (this.indexByRespostas < this.respostasPorUsuario.length - 1)
       this.indexByRespostas++;
   }
 
-  public get getResponseSelectedByIndex(): any {
+  /**
+   *
+   * @description Função para selecionar uma resposta
+   * @returns - Resposta selecionada
+   */
+  public get getRespostaSelecionadaPorIndex(): any {
     return this.respostasPorUsuario[this.indexByRespostas];
   }
 
-  public getTypeQuestByIdQuestion(questId: string): string {
+  /**
+   *
+   * @param questId - ID da questão
+   * @description Função para retornar o tipo da questão
+   * @returns - Tipo da questão
+   */
+  public getTipoQuestaoPorIdQuestao(questId: string): string {
     return (
       this.quizSelecionado?.questoes.find((q: any) => q.id === questId)?.tipo ||
       ''
     );
   }
 
-  public getTitleQuestByIdQuestion(questId: string): string {
+  /**
+   *
+   * @param questId - ID da questão
+   * @description Função para retornar o título da questão
+   * @returns - Título da questão
+   */
+  public getTituloQuestaoPorId(questId: string): string {
     return (
       this.quizSelecionado?.questoes.find((q: any) => q.id === questId)
         ?.titulo || ''
     );
   }
 
-  public getNumberOfResponses(questId: string): number {
+  /**
+   *
+   * @param questId - ID da questão
+   * @description Função para retornar a quantidade de respostas de uma questão
+   * @returns - Quantidade de respostas
+   */
+  public getQuantidadeRespostas(questId: string): number {
     if (!this.quizSelecionado?.respostas?.length) return 0;
     let count = 0;
     this.quizSelecionado.respostas.forEach((resp: any) => {
@@ -316,7 +348,11 @@ export class ListarQuiz {
     return count;
   }
 
-  acessarQuiz(): void {
+  /**
+   *
+   * @description Função para acessar o quiz
+   */
+  public acessarQuiz(): void {
     if (!this.quizSelecionado) return;
     const quiz = this.listaQuizzes.find(
       (quiz) => quiz.idFormulario === this.quizSelectedId

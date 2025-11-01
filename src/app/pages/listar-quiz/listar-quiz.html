@@ -20,17 +20,17 @@
           <input
             type="text"
             placeholder="Filtrar quizzes..."
-            (input)="fillterQuiz($event.target)"
+            (input)="filtarQuiz($event.target)"
           />
         </div>
       </div>
       <div class="forms-grid">
         <ng-container
-          *ngFor="let quiz of quizList; let idx = index; trackBy: trackByQuizId"
+          *ngFor="let quiz of listarQuizzes; let idx = index; trackBy: trackByQuizId"
         >
           <div
             [ngClass]="quizSelectedId === quiz.idFormulario ? 'form-element selected' : 'form-element'"
-            (click)="selectForm(quiz.idFormulario)"
+            (click)="selecionarQuiz(quiz.idFormulario)"
           >
             <div class="header-form">
               <span>{{ quiz.Titulo }}</span>
@@ -42,7 +42,7 @@
             </div>
           </div>
         </ng-container>
-        <p *ngIf="quizList.length === 0">Nenhum quiz encontrado</p>
+        <p *ngIf="listarQuizzes.length === 0">Nenhum quiz encontrado</p>
       </div>
     </div>
 
@@ -79,7 +79,7 @@
             label="Acessae Formulário Manualmente"
             icon="pi pi-cog"
             severity="contrast"
-            (click)="getLinkByManualForm()"
+            (click)="getLinkManualQuiz()"
           ></p-button>
           <span>
             Caso ocorra problemas com o botão acima, tente acessar o formulário pelo seu perfil do Google Forms
@@ -95,16 +95,16 @@
             >
           </p>
           <div class="btn-list">
-            <button (click)="openDialogByPdf(quizSelecionado)">
+            <button (click)="abrirDialogDePDF(quizSelecionado)">
               <i class="pi pi-file-pdf"></i> Gerar PDF
             </button>
-            <button (click)="exportFormToExcel()">
+            <button (click)="exportarQuizParaExcel()">
               <i class="pi pi-file-excel"></i> Gerar Excel
             </button>
             <button (click)="acessarQuiz()">
               <i class="pi pi-external-link"></i> Acessar Quiz
             </button>
-            <button (click)="openDialogByGraphic()">
+            <button (click)="abrirDialogDeGrafico()">
               <i class="pi pi-chart-line"></i> Gerar Gráficos
             </button>
           </div>
@@ -115,19 +115,19 @@
             <div class="header-question-list">
               <h3>
                 <i class="pi pi-list"></i>
-                {{ responsesOrQuestions !== 'quest' ? 'Respostas do Quiz' :
+                {{ respostasOuQuestoes !== 'quest' ? 'Respostas do Quiz' :
                 'Questões do Quiz' }}
               </h3>
               <p-button
                 icon="pi pi-eye"
-                [label]="responsesOrQuestions === 'responses' ? 'Ver Questões' : (quizSelecionado.respostas!.length > 0 ? 'Ver Respostas' : 'Nenhuma Resposta')"
+                [label]="respostasOuQuestoes === 'responses' ? 'Ver Questões' : (quizSelecionado.respostas!.length > 0 ? 'Ver Respostas' : 'Nenhuma Resposta')"
                 severity="contrast"
                 [disabled]="!quizSelecionado || quizSelecionado.respostas?.length === 0"
-                (click)="toogleResponseOrQuestions()"
+                (click)="mudarRespostasOuQuestoes()"
               ></p-button>
             </div>
             <ng-container
-              *ngIf="responsesOrQuestions === 'quest' && quizSelecionado"
+              *ngIf="respostasOuQuestoes === 'quest' && quizSelecionado"
             >
               <div
                 *ngFor="let quest of quizSelecionado.questoes; let i = index"
@@ -139,13 +139,13 @@
                 </div>
                 <span class="responses">
                   <i class="pi pi-eye"></i> Respostas - {{
-                  getNumberOfResponses(quest.id) }}
+                  getQuantidadeRespostas(quest.id) }}
                 </span>
               </div>
             </ng-container>
 
             <ng-container
-              *ngIf="responsesOrQuestions === 'responses' && quizSelecionado"
+              *ngIf="respostasOuQuestoes === 'responses' && quizSelecionado"
             >
               <section class="response-sends">
                 <div class="header-response">
@@ -153,7 +153,7 @@
                     icon="pi pi-angle-left"
                     severity="secondary"
                     [disabled]="indexByRespostas === 0"
-                    (click)="previousResponse()"
+                    (click)="voltarResposta()"
                   ></p-button>
                   <span
                     ><i class="pi pi-user"></i>{{ indexByRespostas + 1 }}ª -
@@ -163,32 +163,32 @@
                     icon="pi pi-angle-right"
                     severity="secondary"
                     [disabled]="indexByRespostas === respostasPorUsuario.length - 1"
-                    (click)="nextResponse()"
+                    (click)="avancarResposta()"
                   ></p-button>
                 </div>
                 <div class="pontuacao-candidato">
                   <i class="pi pi-star"></i>
                   Pontuação total: {{
-                  getPontuacaoByResponse(getResponseSelectedByIndex).total }}
+                  getPontuacaoPorResposta(getRespostaSelecionadaPorIndex).total }}
                   pts
                   <br />
                   <i class="pi pi-star"></i>
                   Pontuação maxima: {{
-                  getPontuacaoByResponse(getResponseSelectedByIndex).max }} pts
+                  getPontuacaoPorResposta(getRespostaSelecionadaPorIndex).max }} pts
                 </div>
 
                 <div class="questions-list">
                   <ng-container
-                    *ngFor="let response of getResponseSelectedByIndex.respostas; let i = index"
+                    *ngFor="let response of getRespostaSelecionadaPorIndex.respostas; let i = index"
                   >
                     <div class="response-quest-element">
                       <div class="header-quest">
                         <strong>
                           <span class="quest-number">{{ i + 1 }}</span> {{
-                          getTitleQuestByIdQuestion(response.idQuestao) }}
+                          getTituloQuestaoPorId(response.idQuestao) }}
                         </strong>
                         <div class="type-quest">
-                          {{ getTypeQuestByIdQuestion(response.idQuestao) }}
+                          {{ getTipoQuestaoPorIdQuestao(response.idQuestao) }}
                         </div>
                       </div>
                       <p>Resposta - {{ response.valor }}</p>
@@ -206,7 +206,7 @@
 
 <p-dialog
   [draggable]="false"
-  [(visible)]="visibilityOfGraphicCreate"
+  [(visible)]="visibilidadeDeCriarGraficos"
   [modal]="true"
   [style]="{ width: '50%' }"
 >
@@ -229,7 +229,7 @@
 
 <p-dialog
   [draggable]="false"
-  [(visible)]="visibilityOfGeneratePDF"
+  [(visible)]="visibilidadeDeGerarPDF"
   [modal]="true"
   [style]="{ width: '50%' }"
 >
