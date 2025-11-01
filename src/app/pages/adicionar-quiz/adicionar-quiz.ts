@@ -235,9 +235,12 @@ export class AdicionarQuiz {
 
   public adicionarOpcao(indexQuestao: number): void {
     const questao = this.quiz.questoes[indexQuestao];
-
     if (!questao.opcoes) questao.opcoes = [];
-    questao.opcoes.push('');
+    questao.opcoes.push({
+      idAlternativa: null,
+      texto: '',
+    });
+    console.log(questao);
   }
 
   public quizIsValid(): boolean {

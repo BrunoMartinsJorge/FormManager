@@ -7,8 +7,8 @@ export interface NewQuiz {
 export interface QuestQuiz{
     titulo: string;
     tipo: string;
-    opcoes?: string[];
-    valorCorreto?: string[];
+    opcoes?: any[];
+    valorCorreto?: any[];
     respostasCorretas?: number[];
     pontos?: number;
     feedbackCorreto?: string;
