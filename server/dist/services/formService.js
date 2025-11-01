@@ -331,11 +331,11 @@ function convertQuestionData(ativo, data) {
     const resposta = {
         ativo,
         questoesFormatadas: questoesFormatadasResponse,
-        respostasPorUsuario: mapResponsesByUser(data),
+        respostasPorUsuario: mapearRespostasPorRespondente(data),
     };
     return resposta;
 }
-function mapResponsesByUser(data) {
+function mapearRespostasPorRespondente(data) {
     const questoes = data.items || [];
     const responses = data.responses || [];
     return responses.map((resp) => {

@@ -191,7 +191,7 @@ export class ListarQuiz {
     if (!questoes.length || !respostas.length) return [];
 
     return respostas.map((resp: any) => {
-      // resp.respostas é um array com as respostas de uma submissão
+      // resp.respostas eh um array com as respostas de uma submissão
       const respostasUsuario = resp.respostas.map((r: any) => ({
         idQuestao: r.idQuestao,
         valor: r.valor,

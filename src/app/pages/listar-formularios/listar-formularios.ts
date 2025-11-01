@@ -39,8 +39,8 @@ export class ListarFormularios {
   private forms: Formulario[] = [];
   public listaFormularios: Formulario[] = [];
 
-  public visibilityOfGraphicCreate: boolean = false;
-  public visibilityOfGeneratePDF: boolean = false;
+  public visibilidadeDeCriarGraficos: boolean = false;
+  public visibilidadeDeGerarPDF: boolean = false;
 
   public formularioSelecionadoId: number | null = null;
   public carregandoFormularioSelecionado: boolean = false;
@@ -55,7 +55,7 @@ export class ListarFormularios {
    * @description Função para criar os gráficos
    */
   public criarGraficos(): void {
-    this.visibilityOfGraphicCreate = !this.visibilityOfGraphicCreate;
+    this.visibilidadeDeCriarGraficos = !this.visibilidadeDeCriarGraficos;
   }
 
   /**
@@ -63,7 +63,7 @@ export class ListarFormularios {
    * @description Função para criar o PDF
    */
   public criarPDF(): void {
-    this.visibilityOfGeneratePDF = !this.visibilityOfGeneratePDF;
+    this.visibilidadeDeGerarPDF = !this.visibilidadeDeGerarPDF;
     this.converterFormularioParaDadosDePDF();
   }
 

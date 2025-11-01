@@ -15,8 +15,8 @@ import { Dialog } from "primeng/dialog";
 })
 export class GerarPdf {
   @Input() public formSelected: FormularioPdfModel | null = null;
-  @Input() public visibilityOfGeneratePDF: boolean = false;
-  @Output() public visibilityOfGeneratePDFChange = new EventEmitter<boolean>();
+  @Input() public visibilidadeDeGerarPDF: boolean = false;
+  @Output() public visibilidadeDeGerarPDFChange = new EventEmitter<boolean>();
   @ViewChild('pdfSection', { static: false }) conteudo!: ElementRef;
 
   constructor() {}
@@ -31,8 +31,8 @@ export class GerarPdf {
   }
 
   public closeDialog(): void {
-    this.visibilityOfGeneratePDFChange.emit(false);
-    this.visibilityOfGeneratePDF = false;
+    this.visibilidadeDeGerarPDFChange.emit(false);
+    this.visibilidadeDeGerarPDF = false;
     this.formSelected = null;
   }
 }

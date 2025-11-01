@@ -1,9 +1,9 @@
 import { Component, signal } from '@angular/core';
 import { Router, RouterOutlet } from '@angular/router';
 import { ButtonModule } from 'primeng/button';
-import { Navbar } from './shared/navbar/navbar';
 import { CommonModule } from '@angular/common';
 import { Token } from './core/auth/token';
+import { Navbar } from './shared/components/navbar/navbar';
 
 @Component({
   selector: 'app-root',

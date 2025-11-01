@@ -62,7 +62,7 @@ export class QuestoesSalvasFormulario {
       label: 'Ver Imagem',
       icon: 'pi pi-image',
       command: () => {
-        this.verImagemPergunta(this.novaPergunta.);
+        this.verImagemPergunta(this.novaPergunta.imagem);
       },
     },
     { separator: true },
@@ -289,6 +289,12 @@ export class QuestoesSalvasFormulario {
     this.novaPergunta.opcoes.pop();
   }
 
+  /**
+   * 
+   * @param url - URL da imagem
+   * @description Verifica se a url eh valida
+   * @returns - Verifica se a url eh valida
+   */
   public urlImagemValida(url: string): boolean {
     if (!url || url.trim() === '') return false;
     const regex =

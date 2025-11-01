@@ -24,7 +24,7 @@
 }
 
 .sidebar .header-sidebar .logo {
-  background: url("../../../../public/logo.png") no-repeat center center;
+  background: url("../../../../../public/logo.png") no-repeat center center;
   background-size: contain;
   width: 50px;
   height: 50px;

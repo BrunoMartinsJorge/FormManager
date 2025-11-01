@@ -380,13 +380,13 @@ function convertQuestionData(ativo: boolean, data: any): RespostasFormDto {
   const resposta: RespostasFormDto = {
     ativo,
     questoesFormatadas: questoesFormatadasResponse,
-    respostasPorUsuario: mapResponsesByUser(data),
+    respostasPorUsuario: mapearRespostasPorRespondente(data),
   };
 
   return resposta;
 }
 
-function mapResponsesByUser(data: any): any[] {
+function mapearRespostasPorRespondente(data: any): any[] {
   const questoes = data.items || [];
   const responses = data.responses || [];
 

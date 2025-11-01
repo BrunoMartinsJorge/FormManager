@@ -185,8 +185,8 @@ export class AdicionarFormulario {
   /**
    * 
    * @param url - URL da imagem
-   * @description Verifica se a URL da imagem é valida
-   * @returns - Verifica se a URL da imagem é valida
+   * @description Verifica se a URL da imagem eh valida
+   * @returns - Verifica se a URL da imagem eh valida
    */
   public urlImagemValida(url: string): boolean {
     if (!url || url.trim() === '') return false;
