@@ -116,7 +116,7 @@ export class QuestoesSalvasFormulario {
   private getPerguntasSalvas(): void {
     this.listaPerguntasSalvas = [];
     this.carregandoPergunta = true;
-    this.formService.findAllQuestionsFavorites().subscribe({
+    this.formService.buscarTodasPerguntasSalvas().subscribe({
       next: (response: any) => {
         this.listaPerguntasSalvas = response || [];
         this.carregandoPergunta = false;
@@ -343,7 +343,7 @@ export class QuestoesSalvasFormulario {
    */
   public adicionarPergunta(): void {
     if (!this.perguntaValida()) return;
-    this.formService.addQuestionToFavorites(this.novaPergunta).subscribe({
+    this.formService.adicionarNovaPerguntaSalva(this.novaPergunta).subscribe({
       next: (response) => {
         this.toast.add({
           severity: 'success',

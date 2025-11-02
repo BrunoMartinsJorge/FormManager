@@ -5,7 +5,6 @@ const formService_1 = require("../services/formService");
 const googleapis_1 = require("googleapis");
 const googleAuth_1 = require("../services/googleAuth");
 const quizService_1 = require("../services/quizService");
-const QuizDto_1 = require("../models/dto/QuizDto");
 const router = (0, express_1.Router)();
 /* AUTENTICAÇÃO DO USUÁRIO */
 router.get('/auth/google', (req, res) => {
@@ -198,8 +197,7 @@ router.get('/quiz', async (req, res) => {
         const userInfo = await oauth2.userinfo.get();
         const userEmail = userInfo.data.email;
         const resultado = await (0, quizService_1.listAllQuizzes)(userEmail ?? null);
-        const resultadoDto = resultado.map((quiz) => QuizDto_1.QuizDto.convert(quiz));
-        res.status(201).json(resultadoDto);
+        res.status(201).json(resultado);
     }
     catch (err) {
         console.error('Erro ao criar quiz:', err.message || err);

@@ -29,16 +29,16 @@
           *ngFor="let quiz of listarQuizzes; let idx = index; trackBy: trackByQuizId"
         >
           <div
-            [ngClass]="quizSelectedId === quiz.idFormulario ? 'form-element selected' : 'form-element'"
-            (click)="selecionarQuiz(quiz.idFormulario)"
+            [ngClass]="quizSelecionadoPorId === quiz.idQuiz ? 'form-element selected' : 'form-element'"
+            (click)="selecionarQuiz(quiz.idQuiz)"
           >
             <div class="header-form">
-              <span>{{ quiz.Titulo }}</span>
-              <p>{{ quiz.Descricao }}</p>
+              <span>{{ quiz.titulo }}</span>
+              <p>{{ quiz.descricao }}</p>
             </div>
             <div class="info-form">
-              <span>Criado em {{ quiz.Data_Criacao }}</span>
-              <span>ID: {{ quiz.idFormulario }}</span>
+              <span>Criado em {{ quiz.dataCriacao | date: 'dd/MM/yyyy HH:mm' }}</span>
+              <span>ID: {{ quiz.idQuiz }}</span>
             </div>
           </div>
         </ng-container>
@@ -120,9 +120,9 @@
               </h3>
               <p-button
                 icon="pi pi-eye"
-                [label]="respostasOuQuestoes === 'responses' ? 'Ver Questões' : (quizSelecionado.respostas!.length > 0 ? 'Ver Respostas' : 'Nenhuma Resposta')"
+                [label]="respostasOuQuestoes === 'responses' ? 'Ver Questões' : (quizSelecionado.questoesFormatadas.respostas?.length === 0 ? 'Sem respostas' : 'Ver Respostas')"
                 severity="contrast"
-                [disabled]="!quizSelecionado || quizSelecionado.respostas?.length === 0"
+                [disabled]="!quizSelecionado || quizSelecionado.questoesFormatadas.respostas?.length === 0"
                 (click)="mudarRespostasOuQuestoes()"
               ></p-button>
             </div>
@@ -130,7 +130,7 @@
               *ngIf="respostasOuQuestoes === 'quest' && quizSelecionado"
             >
               <div
-                *ngFor="let quest of quizSelecionado.questoes; let i = index"
+                *ngFor="let quest of quizSelecionado.questoesFormatadas.questoes; let i = index"
                 class="quest-element"
               >
                 <div class="header-question">
@@ -157,7 +157,7 @@
                   ></p-button>
                   <span
                     ><i class="pi pi-user"></i>{{ indexByRespostas + 1 }}ª -
-                    Resposta Individual</span
+                    Resposta Individual - {{ respostasPorUsuario[indexByRespostas].email }}</span
                   >
                   <p-button
                     icon="pi pi-angle-right"
@@ -224,7 +224,7 @@
       </span>
     </div>
   </ng-template>
-  <app-gerar-graficos [formSelected]="quizSelecionado"></app-gerar-graficos>
+  <!-- <app-gerar-graficos [formSelected]="quizSelecionado"></app-gerar-graficos> -->
 </p-dialog>
 
 <p-dialog
@@ -247,5 +247,5 @@
       </span>
     </div>
   </ng-template>
-  <!-- <app-gerar-pdf [formSelected]="quizPdfData"></app-gerar-pdf> -->
+  <!-- <app-gerar-pdf [formSelected]="quizPdfData"></app-gerar-pdf>  -->
 </p-dialog>

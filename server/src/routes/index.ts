@@ -230,11 +230,7 @@ router.get('/quiz', async (req, res) => {
     const userInfo = await oauth2.userinfo.get();
     const userEmail = userInfo.data.email;
     const resultado = await listAllQuizzes(userEmail ?? null);
-
-    const resultadoDto: QuizDto[] = resultado.map((quiz) =>
-      QuizDto.convert(quiz)
-    );
-    res.status(201).json(resultadoDto);
+    res.status(201).json(resultado);
   } catch (err: any) {
     console.error('Erro ao criar quiz:', err.message || err);
     res

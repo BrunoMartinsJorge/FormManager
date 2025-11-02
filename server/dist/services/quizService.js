@@ -3,7 +3,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.createQuiz = createQuiz;
 exports.apagarFormulario = apagarFormulario;
 exports.listAllQuizzes = listAllQuizzes;
-exports.listarQuestoesPorFormulario = listarQuestoesPorFormulario;
 exports.buscarQuizPorId = buscarQuizPorId;
 exports.salvarQuestao = salvarQuestao;
 exports.editarQuestaoSalva = editarQuestaoSalva;
@@ -12,12 +11,12 @@ const googleapis_1 = require("googleapis");
 const googleAuth_1 = require("./googleAuth");
 const data_source_1 = require("../database/data-source");
 const Formulario_1 = require("../models/Formulario");
-const Pergunta_1 = require("../models/Pergunta");
 const Quiz_1 = require("../models/Quiz");
 const Questao_1 = require("../models/Questao");
 const ListaQuestoesDto_1 = require("../models/dto/ListaQuestoesDto");
 const Alternativa_Questao_1 = require("../models/Alternativa_Questao");
 const Tipo_Questao_1 = require("../models/Tipo_Questao");
+const QuizDto_1 = require("../models/dto/QuizDto");
 // export async function createQuiz(quizForm: NewQuiz, userEmail: string | null) {
 //   const auth = await getAuthClient();
 //   const formsApi = google.forms({ version: 'v1', auth });
@@ -261,14 +260,12 @@ const Tipo_Questao_1 = require("../models/Tipo_Questao");
 async function createQuiz(quizForm, userEmail) {
     const auth = await (0, googleAuth_1.getAuthClient)();
     const formsApi = googleapis_1.google.forms({ version: 'v1', auth });
-    // 🟢 1️⃣ Cria o formulário base
     const createRes = await formsApi.forms.create({
         requestBody: { info: { title: quizForm.titulo } },
     });
     const formId = createRes.data.formId;
     if (!formId)
         throw new Error('formId inválido');
-    // 🟢 2️⃣ Define como quiz
     await formsApi.forms.batchUpdate({
         formId,
         requestBody: {
@@ -282,7 +279,6 @@ async function createQuiz(quizForm, userEmail) {
             ],
         },
     });
-    // 🔵 3️⃣ Monta as perguntas
     const tiposComCorrecao = ['UNICA', 'MULTIPLA', 'VERDADEIRO_FALSO'];
     const requests = (quizForm.questoes || []).map((questao, index) => {
         const item = {
@@ -353,7 +349,6 @@ async function createQuiz(quizForm, userEmail) {
                 };
                 break;
         }
-        // 🔸 Correção (grading)
         if (tiposComCorrecao.includes(questao.tipo) &&
             (questao.respostasCorretas || questao.valorCorreto)) {
             const corretas = questao.respostasCorretas ||
@@ -371,18 +366,16 @@ async function createQuiz(quizForm, userEmail) {
                 whenWrong: { text: questao.feedbackErrado || 'Resposta incorreta.' },
             };
         }
+        // item.questionItem.required = true;
         return { createItem: { item, location: { index } } };
     });
-    // 🔸 Descrição
     requests.push({
         updateFormInfo: {
             info: { description: quizForm.descricao || '' },
             updateMask: 'description',
         },
     });
-    // 🟣 4️⃣ Envia todas as perguntas
     await formsApi.forms.batchUpdate({ formId, requestBody: { requests } });
-    // 🔴 5️⃣ Ativa coleta de e-mail verificada
     await formsApi.forms.batchUpdate({
         formId,
         requestBody: {
@@ -396,7 +389,6 @@ async function createQuiz(quizForm, userEmail) {
             ],
         },
     });
-    // ⚪ 6️⃣ Persiste no banco
     return await data_source_1.AppDataSource.transaction(async (manager) => {
         const quizRepo = manager.getRepository(Quiz_1.Quiz);
         const tipoRepo = manager.getRepository(Tipo_Questao_1.Tipo_Questao);
@@ -449,25 +441,25 @@ async function listAllQuizzes(email) {
     if (!email)
         return [];
     const repo = data_source_1.AppDataSource.getRepository(Quiz_1.Quiz);
-    return await repo.find({
+    const quizzes = await repo.find({
         where: { email: email },
         relations: ['Questoes', 'Questoes.Alternativas'],
     });
-}
-async function listarQuestoesPorFormulario(idForm) {
-    const repo = data_source_1.AppDataSource.getRepository(Pergunta_1.Pergunta);
-    return await repo.find({
-        where: { Formulario: { idFormulario: idForm } },
-        relations: ['Alternativas'],
-    });
+    if (!quizzes)
+        return [];
+    return quizzes.map((quiz) => QuizDto_1.QuizDto.convert(quiz));
 }
 async function buscarQuizPorId(quizId) {
     const forms = googleapis_1.google.forms({ version: 'v1', auth: googleAuth_1.oAuth2Client });
     const formRes = await forms.forms.get({ formId: quizId });
     const respostasRes = await forms.forms.responses.list({ formId: quizId });
+    const ativo = !!formRes.data.responderUri;
     if (!formRes)
         return null;
-    return convertQuizData(formRes.data.items, respostasRes.data.responses);
+    return convertQuestionData(ativo, {
+        items: formRes.data.items || [],
+        responses: respostasRes.data.responses || [],
+    });
 }
 async function salvarQuestao(form) {
     const repo = data_source_1.AppDataSource.getRepository(Questao_1.Questao);
@@ -628,4 +620,94 @@ function convertQuizData(questoesQuiz, respostasQuiz) {
         };
     });
     return { questoes: questoesFormatadas, respostas: respostasFormatadas };
+}
+function convertQuestionData(ativo, data) {
+    const questoes = data.items || [];
+    const responses = data.responses || [];
+    // --- QUESTÕES ---
+    const questoesFormatadas = questoes
+        .filter((q) => q.questionItem?.question)
+        .map((quest) => {
+        const question = quest.questionItem.question;
+        let tipo = 'DESCONHECIDO';
+        let opcoes;
+        if (question.textQuestion)
+            tipo = 'Texto';
+        if (question.choiceQuestion) {
+            tipo = 'Escolha';
+            opcoes =
+                question.choiceQuestion.options?.map((o) => o.value) || [];
+        }
+        if (question.scaleQuestion)
+            tipo = 'Escala';
+        if (question.dateQuestion)
+            tipo = 'Data';
+        return {
+            id: question.questionId,
+            titulo: quest.title,
+            tipo,
+            opcoes,
+        };
+    });
+    // --- RESPOSTAS ---
+    const respostasFormatadas = responses.map((resp) => {
+        const respostasQuestao = [];
+        Object.values(resp.answers || {}).forEach((answer) => {
+            const idQuestao = answer.questionId;
+            const textAnswers = answer.textAnswers?.answers || [];
+            const choiceAnswers = answer.choiceAnswers?.answers || [];
+            [...textAnswers, ...choiceAnswers].forEach((a) => {
+                respostasQuestao.push({
+                    idQuestao,
+                    valor: a.value ?? null,
+                });
+            });
+        });
+        return {
+            idResposta: resp.responseId,
+            dataEnviada: new Date(resp.lastSubmittedTime),
+            usuarioEmail: resp.respondentEmail ?? null,
+            respostas: respostasQuestao,
+        };
+    });
+    // --- FORMATAÇÃO FINAL ---
+    const questoesFormatadasResponse = {
+        questoes: questoesFormatadas,
+        respostas: respostasFormatadas,
+    };
+    const resposta = {
+        ativo,
+        questoesFormatadas: questoesFormatadasResponse,
+        respostasPorUsuario: mapearRespostasPorRespondente(data),
+    };
+    return resposta;
+}
+function mapearRespostasPorRespondente(data) {
+    const questoes = data.items || [];
+    const responses = data.responses || [];
+    return responses.map((resp) => {
+        const respostasUsuario = [];
+        Object.values(resp.answers || {}).forEach((answer) => {
+            const idQuestao = answer.questionId;
+            const questao = questoes.find((q) => q.questionItem?.question?.questionId === idQuestao);
+            if (!questao)
+                return;
+            const titulo = questao.title;
+            const textAnswers = answer.textAnswers?.answers || [];
+            const choiceAnswers = answer.choiceAnswers?.answers || [];
+            [...textAnswers, ...choiceAnswers].forEach((a) => {
+                respostasUsuario.push({
+                    idQuestao,
+                    titulo,
+                    valor: a.value ?? null,
+                });
+            });
+        });
+        return {
+            idResposta: resp.responseId,
+            usuarioEmail: resp.respondentEmail ?? null,
+            dataEnviada: new Date(resp.lastSubmittedTime),
+            respostas: respostasUsuario,
+        };
+    });
 }

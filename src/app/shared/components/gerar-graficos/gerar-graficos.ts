@@ -14,7 +14,7 @@ import { SelectModule } from 'primeng/select';
 import { ChartModule } from 'primeng/chart';
 import { ButtonModule } from 'primeng/button';
 import { Dialog } from 'primeng/dialog';
-import { QuizSelected } from '../../models/ChatSelected.model';
+import { QuizSelected } from '../../models/QuizSelected.model';
 
 @Component({
   selector: 'app-gerar-graficos',
@@ -51,7 +51,7 @@ export class GerarGraficos implements OnChanges {
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['formSelected'] && this.formSelected) {      
-      this.optionsByDropdownQuests = this.formSelected.questoes.map(
+      this.optionsByDropdownQuests = this.formSelected.questoesFormatadas.questoes.map(
         (q: any, i: number) => ({
           label: `${i + 1}º Questão - ${q.titulo}`,
           value: q.id,
@@ -69,7 +69,7 @@ export class GerarGraficos implements OnChanges {
     if (!this.questSelected || this.formSelected == null) return;
 
     const questId = this.questSelected.value ?? this.questSelected;
-    const quest = this.formSelected.questoes.find((q: any) => q.id === questId);
+    const quest = this.formSelected.questoesFormatadas.questoes.find((q: any) => q.id === questId);
     if (!quest) return;
 
     const tipoQuest = (quest.tipo || '').toLowerCase();
@@ -89,7 +89,7 @@ export class GerarGraficos implements OnChanges {
     );
 
     const counts = labels.map((label: any) =>
-      (this.formSelected!.respostas || []).reduce((acc: number, resp: any) => {
+      (this.formSelected!.questoesFormatadas.respostas || []).reduce((acc: number, resp: any) => {
         const r = (resp.respostas || []).find(
           (x: any) => x.idQuestao === quest.id
         );

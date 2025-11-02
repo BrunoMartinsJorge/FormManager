@@ -3,6 +3,8 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from '../core/environments/environment';
 import { QuestaoSalva } from '../pages/questoes-salvas-quiz/model/QuestaoSalva';
+import { QuizDto } from '../pages/listar-quiz/models/QuizDto';
+import { QuizSelected } from '../shared/models/QuizSelected.model';
 
 @Injectable({
   providedIn: 'root',
@@ -39,8 +41,8 @@ export class QuizService {
     });
   }
 
-  public buscarRespostasDeFormularioPorIdForm(formId: string): Observable<any> {
-    return this.http.get<any>(`${this.baseUrl}/quiz/${formId}/responses`);
+  public buscarRespostasDeFormularioPorIdForm(formId: string): Observable<QuizSelected> {
+    return this.http.get<QuizSelected>(`${this.baseUrl}/quiz/${formId}/responses`);
   }
 
   public editarQuestao(questao: QuestaoSalva): Observable<any> {

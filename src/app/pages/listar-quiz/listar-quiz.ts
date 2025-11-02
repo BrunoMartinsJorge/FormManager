@@ -14,7 +14,8 @@ import { Resposta } from '../../shared/models/resposta.model';
 import { QuizService } from '../../services/quiz-service';
 import { Resposta_Questao } from '../listar-formularios/models/Resposta.model';
 import { QuestaoModel } from '../../shared/models/questao.model';
-import { QuizSelected } from '../../shared/models/ChatSelected.model';
+import { QuizSelected } from '../../shared/models/QuizSelected.model';
+import { QuizDto } from './models/QuizDto';
 
 export interface Quest {
   titulo: string;
@@ -47,7 +48,7 @@ export class ListarQuiz {
   public listarQuizzes: any[] = [];
   public carregandoQuiz: boolean = false;
   public quizSelecionado: QuizSelected | null = null;
-  public quizSelectedId: number | null = null;
+  public quizSelecionadoPorId: number | null = null;
   public questoes: QuestaoModel[] = [];
   public respostasPorUsuario: any[] = [];
   public visibilidadeDeCriarGraficos: boolean = false;
@@ -102,7 +103,7 @@ export class ListarQuiz {
    * @description Função para selecionar um quiz
    */
   public selecionarQuiz(id: number): void {
-    this.quizSelectedId = id;
+    this.quizSelecionadoPorId = id;
     this.respostasOuQuestoes = 'quest';
     this.getDadosQuizSelecionado();
   }
@@ -114,7 +115,7 @@ export class ListarQuiz {
   public getLinkManualQuiz(): void {
     if (!this.quizSelecionado) return;
     const quiz = this.listaQuizzes.find(
-      (q) => q.idFormulario === this.quizSelectedId
+      (q) => q.idFormulario === this.quizSelecionadoPorId
     );
     if (!quiz || !quiz.quizId) return;
     const urlPadrao: string = `https://docs.google.com/forms/d/${quiz.quizId}/edit`;
@@ -128,24 +129,15 @@ export class ListarQuiz {
   private carregarQuizzes(): void {
     this.service.getAllQuizzes().subscribe({
       next: (data: any[]) => {
-        this.listaQuizzes = data
-          .map((q) => ({
-            idFormulario: q.idQuiz,
-            Titulo: q.titulo,
-            Descricao: q.descricao,
-            Data_Criacao: new Date(q.data_criacao),
-            Link_Url: q.linkUrl,
-            quizId: q.quizId,
-          }))
-          .sort((a: any, b: any) => b.idFormulario - a.idFormulario);
+        this.listaQuizzes = data.sort((a: any, b: any) => b.idQuiz - a.idQuiz);
+        console.log(this.listaQuizzes);
+
         this.listarQuizzes = [...this.listaQuizzes];
         this.quizSelecionado =
           this.listaQuizzes.length > 0 ? this.listaQuizzes[0] : null;
 
-        this.quizSelectedId =
-          this.listaQuizzes.length > 0
-            ? this.listaQuizzes[0].idFormulario
-            : null;
+        this.quizSelecionadoPorId =
+          this.listaQuizzes.length > 0 ? this.listaQuizzes[0].idQuiz : null;
         this.getDadosQuizSelecionado();
       },
       error: (err) => console.error(err),
@@ -157,25 +149,28 @@ export class ListarQuiz {
    * @description Função para carregar os quizzes
    */
   private getDadosQuizSelecionado(): void {
-    console.log(this.quizSelecionado!.quizId);
-
     const quiz = this.listaQuizzes.find(
-      (q) => q.idFormulario === this.quizSelectedId
+      (q) => q.idQuiz === this.quizSelecionadoPorId
     );
     this.quizSelecionado = null;
     this.carregandoQuiz = true;
     if (!quiz || !quiz.quizId) {
       this.carregandoQuiz = false;
-
       return;
     }
     this.service.buscarRespostasDeFormularioPorIdForm(quiz.quizId).subscribe({
       next: (res: QuizSelected) => {
         this.quizSelecionado = res;
-
-        this.respostasPorUsuario = this.mapearRespostasPorRespondente(res);
-
+        this.quizSelecionado!.ativo = quiz.ativo;
+        this.respostasPorUsuario = res.respostasPorUsuario;
         this.carregandoQuiz = false;
+        this.quizSelecionado.ativo = quiz.ativo;
+        this.quizSelecionado.titulo = quiz.titulo;
+        this.quizSelecionado.dataCriacao = quiz.dataCriacao;
+        this.quizSelecionado.quizId = quiz.quizId;
+        this.quizSelecionado.descricao = quiz.descricao;
+        console.log(this.quizSelecionado);
+        console.log(quiz);
       },
       error: (err) => {
         console.error(err);
@@ -184,29 +179,29 @@ export class ListarQuiz {
     });
   }
 
-  private mapearRespostasPorRespondente(data: QuizSelected): any[] {
-    const questoes = data.questoes || [];
-    const respostas = data.respostas || [];
+  // private mapearRespostasPorRespondente(data: QuizSelected): any[] {
+  //   const questoes = data.questoes || [];
+  //   const respostas = data.respostas || [];
 
-    if (!questoes.length || !respostas.length) return [];
+  //   if (!questoes.length || !respostas.length) return [];
 
-    return respostas.map((resp: any) => {
-      // resp.respostas eh um array com as respostas de uma submissão
-      const respostasUsuario = resp.respostas.map((r: any) => ({
-        idQuestao: r.idQuestao,
-        valor: r.valor,
-        score: r.score,
-        correta: r.correta,
-      }));
+  //   return respostas.map((resp: any) => {
+  //     // resp.respostas eh um array com as respostas de uma submissão
+  //     const respostasUsuario = resp.respostas.map((r: any) => ({
+  //       idQuestao: r.idQuestao,
+  //       valor: r.valor,
+  //       score: r.score,
+  //       correta: r.correta,
+  //     }));
 
-      return {
-        idResposta: resp.idResposta,
-        dataEnviada: resp.dataEnviada,
-        respostas: respostasUsuario,
-        totalScore: resp.totalScore ?? 0,
-      };
-    });
-  }
+  //     return {
+  //       idResposta: resp.idResposta,
+  //       dataEnviada: resp.dataEnviada,
+  //       respostas: respostasUsuario,
+  //       totalScore: resp.totalScore ?? 0,
+  //     };
+  //   });
+  // }
 
   /**
    *
@@ -222,8 +217,8 @@ export class ListarQuiz {
     let total = 0;
     let max = 0;
 
-    for (const quest of this.quizSelecionado.questoes) {
-      const valorQuestao = quest.valor || 0;
+    for (const quest of this.quizSelecionado.questoesFormatadas.questoes) {
+      const valorQuestao = quest.pontuacao || 0;
       max += valorQuestao;
 
       const resposta = respostaUsuario.respostas.find(
@@ -313,8 +308,9 @@ export class ListarQuiz {
    */
   public getTipoQuestaoPorIdQuestao(questId: string): string {
     return (
-      this.quizSelecionado?.questoes.find((q: any) => q.id === questId)?.tipo ||
-      ''
+      this.quizSelecionado?.questoesFormatadas.questoes.find(
+        (q: any) => q.id === questId
+      )?.tipo || ''
     );
   }
 
@@ -326,8 +322,9 @@ export class ListarQuiz {
    */
   public getTituloQuestaoPorId(questId: string): string {
     return (
-      this.quizSelecionado?.questoes.find((q: any) => q.id === questId)
-        ?.titulo || ''
+      this.quizSelecionado?.questoesFormatadas.questoes.find(
+        (q: any) => q.id === questId
+      )?.titulo || ''
     );
   }
 
@@ -338,9 +335,9 @@ export class ListarQuiz {
    * @returns - Quantidade de respostas
    */
   public getQuantidadeRespostas(questId: string): number {
-    if (!this.quizSelecionado?.respostas?.length) return 0;
+    if (!this.quizSelecionado?.questoesFormatadas.respostas?.length) return 0;
     let count = 0;
-    this.quizSelecionado.respostas.forEach((resp: any) => {
+    this.quizSelecionado.questoesFormatadas.respostas.forEach((resp: any) => {
       resp.respostas.forEach((r: any) => {
         if (r.idQuestao === questId) count++;
       });
@@ -355,7 +352,7 @@ export class ListarQuiz {
   public acessarQuiz(): void {
     if (!this.quizSelecionado) return;
     const quiz = this.listaQuizzes.find(
-      (quiz) => quiz.idFormulario === this.quizSelectedId
+      (quiz) => quiz.idFormulario === this.quizSelecionadoPorId
     );
     if (!quiz) return;
     window.open(quiz.Link_Url, '_blank');

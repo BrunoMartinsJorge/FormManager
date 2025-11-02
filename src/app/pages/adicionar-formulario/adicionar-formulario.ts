@@ -171,7 +171,7 @@ export class AdicionarFormulario {
    * @description Busca as perguntas salvas do banco
    */
   private buscarPerguntasSalvas(): void {
-    this.formulariosService.findAllQuestionsFavorites().subscribe({
+    this.formulariosService.buscarTodasPerguntasSalvas().subscribe({
       next: (res) => {
         this.visibilidadePerguntasSalvas = true;
         this.perguntasSalvas = res;

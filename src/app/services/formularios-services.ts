@@ -17,11 +17,11 @@ export class FormulariosServices {
     return this.http.post<any>(`${this.baseUrl}/formularios`, formulario);
   }
 
-  public findAllQuestionsFavorites(): Observable<any[]> {
+  public buscarTodasPerguntasSalvas(): Observable<any[]> {
     return this.http.get<any[]>(`${this.baseUrl}/formularios/questoes-salvas`);
   }
 
-  public addQuestionToFavorites(question: any): Observable<any> {
+  public adicionarNovaPerguntaSalva(question: any): Observable<any> {
     return this.http.post<any>(`${this.baseUrl}/formularios/questoes`, question);
   }
 
