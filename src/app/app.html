@@ -1,3 +1,10 @@
+<p-toast
+  [breakpoints]="{ '720px': { width: '100%', right: '0', left: '0' } }"
+  [showTransitionOptions]="'250ms'"
+  [showTransformOptions]="'translateX(100%)'"
+  [hideTransitionOptions]="'150ms'"
+  [hideTransformOptions]="'translateX(100%)'"
+/>
 <main>
   <div class="sidebar" *ngIf="isAuthenticated()">
     <app-navbar></app-navbar>

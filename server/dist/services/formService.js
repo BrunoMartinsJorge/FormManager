@@ -30,23 +30,6 @@ async function salvarFormularioCompleto(dadosForm, userEmail) {
     const formId = createRes.data.formId;
     let requests = [];
     (dadosForm.questoes || []).forEach((questao, index) => {
-        // 1️⃣ Se tiver imagem, adiciona item de imagem antes
-        if (questao.imagemUrl) {
-            requests.push({
-                createItem: {
-                    item: {
-                        title: questao.descricaoImagem || '',
-                        imageItem: {
-                            image: {
-                                sourceUri: questao.imagemUrl,
-                            },
-                        },
-                    },
-                    location: { index: requests.length },
-                },
-            });
-        }
-        // 2️⃣ Depois adiciona a pergunta
         const item = {
             title: questao.titulo,
             questionItem: { question: {} },
@@ -58,6 +41,21 @@ async function salvarFormularioCompleto(dadosForm, userEmail) {
             case 'PARAGRAFO':
                 item.questionItem.question = { textQuestion: { paragraph: true } };
                 break;
+            case 'IMAGEM':
+                requests.push({
+                    createItem: {
+                        item: {
+                            title: questao.descricaoImagem || '',
+                            imageItem: {
+                                image: {
+                                    sourceUri: questao.imagemUrl,
+                                },
+                            },
+                        },
+                        location: { index: requests.length },
+                    },
+                });
+                return; // <-- evita continuar o fluxo e criar outro item duplicado
             case 'NUMERO':
                 item.questionItem.question = { textQuestion: {} };
                 break;

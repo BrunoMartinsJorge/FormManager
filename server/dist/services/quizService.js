@@ -366,7 +366,6 @@ async function createQuiz(quizForm, userEmail) {
                 whenWrong: { text: questao.feedbackErrado || 'Resposta incorreta.' },
             };
         }
-        // item.questionItem.required = true;
         return { createItem: { item, location: { index } } };
     });
     requests.push({
@@ -571,55 +570,6 @@ async function listarTodasQuestoesFavoritas() {
         return response;
     response = questoes.map((q) => ListaQuestoesDto_1.ListaQuestoesDto.convert(q));
     return response;
-}
-function convertQuizData(questoesQuiz, respostasQuiz) {
-    const questoes = questoesQuiz || [];
-    const responses = respostasQuiz || [];
-    const questoesFormatadas = questoes.map((q) => {
-        const question = q.questionItem?.question;
-        let tipo = 'DESCONHECIDO';
-        let opcoes;
-        if (question.textQuestion)
-            tipo = 'Texto';
-        if (question.choiceQuestion) {
-            tipo = 'Escolha';
-            opcoes = question.choiceQuestion.options.map((o) => o.value);
-        }
-        if (question.scaleQuestion)
-            tipo = 'Escala';
-        if (question.dateQuestion)
-            tipo = 'Data';
-        const grading = question.grading || {};
-        const valor = grading.pointValue || 0;
-        const opcaoCorreta = grading.correctAnswers?.answers?.[0]?.value || null;
-        return {
-            id: question.questionId,
-            titulo: q.title,
-            tipo,
-            opcoes,
-            opcaoCorreta,
-            valor,
-        };
-    });
-    const respostasFormatadas = responses.map((resp) => {
-        const respostasQuestao = [];
-        Object.values(resp.answers).forEach((answer) => {
-            const valor = answer.textAnswers?.answers?.[0]?.value ?? null;
-            respostasQuestao.push({
-                idQuestao: answer.questionId,
-                valor,
-                score: answer.grade?.score ?? 0,
-                correta: answer.grade?.correct ?? false,
-            });
-        });
-        return {
-            idResposta: resp.responseId,
-            dataEnviada: new Date(resp.lastSubmittedTime),
-            respostas: respostasQuestao,
-            totalScore: resp.totalScore ?? 0,
-        };
-    });
-    return { questoes: questoesFormatadas, respostas: respostasFormatadas };
 }
 function convertQuestionData(ativo, data) {
     const questoes = data.items || [];

@@ -30,6 +30,7 @@ import { SplitButtonModule } from 'primeng/splitbutton';
 import { MenuItem } from 'primeng/api';
 import { CheckboxModule } from 'primeng/checkbox';
 import { TableModule } from 'primeng/table';
+import { InfoTipoQuestao } from "../../shared/info-tipo-questao/info-tipo-questao";
 
 export interface Opcao {
   id: number;
@@ -59,7 +60,8 @@ export interface Opcao {
     SplitButtonModule,
     CheckboxModule,
     TableModule,
-  ],
+    InfoTipoQuestao
+],
   standalone: true,
   providers: [FormulariosServices],
   templateUrl: './adicionar-formulario.html',
@@ -112,6 +114,7 @@ export class AdicionarFormulario {
     { nome: 'Texto', value: TypeQuestEnum.TEXTO },
     { nome: 'Parágrafo', value: TypeQuestEnum.PARAGRAFO },
     { nome: 'Número', value: TypeQuestEnum.NUMERO },
+    { nome: 'Imagem', value: TypeQuestEnum.IMAGEM },
     { nome: 'Única Escolha', value: TypeQuestEnum.UNICA },
     { nome: 'Múltipla Escolha', value: TypeQuestEnum.MULTIPLA },
     { nome: 'Data', value: TypeQuestEnum.DATA },
@@ -255,8 +258,16 @@ export class AdicionarFormulario {
     if (!this.formulario.questoes || this.formulario.questoes.length === 0)
       return false;
     for (let questao of this.formulario.questoes) {
-      if (!questao.titulo || !questao.tipo) {
-        return false;
+      if (questao.tipo !== TypeQuestEnum.IMAGEM) { 
+        if (questao.descricaoImagem && questao.descricaoImagem.trim() === '') {
+          return false;
+        }
+        if (!questao.imagemUrl && questao.imagemUrl?.trim() === '') {
+          return false;
+        }
+        if (!questao.titulo) {
+          return false;
+        }
       }
       if (
         questao.tipo === TypeQuestEnum.MULTIPLA ||

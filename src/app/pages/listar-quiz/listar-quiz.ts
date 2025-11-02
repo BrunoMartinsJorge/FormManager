@@ -4,18 +4,15 @@ import { Router } from '@angular/router';
 import { Button } from 'primeng/button';
 import { Dialog } from 'primeng/dialog';
 import { ProgressSpinner } from 'primeng/progressspinner';
-import { ConfirmationService, MessageService } from 'primeng/api';
+import { MessageService } from 'primeng/api';
 import { GerarGraficos } from '../../shared/components/gerar-graficos/gerar-graficos';
 import { GerarPdf } from '../../shared/components/gerar-pdf/gerar-pdf';
 import { FormularioPdfModel } from '../../shared/components/gerar-pdf/models/FormularioPdf.model';
 import * as XLSX from 'xlsx';
-import { Questao } from '../listar-formularios/models/Questao.model';
-import { Resposta } from '../../shared/models/resposta.model';
 import { QuizService } from '../../services/quiz-service';
-import { Resposta_Questao } from '../listar-formularios/models/Resposta.model';
 import { QuestaoModel } from '../../shared/models/questao.model';
 import { QuizSelected } from '../../shared/models/QuizSelected.model';
-import { QuizDto } from './models/QuizDto';
+import { InplaceModule } from 'primeng/inplace';
 
 export interface Quest {
   titulo: string;
@@ -39,6 +36,7 @@ export interface Form {
     ProgressSpinner,
     GerarGraficos,
     GerarPdf,
+    InplaceModule,
   ],
   templateUrl: './listar-quiz.html',
   styleUrl: './listar-quiz.css',
@@ -57,7 +55,11 @@ export class ListarQuiz {
   public respostasOuQuestoes: 'quest' | 'responses' = 'quest';
   public indexByRespostas: number = 0;
 
-  constructor(private service: QuizService, private router: Router) {
+  constructor(
+    private service: QuizService,
+    private router: Router,
+    private toast: MessageService
+  ) {
     this.carregarQuizzes();
   }
 
@@ -130,17 +132,22 @@ export class ListarQuiz {
     this.service.getAllQuizzes().subscribe({
       next: (data: any[]) => {
         this.listaQuizzes = data.sort((a: any, b: any) => b.idQuiz - a.idQuiz);
-        console.log(this.listaQuizzes);
-
         this.listarQuizzes = [...this.listaQuizzes];
         this.quizSelecionado =
           this.listaQuizzes.length > 0 ? this.listaQuizzes[0] : null;
-
         this.quizSelecionadoPorId =
           this.listaQuizzes.length > 0 ? this.listaQuizzes[0].idQuiz : null;
         this.getDadosQuizSelecionado();
       },
-      error: (err) => console.error(err),
+      error: (err) => {
+        console.error(err);
+        this.toast.add({
+          severity: 'error',
+          summary: 'Erro ao carregar os quizzes',
+          detail: err.message,
+          life: 3000
+        })
+      },
     });
   }
 
@@ -169,12 +176,16 @@ export class ListarQuiz {
         this.quizSelecionado.dataCriacao = quiz.dataCriacao;
         this.quizSelecionado.quizId = quiz.quizId;
         this.quizSelecionado.descricao = quiz.descricao;
-        console.log(this.quizSelecionado);
-        console.log(quiz);
       },
       error: (err) => {
         console.error(err);
         this.carregandoQuiz = false;
+        this.toast.add({
+          severity: 'error',
+          summary: 'Erro ao carregar os quiz',
+          detail: err.message,
+          life: 3000
+        })
       },
     });
   }

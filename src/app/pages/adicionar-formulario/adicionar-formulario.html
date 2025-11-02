@@ -28,17 +28,18 @@
       </div>
     </div>
   </div>
-  <h2>Questões do Formulário</h2>
+  <h2>Perguntas do Formulário</h2>
   <div
     class="quest"
     *ngFor="let questao of formulario.questoes; let i = index"
     [@questaoAnimation]
   >
     <div class="quest-header">
-      <h4>Questão {{ i + 1 }}</h4>
+      <h4>{{ i + 1 }}ª Pergunta</h4>
+      <info-tipo-questao [tipoQuestao]="questao.tipo"></info-tipo-questao>
     </div>
     <hr />
-    <div class="input-group">
+    <div class="input-group" *ngIf="questao.tipo !== 'IMAGEM'">
       <label for="titulo-quest">Título da Questão:</label>
       <input
         id="titulo-quest"
@@ -47,31 +48,6 @@
         [(ngModel)]="questao.titulo"
         placeholder="Título da Questão"
       />
-    </div>
-    <div class="image-group">
-      <div class="input-group">
-        <label for="titulo-quest">Imagem da Questão:</label>
-        <input
-          id="titulo-quest"
-          type="text"
-          pInputText
-          [(ngModel)]="questao.imagemUrl"
-          placeholder="Imagem da Questão (URL)"
-          [invalid]="!urlImagemValida(questao.imagemUrl || '') && (questao.imagemUrl || '').trim() !== ''"
-          pTooltip="Opcional."
-        />
-      </div>
-      <div class="input-group">
-        <label for="titulo-quest">Descrição da Imagem:</label>
-        <input
-          id="titulo-quest"
-          type="text"
-          pInputText
-          [(ngModel)]="questao.descricaoImagem"
-          placeholder="Descrição da Imagem"
-          [disabled]="!urlImagemValida(questao.imagemUrl || '')"
-        />
-      </div>
     </div>
     <div class="opcao-quest">
       <div class="input-group">
@@ -113,7 +89,33 @@
         />
       </p-inputgroup>
     </div>
-
+    @if (questao.tipo === 'IMAGEM') {
+          <div class="image-group">
+      <div class="input-group">
+        <label for="titulo-quest">Imagem da Questão:</label>
+        <input
+          id="titulo-quest"
+          type="text"
+          pInputText
+          [(ngModel)]="questao.imagemUrl"
+          placeholder="Imagem da Questão (URL)"
+          [invalid]="!urlImagemValida(questao.imagemUrl || '') && (questao.imagemUrl || '').trim() !== ''"
+          pTooltip="Opcional."
+        />
+      </div>
+      <div class="input-group">
+        <label for="titulo-quest">Descrição da Imagem:</label>
+        <input
+          id="titulo-quest"
+          type="text"
+          pInputText
+          [(ngModel)]="questao.descricaoImagem"
+          placeholder="Descrição da Imagem"
+          [disabled]="!urlImagemValida(questao.imagemUrl || '')"
+        />
+      </div>
+    </div>
+    }
     <div class="info-input" *ngIf="questao.tipo === 'ESCALA'">
       <div class="input-group">
         <label for="min-quest">Valor mínimo:</label>
@@ -137,15 +139,6 @@
         />
       </div>
     </div>
-    <p-fieldset
-      legend="Vizualizar questão"
-      toggleable="true"
-      [collapsed]="true"
-      to
-    >
-      <app-visualizar-questao [questao]="questao"></app-visualizar-questao>
-    </p-fieldset>
-    <hr />
     <div class="footer-quest" [@questaoAnimation]>
       <p-button
         label="Remover Questão"

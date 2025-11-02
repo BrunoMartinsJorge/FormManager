@@ -34,24 +34,6 @@ export async function salvarFormularioCompleto(
   let requests: any[] = [];
 
   (dadosForm.questoes || []).forEach((questao: any, index: number) => {
-    // 1️⃣ Se tiver imagem, adiciona item de imagem antes
-    if (questao.imagemUrl) {
-      requests.push({
-        createItem: {
-          item: {
-            title: questao.descricaoImagem || '',
-            imageItem: {
-              image: {
-                sourceUri: questao.imagemUrl,
-              },
-            },
-          },
-          location: { index: requests.length },
-        },
-      });
-    }
-
-    // 2️⃣ Depois adiciona a pergunta
     const item: any = {
       title: questao.titulo,
       questionItem: { question: {} },
@@ -64,6 +46,22 @@ export async function salvarFormularioCompleto(
       case 'PARAGRAFO':
         item.questionItem.question = { textQuestion: { paragraph: true } };
         break;
+
+      case 'IMAGEM':
+        requests.push({
+          createItem: {
+            item: {
+              title: questao.descricaoImagem || '',
+              imageItem: {
+                image: {
+                  sourceUri: questao.imagemUrl,
+                },
+              },
+            },
+            location: { index: requests.length },
+          },
+        });
+        return; // <-- evita continuar o fluxo e criar outro item duplicado
       case 'NUMERO':
         item.questionItem.question = { textQuestion: {} };
         break;

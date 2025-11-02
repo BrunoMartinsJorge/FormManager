@@ -2,14 +2,17 @@ import { Component, signal } from '@angular/core';
 import { Router, RouterOutlet } from '@angular/router';
 import { ButtonModule } from 'primeng/button';
 import { CommonModule } from '@angular/common';
-import { Token } from './core/auth/token';
+// import { Token } from './core/auth/token';
 import { Navbar } from './shared/components/navbar/navbar';
+import { ToastModule } from 'primeng/toast';
+import { MessageService } from 'primeng/api';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, ButtonModule, Navbar, CommonModule],
+  imports: [RouterOutlet, ButtonModule, Navbar, CommonModule, ToastModule],
   templateUrl: './app.html',
   styleUrl: './app.css',
+  providers: [MessageService],
 })
 export class App {
   protected readonly title = signal('Angular_Electron');

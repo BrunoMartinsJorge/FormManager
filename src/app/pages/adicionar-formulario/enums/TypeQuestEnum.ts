@@ -7,4 +7,5 @@ export enum TypeQuestEnum {
   DATA = 'DATA',
   ESCALA = 'ESCALA',
   VERDADEIRO_FALSO = 'VERDADEIRO_FALSO',
+  IMAGEM = 'IMAGEM',
 }

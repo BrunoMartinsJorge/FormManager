@@ -1,0 +1,176 @@
+<i
+  class="pi pi-info-circle"
+  pTooltip="Clique para ver sobre o campo"
+  (click)="visibilidadeDeInfo = true"
+></i>
+<p-dialog
+  header="Informações sobre o campo"
+  [draggable]="false"
+  [(visible)]="visibilidadeDeInfo"
+  [modal]="true"
+  [style]="{ width: '50%'}"
+>
+  @switch (tipoQuestao) { @case ('TEXTO') {
+  <h3>TEXTO</h3>
+  <p>
+    Esse tipo de campo permite que o respondente escreva uma resposta. Podendo
+    conter múltiplas linhas com caracteres.
+  </p>
+  <p-fieldset legend="Exemplo">
+    <input type="text" pInputText />
+  </p-fieldset>
+  } @case ('PARAGRAFO') {
+  <h3>PARAGRAFO</h3>
+  <p>
+    Sendo semelhante ao campo TEXTO, o PARAGRAFO permite que o respondente
+    escreva uma resposta. Podendo conter múltiplas linhas com caracteres. A
+    diferença entre o PARAGRAFO e o TEXTO é que o PARAGRAFO é um campo maior e
+    expecificado para textos maiores.
+  </p>
+  <p-fieldset legend="Exemplo">
+    <textarea type="text" style="max-width: 40vw; max-height: 160px" pTextarea>
+    </textarea>
+  </p-fieldset>
+  } @case ('NUMERO') {
+  <h3>NÚMERO</h3>
+  <p>
+    Esse tipo de campo permite que o respondente insira números. Entretando com
+    o Google Forms ele támbem permite outros caracteres.
+  </p>
+  <p-fieldset legend="Exemplo">
+    <input type="number" pInputText />
+  </p-fieldset>
+  } @case ('UNICA') {
+  <h3>UNICA</h3>
+  <p>
+    Esse tipo de campo permite que o respondente insira números. Entretando com
+    o Google Forms ele támbem permite outros caracteres.
+  </p>
+  <p-fieldset legend="Exemplo">
+    <div
+      *ngFor="let item of questoesSelecao; let i = index"
+      style="display: flex; align-items: center; gap: 5px"
+    >
+      <p-radiobutton
+        id="opcao-{{i}}"
+        [(ngModel)]="resposta"
+        [value]="'opcao-'+i"
+      />
+      <label for="opcao-{{i}}">{{item.label}}</label>
+    </div>
+  </p-fieldset>
+  } @case ('MULTIPLA') {
+  <h3>UNICA</h3>
+  <p>
+    Esse tipo de campo permite que o respondente insira números. Entretando com
+    o Google Forms ele támbem permite outros caracteres.
+  </p>
+  <p-fieldset legend="Exemplo">
+    <div
+      *ngFor="let item of questoesSelecao; let i = index"
+      style="display: flex; align-items: center; gap: 5px"
+    >
+      <p-checkbox
+        [inputId]="'opcao' + i"
+        [value]="'opcao' + i"
+        [(ngModel)]="resposta"
+        binary="false"
+      ></p-checkbox>
+      <label for="opcao-{{i}}">{{item.label}}</label>
+    </div>
+  </p-fieldset>
+  } @case ('IMAGEM') {
+  <h3>IMAGEM</h3>
+  <p>
+    Esse tipo de campo cria uma imagem que pode auxiliar o respondente. Não pode
+    ser acossiado a nenhuma outra questão.
+  </p>
+  <p-fieldset legend="Exemplo">
+    <div
+      style="
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        align-items: center;
+      "
+    >
+      <input type="text" [(ngModel)]="resposta" pInputText />
+      <img src="{{resposta}}" alt="Imagem..." width="200px" />
+    </div>
+  </p-fieldset>
+  } @case ('DATA') {
+  <h3>DATA</h3>
+  <p>
+    Esse tipo de campo permite que o respondente insira uma data. No formato
+    DD/MM (Dia e mês)
+  </p>
+  <p-fieldset legend="Exemplo">
+    <p-inputMask mask="99/99" [(ngModel)]="resposta"></p-inputMask>
+  </p-fieldset>
+  } @case ('ESCALA') {
+  <h3>ESCALA</h3>
+  <p>
+    Esse tipo de campo cria uma imagem que pode auxiliar o respondente. Não pode
+    ser acossiado a nenhuma outra questão.
+  </p>
+  <p-fieldset legend="Exemplo">
+    <div
+      style="
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        align-items: center;
+        gap: 10px;
+      "
+    >
+      <div
+        *ngFor="let item of questoesSelecao; let i = index"
+        style="
+          display: flex;
+          flex-direction: column;
+          text-align: center;
+          align-items: center;
+        "
+      >
+        <label for="opcao-{{i}}">{{item.escala}}</label>
+        <p-radioButton
+          type="radio"
+          id="opcao-{{i}}"
+          [(ngModel)]="resposta"
+          [value]="'opcao-'+i"
+        />
+      </div>
+    </div>
+  </p-fieldset>
+  } @case ('VERDADEIRO_FALSO') {
+  <h3>Verdadeiro/Falso</h3>
+  <p>
+    Esse tipo de campo cria uma imagem que pode auxiliar o respondente. Não pode
+    ser acossiado a nenhuma outra questão.
+  </p>
+  <p-fieldset legend="Exemplo">
+    <div
+      style="display: flex; flex-wrap: wrap; flex-direction: column;"
+    >
+      <span style="display: flex; gap: 10px; flex-wrap: wrap;">
+          <p-radioButton
+          type="radio"
+          id="true"
+          [(ngModel)]="resposta"
+          [value]="true"
+          />
+          <label for="true">Verdadeiro</label>
+      </span>
+        <span style="display: flex; gap: 10px; flex-wrap: wrap;">
+            <p-radioButton
+            type="radio"
+            id="false"
+            [(ngModel)]="resposta"
+            [value]="false"
+            />
+            <label for="false">Falso</label>
+      </span>
+    </div>
+  </p-fieldset>
+  } @default { Default case. } }
+</p-dialog>
