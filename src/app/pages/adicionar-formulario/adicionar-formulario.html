@@ -51,7 +51,7 @@
     </div>
     <div class="opcao-quest">
       <div class="input-group">
-        <label for="tipo-quest">Qual o tipo da questão:</label>
+        <label for="tipo-quest">Qual o tipo da pergunta:</label>
         <p-select
           id="tipo-quest"
           [options]="tipoDeCampo"
@@ -89,16 +89,52 @@
         />
       </p-inputgroup>
     </div>
-    @if (questao.tipo === 'IMAGEM') {
-          <div class="image-group">
+    @if (questao.tipo === 'PONTUACAO') {
+    <input
+      type="number"
+      pInputText
+      [(ngModel)]="questao.pontuacao"
+      [min]="0"
+      placeholder="Nivel de pontuação"
+    />
+    <p-fieldset legend="Icone de pontuação">
+      <div style="display: flex; flex-wrap: wrap; gap: 15px; align-items: center;">
+        <span style="display: flex; align-items: center; gap: 10px">
+          <p-radiobutton
+            id="STAR"
+            [(ngModel)]="questao.iconPontuacao"
+            [value]="'STAR'"
+          />
+          <label for="STAR">Estrela <i class="pi pi-star"></i></label>
+        </span>
+        <span style="display: flex; align-items: center; gap: 10px">
+          <p-radiobutton
+            id="HEART"
+            [(ngModel)]="questao.iconPontuacao"
+            [value]="'HEART'"
+          />
+          <label for="HEART">Coração <i class="pi pi-heart"></i></label>
+        </span>
+        <span style="display: flex; align-items: center; gap: 10px">
+          <p-radiobutton
+            id="THUMB_UP"
+            [(ngModel)]="questao.iconPontuacao"
+            [value]="'THUMB_UP'"
+          />
+          <label for="THUMB_UP">Polegar <i class="pi pi-thumbs-up"></i></label>
+        </span>
+      </div>
+    </p-fieldset>
+    } @if (questao.tipo === 'IMAGEM') {
+    <div class="image-group">
       <div class="input-group">
-        <label for="titulo-quest">Imagem da Questão:</label>
+        <label for="titulo-quest">Imagem da Pergunta:</label>
         <input
           id="titulo-quest"
           type="text"
           pInputText
           [(ngModel)]="questao.imagemUrl"
-          placeholder="Imagem da Questão (URL)"
+          placeholder="Imagem da Pergunta (URL)"
           [invalid]="!urlImagemValida(questao.imagemUrl || '') && (questao.imagemUrl || '').trim() !== ''"
           pTooltip="Opcional."
         />
@@ -114,6 +150,21 @@
           [disabled]="!urlImagemValida(questao.imagemUrl || '')"
         />
       </div>
+    </div>
+    } @if (questao.tipo === 'DATA') {
+    <div style="display: flex; gap: 10px; flex-wrap: wrap">
+      <span
+        style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap"
+      >
+        <p-toggleswitch [(ngModel)]="questao.anos" id="anos" />
+        <label for="anos">Incluir Anos?</label>
+      </span>
+      <span
+        style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap"
+      >
+        <p-toggleswitch [(ngModel)]="questao.tempo" id="tempo" />
+        <label for="anos">Incluir Tempo?</label>
+      </span>
     </div>
     }
     <div class="info-input" *ngIf="questao.tipo === 'ESCALA'">

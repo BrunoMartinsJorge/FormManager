@@ -14,7 +14,7 @@ import { DatePickerModule } from 'primeng/datepicker';
 import { FormulariosServices } from '../../services/formularios-services';
 import { NewQuest } from './forms/NewQuest';
 import { NewForm } from './forms/NewForm';
-import { TypeQuestEnum } from './enums/TypeQuestEnum';
+import { getTypeQuestLabel, TypeQuestEnum } from './enums/TypeQuestEnum';
 import { ToggleSwitchModule } from 'primeng/toggleswitch';
 import { SelectModule } from 'primeng/select';
 import { FieldsetModule } from 'primeng/fieldset';
@@ -30,7 +30,8 @@ import { SplitButtonModule } from 'primeng/splitbutton';
 import { MenuItem } from 'primeng/api';
 import { CheckboxModule } from 'primeng/checkbox';
 import { TableModule } from 'primeng/table';
-import { InfoTipoQuestao } from "../../shared/info-tipo-questao/info-tipo-questao";
+import { InfoTipoQuestao } from '../../shared/info-tipo-questao/info-tipo-questao';
+import { RadioButton } from "primeng/radiobutton";
 
 export interface Opcao {
   id: number;
@@ -60,7 +61,8 @@ export interface Opcao {
     SplitButtonModule,
     CheckboxModule,
     TableModule,
-    InfoTipoQuestao
+    InfoTipoQuestao,
+    RadioButton
 ],
   standalone: true,
   providers: [FormulariosServices],
@@ -110,20 +112,30 @@ export class AdicionarFormulario {
   ];
   public perguntasSalvas: any[] = [];
 
-  public tipoDeCampo: any[] = [
-    { nome: 'Texto', value: TypeQuestEnum.TEXTO },
-    { nome: 'Parágrafo', value: TypeQuestEnum.PARAGRAFO },
-    { nome: 'Número', value: TypeQuestEnum.NUMERO },
-    { nome: 'Imagem', value: TypeQuestEnum.IMAGEM },
-    { nome: 'Única Escolha', value: TypeQuestEnum.UNICA },
-    { nome: 'Múltipla Escolha', value: TypeQuestEnum.MULTIPLA },
-    { nome: 'Data', value: TypeQuestEnum.DATA },
-    { nome: 'Escala', value: TypeQuestEnum.ESCALA },
-    { nome: 'Verdadeiro / Falso', value: TypeQuestEnum.VERDADEIRO_FALSO },
-  ];
+  public tipoDeCampo: any[] = this.carregarTiposCampos();
+
+  private carregarTiposCampos(): {
+    nome: string;
+    value: TypeQuestEnum;
+  }[] {
+    let tipos = Object.values(TypeQuestEnum);
+    let tiposFormatados = [];
+    for (let i = 0; i < tipos.length; i++) {
+      const tipoF = {
+        nome: '',
+        value: TypeQuestEnum.TEXTO,
+      };
+      tipoF.nome = getTypeQuestLabel(tipos[i]);
+      tipoF.value = tipos[i];
+      tiposFormatados[i] = tipoF;
+    }
+    console.log(tiposFormatados);
+    
+    return tiposFormatados;
+  }
 
   /**
-   * 
+   *
    * @param indexQuestao - Indice da questão
    * @description Adiciona uma opção na questão
    */
@@ -135,7 +147,7 @@ export class AdicionarFormulario {
   }
 
   /**
-   * 
+   *
    * @description Adiciona as perguntas selecionadas ao formulário
    */
   public usarPerguntasSelecionadas(): void {
@@ -153,11 +165,10 @@ export class AdicionarFormulario {
     this.visibilidadePerguntasSalvas = false;
   }
 
-  constructor(private formulariosService: FormulariosServices) {
-  }
+  constructor(private formulariosService: FormulariosServices) {}
 
   /**
-   * 
+   *
    * @description Adiciona uma nova questão ao formulário
    */
   public adicionarQuestao(): void {
@@ -167,10 +178,12 @@ export class AdicionarFormulario {
       opcoes: [],
     };
     this.formulario.questoes.push(novaQuestao);
+    console.log(this.formulario.questoes);
+    
   }
 
   /**
-   * 
+   *
    * @description Busca as perguntas salvas do banco
    */
   private buscarPerguntasSalvas(): void {
@@ -186,7 +199,7 @@ export class AdicionarFormulario {
   }
 
   /**
-   * 
+   *
    * @param url - URL da imagem
    * @description Verifica se a URL da imagem eh valida
    * @returns - Verifica se a URL da imagem eh valida
@@ -199,7 +212,7 @@ export class AdicionarFormulario {
   }
 
   /**
-   * 
+   *
    * @param index - Indice da questão
    * @description Retorna o indice da questão
    * @returns - Indice da questão
@@ -209,7 +222,7 @@ export class AdicionarFormulario {
   }
 
   /**
-   * 
+   *
    * @description Cria um novo formulário
    */
   public criarFormulario(): void {
@@ -238,7 +251,7 @@ export class AdicionarFormulario {
   }
 
   /**
-   * 
+   *
    * @description Remove uma questão do formulário
    * @param index - Indice da questão
    */
@@ -247,7 +260,7 @@ export class AdicionarFormulario {
   }
 
   /**
-   * 
+   *
    * @description Verifica se o formulário esta valido
    * @returns - Retorna true se o formulário for valido
    */
@@ -258,7 +271,7 @@ export class AdicionarFormulario {
     if (!this.formulario.questoes || this.formulario.questoes.length === 0)
       return false;
     for (let questao of this.formulario.questoes) {
-      if (questao.tipo !== TypeQuestEnum.IMAGEM) { 
+      if (questao.tipo !== TypeQuestEnum.IMAGEM) {
         if (questao.descricaoImagem && questao.descricaoImagem.trim() === '') {
           return false;
         }
@@ -298,7 +311,7 @@ export class AdicionarFormulario {
   }
 
   /**
-   * 
+   *
    * @param indexQuestao - Indice da questão
    * @param indexOpcao - Indice da opção
    * @description Remove uma opção da questão
@@ -317,7 +330,7 @@ export class AdicionarFormulario {
   }
 
   /**
-   * 
+   *
    * @description Copia o link do formulário
    */
   public copiarLink(): void {

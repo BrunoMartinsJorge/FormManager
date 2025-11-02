@@ -50,6 +50,38 @@ __decorate([
     (0, typeorm_1.Column)({ type: "text", nullable: true }),
     __metadata("design:type", String)
 ], Pergunta.prototype, "DescricaoImagem", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: "int", nullable: true }),
+    __metadata("design:type", Number)
+], Pergunta.prototype, "low", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: "int", nullable: true }),
+    __metadata("design:type", Number)
+], Pergunta.prototype, "high", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: "text", nullable: true }),
+    __metadata("design:type", String)
+], Pergunta.prototype, "startLabel", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: "text", nullable: true }),
+    __metadata("design:type", String)
+], Pergunta.prototype, "endLabel", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: "boolean", nullable: true }),
+    __metadata("design:type", Boolean)
+], Pergunta.prototype, "anos", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: "boolean", nullable: true }),
+    __metadata("design:type", Boolean)
+], Pergunta.prototype, "tempo", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: "int", nullable: true }),
+    __metadata("design:type", Number)
+], Pergunta.prototype, "nivelPontuacao", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: "text", nullable: true }),
+    __metadata("design:type", String)
+], Pergunta.prototype, "iconPontuacao", void 0);
 exports.Pergunta = Pergunta = __decorate([
     (0, typeorm_1.Entity)()
 ], Pergunta);

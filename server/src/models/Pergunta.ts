@@ -29,4 +29,31 @@ export class Pergunta {
 
   @Column({ type: "text", nullable: true })
   DescricaoImagem!: string;
+  
+  @Column({ type: "int", nullable: true })
+  low!: number;
+  
+  @Column({ type: "int", nullable: true })
+  high!: number;
+  
+  @Column({ type: "text", nullable: true })
+  startLabel!: string;
+  
+  @Column({ type: "text", nullable: true })
+  endLabel!: string;
+  
+  @Column({ type: "boolean", nullable: true })
+  anos!: boolean;
+  
+  @Column({ type: "boolean", nullable: true })
+  tempo!: boolean;
+
+  @Column({ type: "int", nullable: true })
+  nivelPontuacao!: number;
+
+  @Column({ type: "text", nullable: true })
+  iconPontuacao!: string;
+
+  @Column({ type: "boolean" })
+  obrigatorio: boolean = false;
 }

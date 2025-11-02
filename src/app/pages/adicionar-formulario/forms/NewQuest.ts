@@ -10,9 +10,11 @@ export interface NewQuest {
   high?: number;
   startLabel?: string;
   endLabel?: string;
-  maxFiles?: number;
-  maxFileSize?: number;
-  allowedMimeTypes?: string[];
   imagemUrl?: string;
   descricaoImagem?: string;
+  anos?: boolean;
+  tempo?: boolean;
+  pontuacao?: number;
+  iconPontuacao?: string;
+  obrigatorio?: boolean;
 }

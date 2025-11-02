@@ -46,7 +46,14 @@ export async function salvarFormularioCompleto(
       case 'PARAGRAFO':
         item.questionItem.question = { textQuestion: { paragraph: true } };
         break;
-
+      case 'PONTUACAO':
+        item.questionItem.question = {
+          ratingQuestion: {
+            ratingScaleLevel: questao.pontuacao,
+            iconType: questao.iconPontuacao ?? 'STAR',
+          },
+        };
+        break;
       case 'IMAGEM':
         requests.push({
           createItem: {
@@ -83,6 +90,10 @@ export async function salvarFormularioCompleto(
         break;
       case 'DATA':
         item.questionItem.question = { dateQuestion: {} };
+        item.questionItem.question.dateQuestion.includeTime =
+          questao.tempo || false;
+        item.questionItem.question.dateQuestion.includeYear =
+          questao.anos || false;
         break;
       case 'DATAHORA':
         item.questionItem.question = { dateTimeQuestion: {} };
@@ -100,15 +111,16 @@ export async function salvarFormularioCompleto(
           },
         };
         break;
-      case 'UPLOAD':
+      case 'TEMPO':
         item.questionItem.question = {
-          fileUploadQuestion: {
-            maxFiles: questao.maxFiles || 1,
-            maxFileSize: questao.maxFileSize || 10,
+          timeQuestion: {
+            duration: true,
           },
         };
         break;
     }
+
+    item.questionItem.question.required = questao.obrigatorio || false;
 
     requests.push({
       createItem: {
@@ -278,6 +290,14 @@ export async function salvarPergunta(form: NewQuestFormSaved) {
     Alternativas: alternativas,
     Tipo_Pergunta: tipo!,
     Favorita: true,
+    anos: form.anos ?? false,
+    tempo: form.tempo ?? false,
+    DescricaoImagem: form.descricaoImagem ?? '',
+    UrlImagem: form.imagemUrl ?? '',
+    low: form.low ?? 0,
+    high: form.high ?? 0,
+    endLabel: form.endLabel ?? '',
+    startLabel: form.startLabel ?? '',
   });
 
   const saved = await repo.save(pergunta);
