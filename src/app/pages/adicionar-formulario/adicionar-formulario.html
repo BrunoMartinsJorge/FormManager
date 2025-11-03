@@ -98,7 +98,9 @@
       placeholder="Nivel de pontuação"
     />
     <p-fieldset legend="Icone de pontuação">
-      <div style="display: flex; flex-wrap: wrap; gap: 15px; align-items: center;">
+      <div
+        style="display: flex; flex-wrap: wrap; gap: 15px; align-items: center"
+      >
         <span style="display: flex; align-items: center; gap: 10px">
           <p-radiobutton
             id="STAR"
@@ -191,6 +193,12 @@
       </div>
     </div>
     <div class="footer-quest" [@questaoAnimation]>
+      <p-togglebutton
+        [(ngModel)]="questao.obrigatorio"
+        onLabel="Obrigatório"
+        offLabel="Não Obrigatório"
+        class="w-24"
+      />
       <p-button
         label="Remover Questão"
         icon="pi pi-trash"

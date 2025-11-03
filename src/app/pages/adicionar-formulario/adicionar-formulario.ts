@@ -32,6 +32,7 @@ import { CheckboxModule } from 'primeng/checkbox';
 import { TableModule } from 'primeng/table';
 import { InfoTipoQuestao } from '../../shared/info-tipo-questao/info-tipo-questao';
 import { RadioButton } from "primeng/radiobutton";
+import { ToggleButtonModule } from 'primeng/togglebutton';
 
 export interface Opcao {
   id: number;
@@ -62,7 +63,8 @@ export interface Opcao {
     CheckboxModule,
     TableModule,
     InfoTipoQuestao,
-    RadioButton
+    RadioButton,
+    ToggleButtonModule
 ],
   standalone: true,
   providers: [FormulariosServices],

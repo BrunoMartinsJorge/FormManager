@@ -108,13 +108,13 @@ async function salvarFormularioCompleto(dadosForm, userEmail) {
                 break;
             case 'TEMPO':
                 item.questionItem.question = {
-                    required: true,
                     timeQuestion: {
                         duration: true,
                     },
                 };
                 break;
         }
+        item.questionItem.question.required = questao.obrigatorio || false;
         requests.push({
             createItem: {
                 item,

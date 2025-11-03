@@ -54,6 +54,6 @@ export class Pergunta {
   @Column({ type: "text", nullable: true })
   iconPontuacao!: string;
 
-  @Column({ type: "boolean" })
-  obrigatorio: boolean = false;
+  @Column({ type: "boolean", nullable: true })
+  obrigatorio!: boolean;
 }

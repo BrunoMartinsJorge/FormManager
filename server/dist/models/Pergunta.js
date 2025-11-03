@@ -82,6 +82,10 @@ __decorate([
     (0, typeorm_1.Column)({ type: "text", nullable: true }),
     __metadata("design:type", String)
 ], Pergunta.prototype, "iconPontuacao", void 0);
+__decorate([
+    (0, typeorm_1.Column)({ type: "boolean", nullable: true }),
+    __metadata("design:type", Boolean)
+], Pergunta.prototype, "obrigatorio", void 0);
 exports.Pergunta = Pergunta = __decorate([
     (0, typeorm_1.Entity)()
 ], Pergunta);
