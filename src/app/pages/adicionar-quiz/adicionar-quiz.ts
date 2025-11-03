@@ -268,142 +268,142 @@ export class AdicionarQuiz {
     this.erroAoCriarFormulario = false;
     this.mostrarTelaAcao = false;
     console.log(this.quiz);
-    const form = {
-      titulo: 'Testando Todos os Tipos de Campos',
-      descricao: 'Testando Todos...',
-      questoes: [
-        {
-          titulo: 'Texto',
-          tipo: 'TEXTO',
-          valorCorreto: [],
-          respostasCorretas: [],
-        },
-        {
-          titulo: 'Parágrafo',
-          tipo: 'PARAGRAFO',
-          valorCorreto: [],
-          respostasCorretas: [],
-        },
-        {
-          titulo: 'Número',
-          tipo: 'NUMERO',
-          valorCorreto: [],
-          respostasCorretas: [],
-        },
-        {
-          titulo: 'Única',
-          tipo: 'UNICA',
-          opcoes: [
-            {
-              idAlternativa: null,
-              texto: 'Opção 1',
-            },
-            {
-              idAlternativa: null,
-              texto: 'Opção 2',
-            },
-          ],
-          valorCorreto: [],
-          respostasCorretas: [0],
-          pontuacao: 10,
-          feedbackCorreto: 'Boa',
-          feedbackErro: 'Não',
-        },
-        {
-          titulo: 'Múltipla escolha',
-          tipo: 'MULTIPLA',
-          opcoes: [
-            {
-              idAlternativa: null,
-              texto: 'Opção 1',
-            },
-            {
-              idAlternativa: null,
-              texto: 'Opção 2',
-            },
-            {
-              idAlternativa: null,
-              texto: 'Opção 3',
-            },
-          ],
-          valorCorreto: [],
-          respostasCorretas: [0, 1],
-          pontuacao: 10,
-          feedbackCorreto: 'Boa',
-          feedbackErro: 'Não',
-        },
-        {
-          titulo: 'Data: Normal',
-          tipo: 'DATA',
-          valorCorreto: [],
-          respostasCorretas: [],
-        },
-        {
-          titulo: 'Data: Com Anos',
-          tipo: 'DATA',
-          valorCorreto: [],
-          respostasCorretas: [],
-          anos: true,
-        },
-        {
-          titulo: 'Data: Com Tempo',
-          tipo: 'DATA',
-          valorCorreto: [],
-          respostasCorretas: [],
-          tempo: true,
-        },
-        {
-          titulo: 'Data: Ambos',
-          tipo: 'DATA',
-          valorCorreto: [],
-          respostasCorretas: [],
-          anos: true,
-          tempo: true,
-        },
-        {
-          titulo: 'Escala',
-          tipo: 'ESCALA',
-          valorCorreto: [],
-          respostasCorretas: [],
-          low: 0,
-          high: 10,
-        },
-        {
-          titulo: 'Verdadeiro e Falso',
-          tipo: 'VERDADEIRO_FALSO',
-          valorCorreto: ['Falso'],
-          respostasCorretas: [],
-          pontuacao: 10,
-          feedbackCorreto: 'Boa',
-          feedbackErro: 'Não',
-        },
-        {
-          titulo: 'Imagem',
-          tipo: 'IMAGEM',
-          valorCorreto: [],
-          respostasCorretas: [],
-          imagemUrl:
-            'https://imgs.search.brave.com/WsJZNxSbtrWWce5g2iUwaBI1kU0UST_a8IOUn9eViB8/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9saDMu/Z29vZ2xldXNlcmNv/bnRlbnQuY29tL1dn/ZHd2a1FJMlV4S0hP/OVJYaGswSnRfekZa/Y19GVE42SEZFX1RX/elBmWmdWTkxYVXh1/bHROdzUxZk91ZzVh/QS12YVBYLXNBN3ZW/RTAtbDdGV3RYZlBI/Nzkyb25adWY3RnRQ/Si1yYUVtUWRGZGNM/dXhoRzg9czAtcnct/bG8',
-          descricaoImagem: 'Imagem',
-        },
-        {
-          titulo: 'Tempo',
-          tipo: 'TEMPO',
-          valorCorreto: [],
-          respostasCorretas: [],
-        },
-        {
-          titulo: 'Pontuação',
-          tipo: 'PONTUACAO',
-          valorCorreto: [],
-          respostasCorretas: [],
-          pontuacao: 10,
-          iconPontuacao: 'THUMB_UP',
-        },
-      ],
-    };
+    // const form = {
+    //   titulo: 'Testando Todos os Tipos de Campos',
+    //   descricao: 'Testando Todos...',
+    //   questoes: [
+    //     {
+    //       titulo: 'Texto',
+    //       tipo: 'TEXTO',
+    //       valorCorreto: [],
+    //       respostasCorretas: [],
+    //     },
+    //     {
+    //       titulo: 'Parágrafo',
+    //       tipo: 'PARAGRAFO',
+    //       valorCorreto: [],
+    //       respostasCorretas: [],
+    //     },
+    //     {
+    //       titulo: 'Número',
+    //       tipo: 'NUMERO',
+    //       valorCorreto: [],
+    //       respostasCorretas: [],
+    //     },
+    //     {
+    //       titulo: 'Única',
+    //       tipo: 'UNICA',
+    //       opcoes: [
+    //         {
+    //           idAlternativa: null,
+    //           texto: 'Opção 1',
+    //         },
+    //         {
+    //           idAlternativa: null,
+    //           texto: 'Opção 2',
+    //         },
+    //       ],
+    //       valorCorreto: [],
+    //       respostasCorretas: [0],
+    //       pontuacao: 10,
+    //       feedbackCorreto: 'Boa',
+    //       feedbackErro: 'Não',
+    //     },
+    //     {
+    //       titulo: 'Múltipla escolha',
+    //       tipo: 'MULTIPLA',
+    //       opcoes: [
+    //         {
+    //           idAlternativa: null,
+    //           texto: 'Opção 1',
+    //         },
+    //         {
+    //           idAlternativa: null,
+    //           texto: 'Opção 2',
+    //         },
+    //         {
+    //           idAlternativa: null,
+    //           texto: 'Opção 3',
+    //         },
+    //       ],
+    //       valorCorreto: [],
+    //       respostasCorretas: [0, 1],
+    //       pontuacao: 10,
+    //       feedbackCorreto: 'Boa',
+    //       feedbackErro: 'Não',
+    //     },
+    //     {
+    //       titulo: 'Data: Normal',
+    //       tipo: 'DATA',
+    //       valorCorreto: [],
+    //       respostasCorretas: [],
+    //     },
+    //     {
+    //       titulo: 'Data: Com Anos',
+    //       tipo: 'DATA',
+    //       valorCorreto: [],
+    //       respostasCorretas: [],
+    //       anos: true,
+    //     },
+    //     {
+    //       titulo: 'Data: Com Tempo',
+    //       tipo: 'DATA',
+    //       valorCorreto: [],
+    //       respostasCorretas: [],
+    //       tempo: true,
+    //     },
+    //     {
+    //       titulo: 'Data: Ambos',
+    //       tipo: 'DATA',
+    //       valorCorreto: [],
+    //       respostasCorretas: [],
+    //       anos: true,
+    //       tempo: true,
+    //     },
+    //     {
+    //       titulo: 'Escala',
+    //       tipo: 'ESCALA',
+    //       valorCorreto: [],
+    //       respostasCorretas: [],
+    //       low: 0,
+    //       high: 10,
+    //     },
+    //     {
+    //       titulo: 'Verdadeiro e Falso',
+    //       tipo: 'VERDADEIRO_FALSO',
+    //       valorCorreto: ['Falso'],
+    //       respostasCorretas: [],
+    //       pontuacao: 10,
+    //       feedbackCorreto: 'Boa',
+    //       feedbackErro: 'Não',
+    //     },
+    //     {
+    //       titulo: 'Imagem',
+    //       tipo: 'IMAGEM',
+    //       valorCorreto: [],
+    //       respostasCorretas: [],
+    //       imagemUrl:
+    //         'https://imgs.search.brave.com/WsJZNxSbtrWWce5g2iUwaBI1kU0UST_a8IOUn9eViB8/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9saDMu/Z29vZ2xldXNlcmNv/bnRlbnQuY29tL1dn/ZHd2a1FJMlV4S0hP/OVJYaGswSnRfekZa/Y19GVE42SEZFX1RX/elBmWmdWTkxYVXh1/bHROdzUxZk91ZzVh/QS12YVBYLXNBN3ZW/RTAtbDdGV3RYZlBI/Nzkyb25adWY3RnRQ/Si1yYUVtUWRGZGNM/dXhoRzg9czAtcnct/bG8',
+    //       descricaoImagem: 'Imagem',
+    //     },
+    //     {
+    //       titulo: 'Tempo',
+    //       tipo: 'TEMPO',
+    //       valorCorreto: [],
+    //       respostasCorretas: [],
+    //     },
+    //     {
+    //       titulo: 'Pontuação',
+    //       tipo: 'PONTUACAO',
+    //       valorCorreto: [],
+    //       respostasCorretas: [],
+    //       pontuacao: 10,
+    //       iconPontuacao: 'THUMB_UP',
+    //     },
+    //   ],
+    // };
     
-    this.formulariosService.criarQuiz(form).subscribe(
+    this.formulariosService.criarQuiz(this.quiz).subscribe(
       (response) => {
         this.urlQuiz = response.formUrl;
         this.visibilidadeDialog = true;

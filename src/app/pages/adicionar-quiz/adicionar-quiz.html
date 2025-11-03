@@ -277,6 +277,7 @@
 <footer>
   <p-button
     label="Criar Quiz"
+    [disabled]="!quizValido()"
     (click)="criarQuiz()"
     icon="pi pi-check"
   ></p-button>

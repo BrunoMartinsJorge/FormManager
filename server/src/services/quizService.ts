@@ -145,11 +145,28 @@ export async function createQuiz(quizForm: NewQuiz, userEmail: string | null) {
 
     if (
       tiposComCorrecao.includes(questao.tipo) &&
-      (questao.respostasCorretas || questao.valorCorreto)
+      ((Array.isArray(questao.respostasCorretas) &&
+        questao.respostasCorretas.length > 0) ||
+        questao.valorCorreto !== undefined)
     ) {
-      const corretas =
-        questao.respostasCorretas ||
-        (questao.valorCorreto ? [questao.valorCorreto] : []);
+      let corretas: (number | string)[] = [];
+
+      if (questao.tipo === 'VERDADEIRO_FALSO') {
+        // 🔹 Caso especial: índice 0 = Verdadeiro, índice 1 = Falso
+        const idx =
+          Array.isArray(questao.valorCorreto) && questao.valorCorreto.length > 0
+            ? questao.valorCorreto[0]
+            : questao.valorCorreto;
+        corretas = [idx === 0 ? 'Verdadeiro' : 'Falso'];
+      } else {
+        corretas =
+          Array.isArray(questao.respostasCorretas) &&
+          questao.respostasCorretas.length > 0
+            ? questao.respostasCorretas
+            : Array.isArray(questao.valorCorreto)
+            ? questao.valorCorreto
+            : [questao.valorCorreto];
+      }
 
       item.questionItem.question.grading = {
         pointValue: questao.pontuacao || 1,
@@ -157,12 +174,17 @@ export async function createQuiz(quizForm: NewQuiz, userEmail: string | null) {
           answers: corretas.map((i: number | string) => ({
             value:
               typeof i === 'number'
-                ? questao.opcoes?.[i]?.texto || questao.opcoes?.[i]
+                ? questao.opcoes?.[i]?.texto || questao.opcoes?.[i] || String(i)
                 : i,
           })),
         },
         whenRight: { text: questao.feedbackCorreto || 'Correto!' },
-        whenWrong: { text: questao.feedbackErrado || 'Resposta incorreta.' },
+        whenWrong: {
+          text:
+            questao.feedbackErrado ||
+            questao.feedbackErro ||
+            'Resposta incorreta.',
+        },
       };
     }
 

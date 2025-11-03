@@ -13,6 +13,8 @@ import { QuizService } from '../../services/quiz-service';
 import { QuestaoModel } from '../../shared/models/questao.model';
 import { QuizSelected } from '../../shared/models/QuizSelected.model';
 import { InplaceModule } from 'primeng/inplace';
+import { QuizDto } from './models/QuizDto';
+import { RespostasPorUsuario } from '../listar-formularios/models/RespostasFormDto';
 
 export interface Quest {
   titulo: string;
@@ -42,13 +44,13 @@ export interface Form {
   styleUrl: './listar-quiz.css',
 })
 export class ListarQuiz {
-  public listaQuizzes: any[] = [];
-  public listarQuizzes: any[] = [];
+  public listaQuizzes: QuizDto[] = [];
+  public listarQuizzes: QuizDto[] = [];
   public carregandoQuiz: boolean = false;
   public quizSelecionado: QuizSelected | null = null;
   public quizSelecionadoPorId: number | null = null;
   public questoes: QuestaoModel[] = [];
-  public respostasPorUsuario: any[] = [];
+  public respostasPorUsuario: RespostasPorUsuario[] = [];
   public visibilidadeDeCriarGraficos: boolean = false;
   public visibilidadeDeGerarPDF: boolean = false;
   public quizPdfData: Form | null = null;
@@ -71,7 +73,7 @@ export class ListarQuiz {
    * @returns - Indice da questão
    */
   public trackByQuizId(index: number, quiz: any): number {
-    return quiz.idFormulario;
+    return quiz.idQuiz;
   }
 
   /**
@@ -95,7 +97,7 @@ export class ListarQuiz {
       return;
     }
     this.listarQuizzes = this.listaQuizzes.filter((quiz) =>
-      quiz.Titulo?.toLowerCase().includes(value.toLowerCase())
+      quiz.titulo?.toLowerCase().includes(value.toLowerCase())
     );
   }
 
@@ -117,7 +119,7 @@ export class ListarQuiz {
   public getLinkManualQuiz(): void {
     if (!this.quizSelecionado) return;
     const quiz = this.listaQuizzes.find(
-      (q) => q.idFormulario === this.quizSelecionadoPorId
+      (q) => q.idQuiz === this.quizSelecionadoPorId
     );
     if (!quiz || !quiz.quizId) return;
     const urlPadrao: string = `https://docs.google.com/forms/d/${quiz.quizId}/edit`;
@@ -133,8 +135,8 @@ export class ListarQuiz {
       next: (data: any[]) => {
         this.listaQuizzes = data.sort((a: any, b: any) => b.idQuiz - a.idQuiz);
         this.listarQuizzes = [...this.listaQuizzes];
-        this.quizSelecionado =
-          this.listaQuizzes.length > 0 ? this.listaQuizzes[0] : null;
+        // this.quizSelecionado =
+        //   this.listaQuizzes.length > 0 ? this.listaQuizzes[0] : null;
         this.quizSelecionadoPorId =
           this.listaQuizzes.length > 0 ? this.listaQuizzes[0].idQuiz : null;
         this.getDadosQuizSelecionado();
@@ -168,10 +170,9 @@ export class ListarQuiz {
     this.service.buscarRespostasDeFormularioPorIdForm(quiz.quizId).subscribe({
       next: (res: QuizSelected) => {
         this.quizSelecionado = res;
-        this.quizSelecionado!.ativo = quiz.ativo;
+        this.quizSelecionado!.ativo = res.ativo;
         this.respostasPorUsuario = res.respostasPorUsuario;
         this.carregandoQuiz = false;
-        this.quizSelecionado.ativo = quiz.ativo;
         this.quizSelecionado.titulo = quiz.titulo;
         this.quizSelecionado.dataCriacao = quiz.dataCriacao;
         this.quizSelecionado.quizId = quiz.quizId;
@@ -363,9 +364,9 @@ export class ListarQuiz {
   public acessarQuiz(): void {
     if (!this.quizSelecionado) return;
     const quiz = this.listaQuizzes.find(
-      (quiz) => quiz.idFormulario === this.quizSelecionadoPorId
+      (quiz) => quiz.idQuiz === this.quizSelecionadoPorId
     );
     if (!quiz) return;
-    window.open(quiz.Link_Url, '_blank');
+    window.open(quiz.linkUrl, '_blank');
   }
 }
