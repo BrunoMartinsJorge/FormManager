@@ -1,6 +1,9 @@
 import { Component } from '@angular/core';
 import { FormulariosServices } from '../../services/formularios-services';
-import { TypeQuestEnum } from '../adicionar-formulario/enums/TypeQuestEnum';
+import {
+  getTypeQuestLabel,
+  TypeQuestEnum,
+} from '../adicionar-formulario/enums/TypeQuestEnum';
 import { NewForm } from '../adicionar-formulario/forms/NewForm';
 import { NewQuest } from '../adicionar-formulario/forms/NewQuest';
 import { NewQuestQuiz } from '../adicionar-formulario/forms/NewQuestQuiz';
@@ -27,6 +30,9 @@ import { MenuItem } from 'primeng/api';
 import { TableModule } from 'primeng/table';
 import { Checkbox } from 'primeng/checkbox';
 import { QuestaoSalva } from '../questoes-salvas-quiz/model/QuestaoSalva';
+import { InfoTipoQuestao } from '../../shared/info-tipo-questao/info-tipo-questao';
+import { RadioButton } from 'primeng/radiobutton';
+import { ToggleButton } from "primeng/togglebutton";
 
 @Component({
   selector: 'app-adicionar-quiz',
@@ -51,7 +57,10 @@ import { QuestaoSalva } from '../questoes-salvas-quiz/model/QuestaoSalva';
     SplitButton,
     TableModule,
     Checkbox,
-  ],
+    InfoTipoQuestao,
+    RadioButton,
+    ToggleButton
+],
   templateUrl: './adicionar-quiz.html',
   styleUrl: './adicionar-quiz.css',
 })
@@ -80,17 +89,32 @@ export class AdicionarQuiz {
     },
   ];
 
-  public tipoDeCampo: any[] = [
-    { nome: 'Texto', value: TypeQuestEnum.TEXTO },
-    { nome: 'Parágrafo', value: TypeQuestEnum.PARAGRAFO },
-    { nome: 'Número', value: TypeQuestEnum.NUMERO },
-    { nome: 'Única Escolha', value: TypeQuestEnum.UNICA },
-    { nome: 'Múltipla Escolha', value: TypeQuestEnum.MULTIPLA },
-    { nome: 'Data', value: TypeQuestEnum.DATA },
-    // { nome: 'Data e Hora', value: TypeQuestEnum.DATAHORA },
-    { nome: 'Escala', value: TypeQuestEnum.ESCALA },
-    { nome: 'Verdadeiro / Falso', value: TypeQuestEnum.VERDADEIRO_FALSO },
-  ];
+  public tipoDeCampo: any[] = this.carregarTiposCampos();
+
+  /**
+   *
+   * @description Carrega os tipos de campos
+   * @returns - Tipos de campos
+   */
+  private carregarTiposCampos(): {
+    nome: string;
+    value: TypeQuestEnum;
+  }[] {
+    let tipos = Object.values(TypeQuestEnum);
+    let tiposFormatados = [];
+    for (let i = 0; i < tipos.length; i++) {
+      const tipoF = {
+        nome: '',
+        value: TypeQuestEnum.TEXTO,
+      };
+      tipoF.nome = getTypeQuestLabel(tipos[i]);
+      tipoF.value = tipos[i];
+      tiposFormatados[i] = tipoF;
+    }
+    console.log(tiposFormatados);
+
+    return tiposFormatados;
+  }
 
   constructor(private formulariosService: FormulariosServices) {}
 
@@ -155,7 +179,7 @@ export class AdicionarQuiz {
   }
 
   /**
-   * 
+   *
    * @param index - Indice da questão
    * @description Retorna o indice da questão
    * @returns - Indice da questão
@@ -165,7 +189,7 @@ export class AdicionarQuiz {
   }
 
   /**
-   * 
+   *
    * @param indexQuestao - Indice da questão
    * @param indexOpcao - Indice da opção
    * @description Verifica se a opção for correta
@@ -178,7 +202,7 @@ export class AdicionarQuiz {
   }
 
   /**
-   * 
+   *
    * @param indexQuestao - Indice da questão
    * @param opcao - Opção Verdadeiro ou Falso
    * @description Verifica se a opção for correta
@@ -191,11 +215,12 @@ export class AdicionarQuiz {
     const questao = this.quiz.questoes[indexQuestao];
     if (!questao.respostasCorretas) questao.respostasCorretas = [];
     if (!questao.valorCorreto) return false;
+    
     return questao.valorCorreto.includes(opcao);
   }
 
   /**
-   * 
+   *
    * @param indexQuestao - Indice da questão
    * @param indexOpcao - Indice da opção
    * @description Altera a opção correta para a selecionada
@@ -218,7 +243,7 @@ export class AdicionarQuiz {
   }
 
   /**
-   * 
+   *
    * @param indexQuestao - Indice da questão
    * @param opcao - Opção Verdadeiro ou Falso
    * @description Altera a opção correta para a selecionada
@@ -230,11 +255,12 @@ export class AdicionarQuiz {
     const questao = this.quiz.questoes[indexQuestao];
     if (!questao.valorCorreto) questao.valorCorreto = [];
     if (questao.valorCorreto.length > 0) questao.valorCorreto = [];
-    questao.valorCorreto.push(opcao);
+    const index = opcao === 'Verdadeiro' ? 0 : 1;
+    questao.valorCorreto.push(index);
   }
 
   /**
-   * 
+   *
    * @description Cria o quiz
    */
   public criarQuiz(): void {
@@ -242,8 +268,142 @@ export class AdicionarQuiz {
     this.erroAoCriarFormulario = false;
     this.mostrarTelaAcao = false;
     console.log(this.quiz);
-
-    this.formulariosService.criarQuiz(this.quiz).subscribe(
+    const form = {
+      titulo: 'Testando Todos os Tipos de Campos',
+      descricao: 'Testando Todos...',
+      questoes: [
+        {
+          titulo: 'Texto',
+          tipo: 'TEXTO',
+          valorCorreto: [],
+          respostasCorretas: [],
+        },
+        {
+          titulo: 'Parágrafo',
+          tipo: 'PARAGRAFO',
+          valorCorreto: [],
+          respostasCorretas: [],
+        },
+        {
+          titulo: 'Número',
+          tipo: 'NUMERO',
+          valorCorreto: [],
+          respostasCorretas: [],
+        },
+        {
+          titulo: 'Única',
+          tipo: 'UNICA',
+          opcoes: [
+            {
+              idAlternativa: null,
+              texto: 'Opção 1',
+            },
+            {
+              idAlternativa: null,
+              texto: 'Opção 2',
+            },
+          ],
+          valorCorreto: [],
+          respostasCorretas: [0],
+          pontuacao: 10,
+          feedbackCorreto: 'Boa',
+          feedbackErro: 'Não',
+        },
+        {
+          titulo: 'Múltipla escolha',
+          tipo: 'MULTIPLA',
+          opcoes: [
+            {
+              idAlternativa: null,
+              texto: 'Opção 1',
+            },
+            {
+              idAlternativa: null,
+              texto: 'Opção 2',
+            },
+            {
+              idAlternativa: null,
+              texto: 'Opção 3',
+            },
+          ],
+          valorCorreto: [],
+          respostasCorretas: [0, 1],
+          pontuacao: 10,
+          feedbackCorreto: 'Boa',
+          feedbackErro: 'Não',
+        },
+        {
+          titulo: 'Data: Normal',
+          tipo: 'DATA',
+          valorCorreto: [],
+          respostasCorretas: [],
+        },
+        {
+          titulo: 'Data: Com Anos',
+          tipo: 'DATA',
+          valorCorreto: [],
+          respostasCorretas: [],
+          anos: true,
+        },
+        {
+          titulo: 'Data: Com Tempo',
+          tipo: 'DATA',
+          valorCorreto: [],
+          respostasCorretas: [],
+          tempo: true,
+        },
+        {
+          titulo: 'Data: Ambos',
+          tipo: 'DATA',
+          valorCorreto: [],
+          respostasCorretas: [],
+          anos: true,
+          tempo: true,
+        },
+        {
+          titulo: 'Escala',
+          tipo: 'ESCALA',
+          valorCorreto: [],
+          respostasCorretas: [],
+          low: 0,
+          high: 10,
+        },
+        {
+          titulo: 'Verdadeiro e Falso',
+          tipo: 'VERDADEIRO_FALSO',
+          valorCorreto: ['Falso'],
+          respostasCorretas: [],
+          pontuacao: 10,
+          feedbackCorreto: 'Boa',
+          feedbackErro: 'Não',
+        },
+        {
+          titulo: 'Imagem',
+          tipo: 'IMAGEM',
+          valorCorreto: [],
+          respostasCorretas: [],
+          imagemUrl:
+            'https://imgs.search.brave.com/WsJZNxSbtrWWce5g2iUwaBI1kU0UST_a8IOUn9eViB8/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9saDMu/Z29vZ2xldXNlcmNv/bnRlbnQuY29tL1dn/ZHd2a1FJMlV4S0hP/OVJYaGswSnRfekZa/Y19GVE42SEZFX1RX/elBmWmdWTkxYVXh1/bHROdzUxZk91ZzVh/QS12YVBYLXNBN3ZW/RTAtbDdGV3RYZlBI/Nzkyb25adWY3RnRQ/Si1yYUVtUWRGZGNM/dXhoRzg9czAtcnct/bG8',
+          descricaoImagem: 'Imagem',
+        },
+        {
+          titulo: 'Tempo',
+          tipo: 'TEMPO',
+          valorCorreto: [],
+          respostasCorretas: [],
+        },
+        {
+          titulo: 'Pontuação',
+          tipo: 'PONTUACAO',
+          valorCorreto: [],
+          respostasCorretas: [],
+          pontuacao: 10,
+          iconPontuacao: 'THUMB_UP',
+        },
+      ],
+    };
+    
+    this.formulariosService.criarQuiz(form).subscribe(
       (response) => {
         this.urlQuiz = response.formUrl;
         this.visibilidadeDialog = true;
@@ -263,7 +423,7 @@ export class AdicionarQuiz {
   }
 
   /**
-   * 
+   *
    * @param index - Indice da questão
    * @description Remove a questão do quiz
    */
@@ -272,7 +432,7 @@ export class AdicionarQuiz {
   }
 
   /**
-   * 
+   *
    * @param indexQuestao - Indice da questão
    * @description Adiciona uma opção na questão
    */
@@ -287,7 +447,7 @@ export class AdicionarQuiz {
   }
 
   /**
-   * 
+   *
    * @description Verifica se o quiz for valido
    * @returns - Verdadeiro se o quiz for valido
    */
@@ -330,7 +490,7 @@ export class AdicionarQuiz {
   }
 
   /**
-   * 
+   *
    * @param indexQuestao - Indice da questão
    * @param indexOpcao - Indice da opção
    * @description Remove uma opção da questão
@@ -350,10 +510,23 @@ export class AdicionarQuiz {
   }
 
   /**
-   * 
+   *
    * @description Copia o link do quiz
    */
   public copiarLink(): void {
     navigator.clipboard.writeText(this.urlQuiz);
+  }
+
+  /**
+   *
+   * @param url - URL da imagem
+   * @description Verifica se a URL da imagem eh valida
+   * @returns - Verifica se a URL da imagem eh valida
+   */
+  public urlImagemValida(url: string): boolean {
+    if (!url || url.trim() === '') return false;
+    const regex =
+      /^(https?|ftp|file):\/\/((?!(https?|ftp|file):\/\/[-a-zA-Z\d+&@#/%?=~_|!:,.;]*[-a-zA-Z\d+&@#/%=~_|])[-a-zA-Z\d+&@#/%?=~_|!:,.;])*[-a-zA-Z\d+&@#/%=~_|]$/;
+    return regex.test(url);
   }
 }

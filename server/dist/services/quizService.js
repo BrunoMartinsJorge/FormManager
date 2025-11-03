@@ -17,246 +17,6 @@ const ListaQuestoesDto_1 = require("../models/dto/ListaQuestoesDto");
 const Alternativa_Questao_1 = require("../models/Alternativa_Questao");
 const Tipo_Questao_1 = require("../models/Tipo_Questao");
 const QuizDto_1 = require("../models/dto/QuizDto");
-// export async function createQuiz(quizForm: NewQuiz, userEmail: string | null) {
-//   const auth = await getAuthClient();
-//   const formsApi = google.forms({ version: 'v1', auth });
-//   const createRes = await formsApi.forms.create({
-//     requestBody: {
-//       info: { title: quizForm.titulo },
-//     },
-//   });
-//   const formId = createRes.data.formId;
-//   const tiposComCorrecao = ["UNICA", "MULTIPLA", "VERDADEIRO_FALSO"];
-//   if (!formId) throw new Error('formId inválido');
-//   const requests: any[] = (quizForm.questoes || []).map(
-//     (questao: any, index: number) => {
-//       const item: any = {
-//         title: questao.titulo,
-//         questionItem: { question: {} },
-//       };
-//       // switch (questao.tipo) {
-//       //   case 'TEXTO':
-//       //     item.questionItem.question = { textQuestion: { paragraph: false } };
-//       //     break;
-//       //   case 'PARAGRAFO':
-//       //     item.questionItem.question = { textQuestion: { paragraph: true } };
-//       //     break;
-//       //   case 'NUMERO':
-//       //     item.questionItem.question = { textQuestion: {} };
-//       //     break;
-//       //   case 'UNICA':
-//       //     item.questionItem.question = {
-//       //       choiceQuestion: {
-//       //         type: 'CHECKBOX',
-//       //         options: (questao.opcoes || []).map((v: string, i: number) => ({
-//       //           value: v,
-//       //           correctAnswer: questao.correta.includes(i),
-//       //         })),
-//       //       },
-//       //       grading: {
-//       //         pointValue: questao.pontos || questao.correta.length,
-//       //       },
-//       //     };
-//       //     break;
-//       //   case 'MULTIPLA':
-//       //     item.questionItem.question = {
-//       //       choiceQuestion: {
-//       //         type: 'CHECKBOX',
-//       //         options: (questao.opcoes || []).map((v: string, i: number) => ({
-//       //           value: v,
-//       //           correctAnswer: questao.correta.includes(i),
-//       //         })),
-//       //       },
-//       //       grading: {
-//       //         pointValue: questao.pontos || questao.correta.length,
-//       //       },
-//       //     };
-//       //     break;
-//       //   case 'DATA':
-//       //     item.questionItem.question = { dateQuestion: {} };
-//       //     break;
-//       //   case 'DATAHORA':
-//       //     item.questionItem.question = { dateTimeQuestion: {} };
-//       //     break;
-//       //   case 'ESCALA':
-//       //     item.questionItem.question = {
-//       //       scaleQuestion: { low: questao.low || 1, high: questao.high || 5 },
-//       //     };
-//       //     break;
-//       //   case 'VERDADEIRO_FALSO':
-//       //     item.questionItem.question = {
-//       //       choiceQuestion: {
-//       //         type: 'RADIO',
-//       //         options: [{ value: 'Verdadeiro' }, { value: 'Falso' }],
-//       //       },
-//       //     };
-//       //     break;
-//       //   case 'UPLOAD':
-//       //     item.questionItem.question = {
-//       //       fileUploadQuestion: {
-//       //         maxFiles: questao.maxFiles || 1,
-//       //         maxFileSize: questao.maxFileSize || 10,
-//       //       },
-//       //     };
-//       //     break;
-//       // }
-//       switch (questao.tipo) {
-//         case 'TEXTO':
-//           item.questionItem.question = { textQuestion: { paragraph: false } };
-//           break;
-//         case 'PARAGRAFO':
-//           item.questionItem.question = { textQuestion: { paragraph: true } };
-//           break;
-//         case 'NUMERO':
-//           item.questionItem.question = { textQuestion: {} };
-//           break;
-//         case 'UNICA':
-//           item.questionItem.question = {
-//             choiceQuestion: {
-//               type: 'RADIO',
-//               options: (questao.opcoes || []).map((v: string) => ({ value: v })),
-//             },
-//           };
-//           break;
-//         case 'MULTIPLA':
-//           item.questionItem.question = {
-//             choiceQuestion: {
-//               type: 'CHECKBOX',
-//               options: (questao.opcoes || []).map((v: string) => ({ value: v })),
-//             },
-//           };
-//           break;
-//         case 'DATA':
-//           item.questionItem.question = { dateQuestion: {} };
-//           break;
-//         case 'DATAHORA':
-//           item.questionItem.question = { dateTimeQuestion: {} };
-//           break;
-//         case 'ESCALA':
-//           item.questionItem.question = {
-//             scaleQuestion: {
-//               low: questao.low || 1,
-//               high: questao.high || 5,
-//             },
-//           };
-//           break;
-//         case 'VERDADEIRO_FALSO':
-//           item.questionItem.question = {
-//             choiceQuestion: {
-//               type: 'RADIO',
-//               options: [{ value: 'Verdadeiro' }, { value: 'Falso' }],
-//             },
-//           };
-//           break;
-//         case 'UPLOAD':
-//           item.questionItem.question = {
-//             fileUploadQuestion: {
-//               maxFiles: questao.maxFiles || 1,
-//               maxFileSize: questao.maxFileSize || 10,
-//             },
-//           };
-//           break;
-//       }
-//       if (
-//         tiposComCorrecao.includes(questao.tipo) &&
-//         (questao.pontos || questao.respostasCorretas)
-//       ) {
-//         if (questao.tipo === 'VERDADEIRO_FALSO') {
-//           item.questionItem.question.grading = {
-//             pointValue: questao.pontos || 1,
-//             correctAnswers: {
-//               answers: (questao.valorCorreto || []).map((i: number) => ({
-//                 value: questao.opcoes?.[i] || i,
-//               })),
-//             },
-//             whenRight: { text: questao.feedbackCorreto || 'Correto!' },
-//             whenWrong: {
-//               text: questao.feedbackErrado || 'Resposta incorreta.',
-//             },
-//           };
-//         } else {
-//           item.questionItem.question.grading = {
-//             pointValue: questao.pontos || 1,
-//             correctAnswers: {
-//               answers: (questao.respostasCorretas || []).map((i: number) => ({
-//                 value: questao.opcoes?.[i] || i,
-//               })),
-//             },
-//             whenRight: { text: questao.feedbackCorreto || 'Correto!' },
-//             whenWrong: {
-//               text: questao.feedbackErrado || 'Resposta incorreta.',
-//             },
-//           };
-//         }
-//       }
-//       return { createItem: { item, location: { index } } };
-//     }
-//   );
-//   requests.push({
-//     updateSettings: {
-//       settings: { quizSettings: { isQuiz: true } },
-//       updateMask: 'quizSettings',
-//     },
-//   });
-//   requests.push({
-//     updateFormInfo: {
-//       info: { description: quizForm.descricao || '' },
-//       updateMask: 'description',
-//     },
-//   } as any);
-//   await formsApi.forms.batchUpdate({ formId, requestBody: { requests } });
-//   await formsApi.forms.batchUpdate({
-//     formId,
-//     requestBody: {
-//       requests: [
-//         {
-//           updateSettings: {
-//             settings: {
-//               emailCollectionType: 'VERIFIED',
-//             },
-//             updateMask: 'emailCollectionType',
-//           },
-//         },
-//       ],
-//     },
-//   });
-//   return await AppDataSource.transaction(async (manager) => {
-//     const quizRepo = manager.getRepository(Quiz);
-//     const tipoRepo = manager.getRepository(Tipo_Questao);
-//     const questaoRepo = manager.getRepository(Questao);
-//     const altRepo = manager.getRepository(Alternativa_Questao);
-//     if (!createRes || !createRes.data.responderUri)
-//       throw new Error('Erro ao criar formulário');
-//     const form = quizRepo.create({
-//       Titulo: quizForm.titulo,
-//       Descricao: quizForm.descricao,
-//       Link_Url: createRes.data.responderUri,
-//       quizId: formId,
-//       email: userEmail ?? 'sem_email',
-//     });
-//     await quizRepo.save(form);
-//     for (const q of quizForm.questoes) {
-//       let tipo = await tipoRepo.findOne({ where: { Descricao: q.tipo } });
-//       if (!tipo) {
-//         tipo = tipoRepo.create({ Descricao: q.tipo });
-//         await tipoRepo.save(tipo);
-//       }
-//       const questao = questaoRepo.create({
-//         Tipo_Questao: tipo,
-//         Quiz: form,
-//         Titulo: q.titulo,
-//       });
-//       await questaoRepo.save(questao);
-//       if (q.opcoes?.length) {
-//         for (const opcao of q.opcoes) {
-//           const alt = altRepo.create({ Questao: questao, Texto: opcao });
-//           await altRepo.save(alt);
-//         }
-//       }
-//     }
-//     return createRes.data.responderUri;
-//   });
-// }
 async function createQuiz(quizForm, userEmail) {
     const auth = await (0, googleAuth_1.getAuthClient)();
     const formsApi = googleapis_1.google.forms({ version: 'v1', auth });
@@ -280,7 +40,8 @@ async function createQuiz(quizForm, userEmail) {
         },
     });
     const tiposComCorrecao = ['UNICA', 'MULTIPLA', 'VERDADEIRO_FALSO'];
-    const requests = (quizForm.questoes || []).map((questao, index) => {
+    let requests = [];
+    (quizForm.questoes || []).forEach((questao, index) => {
         const item = {
             title: questao.titulo,
             questionItem: { question: {} },
@@ -295,6 +56,29 @@ async function createQuiz(quizForm, userEmail) {
             case 'NUMERO':
                 item.questionItem.question = { textQuestion: {} };
                 break;
+            case 'PONTUACAO':
+                item.questionItem.question = {
+                    ratingQuestion: {
+                        ratingScaleLevel: questao.pontuacao,
+                        iconType: questao.iconPontuacao ?? 'STAR',
+                    },
+                };
+                break;
+            case 'IMAGEM':
+                requests.push({
+                    createItem: {
+                        item: {
+                            title: questao.descricaoImagem || '',
+                            imageItem: {
+                                image: {
+                                    sourceUri: questao.imagemUrl,
+                                },
+                            },
+                        },
+                        location: { index: requests.length },
+                    },
+                });
+                return;
             case 'ESCALA':
                 item.questionItem.question = {
                     scaleQuestion: {
@@ -336,19 +120,20 @@ async function createQuiz(quizForm, userEmail) {
                 break;
             case 'DATA':
                 item.questionItem.question = { dateQuestion: {} };
+                item.questionItem.question.dateQuestion.includeTime =
+                    questao.tempo || false;
+                item.questionItem.question.dateQuestion.includeYear =
+                    questao.anos || false;
                 break;
-            case 'DATAHORA':
-                item.questionItem.question = { dateTimeQuestion: {} };
-                break;
-            case 'UPLOAD':
+            case 'TEMPO':
                 item.questionItem.question = {
-                    fileUploadQuestion: {
-                        maxFiles: questao.maxFiles || 1,
-                        maxFileSize: questao.maxFileSize || 10,
+                    timeQuestion: {
+                        duration: true,
                     },
                 };
                 break;
         }
+        item.questionItem.question.required = questao.obrigatorio || false;
         if (tiposComCorrecao.includes(questao.tipo) &&
             (questao.respostasCorretas || questao.valorCorreto)) {
             const corretas = questao.respostasCorretas ||
@@ -366,6 +151,12 @@ async function createQuiz(quizForm, userEmail) {
                 whenWrong: { text: questao.feedbackErrado || 'Resposta incorreta.' },
             };
         }
+        requests.push({
+            createItem: {
+                item,
+                location: { index: requests.length },
+            },
+        });
         return { createItem: { item, location: { index } } };
     });
     requests.push({

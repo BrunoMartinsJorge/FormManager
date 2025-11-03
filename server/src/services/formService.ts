@@ -68,7 +68,7 @@ export async function salvarFormularioCompleto(
             location: { index: requests.length },
           },
         });
-        return; // <-- evita continuar o fluxo e criar outro item duplicado
+        return;
       case 'NUMERO':
         item.questionItem.question = { textQuestion: {} };
         break;
@@ -94,9 +94,6 @@ export async function salvarFormularioCompleto(
           questao.tempo || false;
         item.questionItem.question.dateQuestion.includeYear =
           questao.anos || false;
-        break;
-      case 'DATAHORA':
-        item.questionItem.question = { dateTimeQuestion: {} };
         break;
       case 'ESCALA':
         item.questionItem.question = {

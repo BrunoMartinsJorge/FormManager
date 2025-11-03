@@ -116,6 +116,11 @@ export class AdicionarFormulario {
 
   public tipoDeCampo: any[] = this.carregarTiposCampos();
 
+  /**
+   * 
+   * @description Carrega os tipos de campos
+   * @returns - Tipos de campos
+   */
   private carregarTiposCampos(): {
     nome: string;
     value: TypeQuestEnum;
