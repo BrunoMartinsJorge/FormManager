@@ -1,4 +1,4 @@
-import { Component, inject, Type } from '@angular/core';
+import { ChangeDetectorRef, Component, inject, Type } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormulariosServices } from '../../services/formularios-services';
 import { Button } from 'primeng/button';
@@ -21,6 +21,10 @@ import {
   RespostaUnica,
 } from './models/RespostasFormDto';
 import { Formulario } from './models/Formulario';
+import {
+  getTypeQuestLabel,
+  TypeQuestEnum,
+} from '../adicionar-formulario/enums/TypeQuestEnum';
 
 @Component({
   selector: 'app-listar-formularios',
@@ -44,6 +48,7 @@ export class ListarFormularios {
 
   public formularioSelecionadoId: number | null = null;
   public carregandoFormularioSelecionado: boolean = false;
+  public problemaAoCarregarFormulario: boolean = false;
   public respostasOuPerguntas: 'quest' | 'responses' = 'quest';
   public indexPorResposta: number = 0;
   public formularioSelecionado!: RespostasFormDto | null;
@@ -51,7 +56,7 @@ export class ListarFormularios {
   public formPdfData: FormularioPdfModel | null = null;
 
   /**
-   * 
+   *
    * @description Função para criar os gráficos
    */
   public criarGraficos(): void {
@@ -59,7 +64,7 @@ export class ListarFormularios {
   }
 
   /**
-   * 
+   *
    * @description Função para criar o PDF
    */
   public criarPDF(): void {
@@ -69,13 +74,14 @@ export class ListarFormularios {
 
   constructor(
     private formulariosService: FormulariosServices,
-    private router: Router
+    private router: Router,
+    private cdRef: ChangeDetectorRef
   ) {
     this.carregarTodosFormularios();
   }
 
   /**
-   * 
+   *
    * @description Função para criar um novo formulário
    */
   public criarNovoFormulario(): void {
@@ -83,7 +89,7 @@ export class ListarFormularios {
   }
 
   /**
-   * 
+   *
    * @description Função para mudar entre perguntas e respostas
    */
   public mudarRespostasOuPerguntas(): void {
@@ -94,7 +100,7 @@ export class ListarFormularios {
   }
 
   /**
-   * 
+   *
    * @param id - ID do formulário
    * @description Função para selecionar um formulário
    */
@@ -105,7 +111,7 @@ export class ListarFormularios {
   }
 
   /**
-   * 
+   *
    * @param questId - ID da pergunta
    * @description Função para selecionar uma pergunta
    * @returns - Pergunta
@@ -117,7 +123,24 @@ export class ListarFormularios {
   }
 
   /**
-   * 
+   *
+   * @param tipo - Tipo da pergunta
+   * @description Função para procurar a descrição do tipo da pergunta com base no tipo em ENUM
+   * @returns - Descrição do tipo da pergunta da questão
+   */
+  public procurarDescricaoPorTipoPergunta(tipo: any): string {
+    if (!tipo) return 'DESCONHECIDO';
+    return getTypeQuestLabel(tipo as TypeQuestEnum);
+  }
+
+  public procurarDescricaoPorIdPergunta(idPergunta: string): string {
+    let pergunta: Questao | undefined = this.formularioSelecionado?.questoesFormatadas.questoes.find((p: Questao) => p.id === idPergunta);
+    if (!pergunta) return 'DESCONHECIDO';
+    return getTypeQuestLabel(pergunta.tipo as TypeQuestEnum);
+  }
+
+  /**
+   *
    * @param questId - ID da pergunta
    * @description Função para selecionar o tipo da pergunta
    * @returns - Tipo da pergunta
@@ -130,11 +153,11 @@ export class ListarFormularios {
       (quest: QuestaoUnica) => quest.id === questId
     );
     if (!questao) return '';
-    return questao.tipo;
+    return '';
   }
 
   /**
-   * 
+   *
    * @description Função para obter o label do botão
    */
   public get buscarLabelBotao(): string {
@@ -149,7 +172,7 @@ export class ListarFormularios {
   }
 
   /**
-   * 
+   *
    * @description Função para exportar o formulário para excel
    */
   public exportarFormularioParaExcel(): void {
@@ -159,20 +182,22 @@ export class ListarFormularios {
       !this.formularioSelecionado.questoesFormatadas.respostas
     )
       return;
-    const formFormated = this.formularioSelecionado.questoesFormatadas.questoes.map(
-      (quest: any) => ({
-        titulo: quest.titulo,
-        tipo: quest.tipo,
-        opcoes: quest.opcoes,
-        respostas: this.formularioSelecionado?.questoesFormatadas.respostas.map(
-          (resp: any) => ({
-            idQuestao: resp.idQuestao,
-            valor: resp.respostas.find((r: any) => r.idQuestao === quest.id)
-              ?.valor,
-          })
-        ),
-      })
-    );
+    const formFormated =
+      this.formularioSelecionado.questoesFormatadas.questoes.map(
+        (quest: any) => ({
+          titulo: quest.titulo,
+          tipo: quest.tipo,
+          opcoes: quest.opcoes,
+          respostas:
+            this.formularioSelecionado?.questoesFormatadas.respostas.map(
+              (resp: any) => ({
+                idQuestao: resp.idQuestao,
+                valor: resp.respostas.find((r: any) => r.idQuestao === quest.id)
+                  ?.valor,
+              })
+            ),
+        })
+      );
     if (!formFormated[0].respostas) return;
     const qtdRespostas = formFormated[0].respostas.length;
     const header = [
@@ -202,18 +227,21 @@ export class ListarFormularios {
   }
 
   /**
-   * 
+   *
    * @description Função para carregar todos os formulários
    */
   private carregarTodosFormularios(): void {
     this.formulariosService.listarFormularios().subscribe({
       next: (res) => {
         this.forms = res;
-        this.listaFormularios = res.sort(
-          (a: any, b: any) => b.idFormulario - a.idFormulario
-        );
-        this.formularioSelecionadoId = this.forms[0].idFormulario || 0;
-        this.getDadosFormularioSelecionado();
+        this.listaFormularios =
+          res && res.length > 0
+            ? res.sort((a: any, b: any) => b.idFormulario - a.idFormulario)
+            : [];
+        if (this.listaFormularios && this.listaFormularios.length > 0) {
+          this.formularioSelecionadoId = this.forms[0].idFormulario || 0;
+          this.getDadosFormularioSelecionado();
+        }
       },
       error: (error: any) => {
         console.error(error);
@@ -222,7 +250,7 @@ export class ListarFormularios {
   }
 
   /**
-   * 
+   *
    * @description Função para abrir o formulário
    */
   public abrirFormulario(): void {
@@ -235,7 +263,7 @@ export class ListarFormularios {
   }
 
   /**
-   * 
+   *
    * @description Função para converter o formulário para dados de PDF
    */
   private converterFormularioParaDadosDePDF(): void {
@@ -265,7 +293,7 @@ export class ListarFormularios {
   }
 
   /**
-   * 
+   *
    * @description Função para carregar os dados do formulário selecionado
    */
   private getDadosFormularioSelecionado(): void {
@@ -274,10 +302,13 @@ export class ListarFormularios {
     );
     this.formularioSelecionado = null;
     this.carregandoFormularioSelecionado = true;
+    this.cdRef.detectChanges();
+
     if (!form || !form.formId) {
       this.carregandoFormularioSelecionado = false;
       return;
     }
+
     this.formulariosService
       .buscarRespostasDeFormularioPorIdForm(form.formId)
       .subscribe({
@@ -288,19 +319,21 @@ export class ListarFormularios {
           this.formularioSelecionado!.idFormulario = form.idFormulario;
           this.formularioSelecionado!.titulo = form.titulo;
           console.log(this.formularioSelecionado);
-          
+
           this.responsesByUser = res.respostasPorUsuario;
           this.carregandoFormularioSelecionado = false;
+          this.problemaAoCarregarFormulario = false;
         },
         error: (error: Error) => {
           console.error(error);
           this.carregandoFormularioSelecionado = false;
+          this.problemaAoCarregarFormulario = true;
         },
       });
   }
 
   /**
-   * 
+   *
    * @description Função para retornar as perguntas do formulário selecionado
    */
   public get getPerguntas(): any[] {
@@ -308,7 +341,7 @@ export class ListarFormularios {
   }
 
   /**
-   * 
+   *
    * @description Função para retornar as respostas do formulário selecionado
    */
   public voltarResposta(): void {
@@ -316,15 +349,22 @@ export class ListarFormularios {
   }
 
   /**
-   * 
+   *
    * @description Função para retornar as respostas do formulário selecionado
    */
   public get getRespostaSelecionadaPorIndex(): any {
-    return this.responsesByUser[this.indexPorResposta];
+    if (!this.formularioSelecionado) return [];
+    const questoes = this.formularioSelecionado.questoesFormatadas.questoes;
+    const ordemQuestoes = questoes.map((questao: QuestaoUnica) => questao.id);
+    const respostas = this.responsesByUser[this.indexPorResposta];
+    respostas.respostas.sort((a: any, b: any) => {
+      return ordemQuestoes.indexOf(a.idQuestao) - ordemQuestoes.indexOf(b.idQuestao);
+    });
+    return respostas;
   }
 
   /**
-   * 
+   *
    * @description Função para retornar as respostas do formulário selecionado
    */
   public avancarResposta(): void {
@@ -355,7 +395,7 @@ export class ListarFormularios {
   }
 
   /**
-   * 
+   *
    * @param event - Evento do filtro
    * @description Função para filtrar os formulários
    */
@@ -372,11 +412,13 @@ export class ListarFormularios {
   }
 
   /**
-   * 
+   *
    * @description Função para retornar o formulário selecionado
    * @return - Formulário selecionado
    */
   public get getFormularioSelecionado(): any | null {
-    return this.forms.find((form) => form.idFormulario === this.formularioSelecionadoId);
+    return this.forms.find(
+      (form) => form.idFormulario === this.formularioSelecionadoId
+    );
   }
 }

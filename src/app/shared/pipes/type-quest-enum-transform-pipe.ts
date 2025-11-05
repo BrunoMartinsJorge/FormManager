@@ -1,22 +1,12 @@
 import { Pipe, PipeTransform } from '@angular/core';
+import { getTypeQuestLabel, TypeQuestEnum } from '../../pages/adicionar-formulario/enums/TypeQuestEnum';
 
 @Pipe({
-  name: 'typeQuestEnumTransform'
+  name: 'typeQuestEnumTransform',
 })
 export class TypeQuestEnumTransformPipe implements PipeTransform {
-
   transform(typeEnum: string): string {
-    switch(typeEnum) {
-      case 'TEXTO': return 'Texto';
-      case 'PARAGRAFO': return 'Parágrafo';
-      case 'NUMERO': return 'Número';
-      case 'UNICA': return 'Única Escolha';
-      case 'MULTIPLA': return 'Múltipla Escolha';
-      case 'DATA': return 'Data';
-      case 'ESCALA': return 'Escala';
-      case 'VERDADEIRO_FALSO': return 'Verdadeiro / Falso';
-      default: return '';
-    }
+    const nome = getTypeQuestLabel(typeEnum as TypeQuestEnum);
+    return nome;
   }
-
 }

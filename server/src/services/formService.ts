@@ -16,6 +16,7 @@ import {
   RespostaUnica,
 } from '../models/dto/RespostasFormDto';
 import { FormulariosListaDto } from '../models/dto/FormulariosListaDto';
+import { TypeQuestEnum } from '../enums/TypeQuestEnum';
 
 export async function salvarFormularioCompleto(
   dadosForm: any,
@@ -332,33 +333,63 @@ function convertQuestionData(ativo: boolean, data: any): RespostasFormDto {
   const questoes: any[] = data.items || [];
   const responses = data.responses || [];
 
-  const questoesFormatadas: QuestaoUnica[] = questoes
-    .filter((quest) => quest.questionItem && quest.questionItem.question)
-    .map((quest) => {
-      const q = quest.questionItem.question;
-      let tipo = 'DESCONHECIDO';
-      let opcoes: string[] | undefined;
+const questoesFormatadas: QuestaoUnica[] = questoes
+  .filter((quest) => quest.questionItem?.question)
+  .map((quest) => {
+    const q = quest.questionItem.question;
+    let tipo: TypeQuestEnum = TypeQuestEnum.TEXTO;
+    let opcoes: string[] | undefined;
 
-      if (q.textQuestion) tipo = 'Texto';
-      if (q.choiceQuestion) {
-        tipo = 'Escolha';
-        opcoes = q.choiceQuestion.options.map((o: any) => o.value);
+    if (q.textQuestion) {
+      tipo = q.textQuestion.paragraph
+        ? TypeQuestEnum.PARAGRAFO
+        : TypeQuestEnum.TEXTO;
+    } else if (q.choiceQuestion) {
+      const { type, options } = q.choiceQuestion;
+      opcoes = options?.map((o: any) => o.value) || [];
+
+      switch (type) {
+        case 'RADIO':
+          tipo = TypeQuestEnum.UNICA;
+          break;
+        case 'CHECKBOX':
+          tipo = TypeQuestEnum.MULTIPLA;
+          break;
+        case 'DROP_DOWN':
+          tipo = TypeQuestEnum.UNICA;
+          break;
+        default:
+          tipo = TypeQuestEnum.UNICA;
       }
-      if (q.scaleQuestion) tipo = 'Escala';
-      if (q.dateQuestion) tipo = 'Data';
+    } else if (q.scaleQuestion) {
+      tipo = TypeQuestEnum.ESCALA;
+    } else if (q.dateQuestion) {
+      tipo = TypeQuestEnum.DATA;
+    } else if (q.timeQuestion) {
+      tipo = TypeQuestEnum.TEMPO;
+    } else if (q.numberQuestion) {
+      tipo = TypeQuestEnum.NUMERO;
+    } else if (q.trueFalseQuestion) {
+      tipo = TypeQuestEnum.VERDADEIRO_FALSO;
+    } else if (q.imageQuestion) {
+      tipo = TypeQuestEnum.IMAGEM;
+    } else if (q.pointQuestion) {
+      tipo = TypeQuestEnum.PONTUACAO;
+    } else {
+      tipo = TypeQuestEnum.TEXTO;
+    }
 
-      return {
-        id: q.questionId,
-        titulo: quest.title,
-        tipo,
-        opcoes,
-      };
-    });
+    return {
+      id: q.questionId,
+      titulo: quest.title || '',
+      tipo,
+      opcoes,
+    };
+  });
 
   const respostasFormatadas: RespostaUnica[] = responses.map((resp: any) => {
     const respostasQuestao: Resposta_Questao[] = [];
 
-    // Extrair respostas das questões
     Object.values(resp.answers || {}).forEach((answer: any) => {
       if (answer.textAnswers) {
         answer.textAnswers.answers.forEach((a: any) => {
@@ -382,7 +413,7 @@ function convertQuestionData(ativo: boolean, data: any): RespostasFormDto {
     return {
       idResposta: resp.responseId,
       dataEnviada: new Date(resp.lastSubmittedTime),
-      usuarioEmail: resp.respondentEmail, // <-- Aqui pegamos o email do respondente
+      usuarioEmail: resp.respondentEmail,
       respostas: respostasQuestao,
     };
   });

@@ -33,16 +33,34 @@ async function createWindow() {
     {
       label: "Visão",
       submenu: [
-        { label: "Tela cheia", role: "togglefullscreen" },
         {
-          label: "Recarregar",
+          label: "Abrir Tela Cheia",
+          role: "togglefullscreen"
+        },
+        {
+          label: "Recarregar Aplicativo",
           accelerator: "Ctrl+R",
           click: () => {
-            mainWindow.loadURL("http://localhost:4200");
-          },
-        },
-      ],
+            mainWindow.loadFile(
+              path.join(__dirname, "dist/Angular_Electron/browser/index.html")
+            );
+          }
+        }
+      ]
     },
+    {
+      label: "Ajuda",
+      submenu: [
+        {
+          label: "Manual do Usuário",
+          click: () => {
+            const { shell } = require("electron");
+            const docPath = path.join(__dirname, "documentacao.pdf");
+            shell.openPath(docPath);
+          }
+        }
+      ]
+    }
   ]);
 
   Menu.setApplicationMenu(menu);

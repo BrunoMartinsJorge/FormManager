@@ -1,16 +1,17 @@
 import { Component } from '@angular/core';
 import { FormulariosServices } from '../../services/formularios-services';
 import { Dialog } from 'primeng/dialog';
-import { TypeQuestEnum } from '../adicionar-formulario/enums/TypeQuestEnum';
+import {
+  getTypeQuestLabel,
+  TypeQuestEnum,
+} from '../adicionar-formulario/enums/TypeQuestEnum';
 import { CommonModule } from '@angular/common';
 import { InputNumber } from 'primeng/inputnumber';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { Fieldset } from 'primeng/fieldset';
 import { Button } from 'primeng/button';
 import { Select } from 'primeng/select';
 import { InputText } from 'primeng/inputtext';
 import { InputGroup } from 'primeng/inputgroup';
-import { VisualizarQuestao } from '../../shared/visualizar-questao/visualizar-questao';
 import { MessageService } from 'primeng/api';
 import { TableModule } from 'primeng/table';
 import { TypeQuestEnumTransformPipe } from '../../shared/pipes/type-quest-enum-transform-pipe';
@@ -25,12 +26,10 @@ import { ProgressSpinner } from 'primeng/progressspinner';
     InputNumber,
     ReactiveFormsModule,
     FormsModule,
-    Fieldset,
     Button,
     Select,
     InputText,
     InputGroup,
-    VisualizarQuestao,
     TableModule,
     TypeQuestEnumTransformPipe,
     SplitButton,
@@ -47,22 +46,13 @@ export class QuestoesSalvasFormulario {
   public novaPergunta: any = {};
   public carregandoPergunta: boolean = false;
   private idPerguntaSelecionada: number = 0;
-  public tipoDeCampo: any[] = [
-    { nome: 'Texto', value: TypeQuestEnum.TEXTO },
-    { nome: 'Parágrafo', value: TypeQuestEnum.PARAGRAFO },
-    { nome: 'Número', value: TypeQuestEnum.NUMERO },
-    { nome: 'Única Escolha', value: TypeQuestEnum.UNICA },
-    { nome: 'Múltipla Escolha', value: TypeQuestEnum.MULTIPLA },
-    { nome: 'Data', value: TypeQuestEnum.DATA },
-    { nome: 'Escala', value: TypeQuestEnum.ESCALA },
-    { nome: 'Verdadeiro / Falso', value: TypeQuestEnum.VERDADEIRO_FALSO },
-  ];
+  public tipoDeCampo: any[] = this.carregarTiposCampos();
   public opcoesMenu: any[] = [
     {
       label: 'Ver Imagem',
       icon: 'pi pi-image',
       command: () => {
-        this.verImagemPergunta(this.novaPergunta.imagem);
+        this.verImagemPergunta(this.novaPergunta.urlImagem);
       },
     },
     { separator: true },
@@ -75,6 +65,30 @@ export class QuestoesSalvasFormulario {
     },
   ];
 
+  /**
+   *
+   * @description Carrega os tipos de campos
+   * @returns - Tipos de campos
+   */
+  private carregarTiposCampos(): {
+    nome: string;
+    value: TypeQuestEnum;
+  }[] {
+    let tipos = Object.values(TypeQuestEnum);
+    let tiposFormatados = [];
+    for (let i = 0; i < tipos.length; i++) {
+      const tipoF = {
+        nome: '',
+        value: TypeQuestEnum.TEXTO,
+      };
+      tipoF.nome = getTypeQuestLabel(tipos[i]);
+      tipoF.value = tipos[i];
+      tiposFormatados[i] = tipoF;
+    }
+
+    return tiposFormatados;
+  }
+
   constructor(
     private formService: FormulariosServices,
     private toast: MessageService
@@ -83,10 +97,10 @@ export class QuestoesSalvasFormulario {
   }
 
   /**
-   * 
+   *
    * @description Funcionalidade para apagar uma pergunta
    */
-  public apagarPergunta(): void {    
+  public apagarPergunta(): void {
     if (!this.idPerguntaSelecionada) return;
     this.formService.apagarPerguntaSalva(this.idPerguntaSelecionada).subscribe({
       next: (response: any) => {
@@ -110,7 +124,7 @@ export class QuestoesSalvasFormulario {
   }
 
   /**
-   * 
+   *
    * @description Funcionalidade para buscar as perguntas salvas
    */
   private getPerguntasSalvas(): void {
@@ -134,14 +148,14 @@ export class QuestoesSalvasFormulario {
   }
 
   /**
-   * 
+   *
    * @param event - Evento
    * @param quest - Questão
    * @description Funcionalidade para selecionar uma pergunta
    */
   public selecionarPergunta(event: any, quest: any): void {
     this.idPerguntaSelecionada = quest.idPergunta;
-    if (quest.imagem == null || quest.imagem == '') {
+    if (quest.tipo !== 'IMAGEM') {
       this.opcoesMenu = [
         {
           label: 'Apagar Pergunta',
@@ -157,7 +171,7 @@ export class QuestoesSalvasFormulario {
           label: 'Ver Imagem',
           icon: 'pi pi-image',
           command: () => {
-            this.verImagemPergunta(quest.imagem);
+            this.verImagemPergunta(quest.urlImagem);
           },
         },
         { separator: true },
@@ -173,7 +187,7 @@ export class QuestoesSalvasFormulario {
   }
 
   /**
-   * 
+   *
    * @description Funcionalidade para abrir o dialog de adicionar uma pergunta
    */
   public abrirDialogAdcionarPergunta(): void {
@@ -188,7 +202,7 @@ export class QuestoesSalvasFormulario {
   }
 
   /**
-   * 
+   *
    * @description Funcionalidade para editar uma pergunta salva
    */
   public editarPerguntaSalva(): void {
@@ -224,7 +238,7 @@ export class QuestoesSalvasFormulario {
   }
 
   /**
-   * 
+   *
    * @param questao - Questão a ser editada
    * @description Abre o dialog de editar pergunta
    */
@@ -237,16 +251,18 @@ export class QuestoesSalvasFormulario {
         descricaoImagem: questao.descricaoImagem,
         favorita: questao.favorito,
         id: questao.idPergunta,
-        imagem: questao.imagem,
+        imagemUrl: questao.urlImagem,
         opcoes: questao.opcoes,
         titulo: questao.titulo,
         tipo: questao.tipo,
       };
+      console.log(questao);
+      
     } else this.novaPergunta = {};
   }
 
   /**
-   * 
+   *
    * @param url - URL da imagem
    * @description Abre uma nova aba com a imagem
    */
@@ -255,7 +271,7 @@ export class QuestoesSalvasFormulario {
   }
 
   /**
-   * 
+   *
    * @description Adiciona uma opcao na pergunta
    */
   public adicionarOpcao(): void {
@@ -264,7 +280,7 @@ export class QuestoesSalvasFormulario {
   }
 
   /**
-   * 
+   *
    * @param index - Indice da opcao
    * @description Retorna o indice da opcao
    * @returns - Indice da opcao
@@ -274,7 +290,7 @@ export class QuestoesSalvasFormulario {
   }
 
   /**
-   * 
+   *
    * @param indexOpcao - Indice da opcao
    * @description Remove uma opcao da pergunta
    */
@@ -290,7 +306,7 @@ export class QuestoesSalvasFormulario {
   }
 
   /**
-   * 
+   *
    * @param url - URL da imagem
    * @description Verifica se a url eh valida
    * @returns - Verifica se a url eh valida
@@ -303,15 +319,20 @@ export class QuestoesSalvasFormulario {
   }
 
   /**
-   * 
+   *
    * @description Verifica se a pergunta eh valida
    * @returns - Verifica se a pergunta eh valida
    */
   public perguntaValida(): boolean {
-    if (!this.novaPergunta.titulo || this.novaPergunta.titulo.trim() === '') {
-      return false;
+    if (this.novaPergunta.tipo !== 'IMAGEM') {
+      if (!this.novaPergunta.titulo || this.novaPergunta.titulo.trim() === '') {
+        return false;
+      }
     }
-    if (this.novaPergunta.imagemUrl && this.novaPergunta.imagemUrl.trim() != '') {
+    if (
+      this.novaPergunta.imagemUrl &&
+      this.novaPergunta.imagemUrl.trim() != ''
+    ) {
       if (
         !this.novaPergunta.descricaoImagem ||
         this.novaPergunta.descricaoImagem.trim() === ''
@@ -338,7 +359,7 @@ export class QuestoesSalvasFormulario {
   }
 
   /**
-   * 
+   *
    * @description Adiciona uma pergunta aos favoritos
    */
   public adicionarPergunta(): void {

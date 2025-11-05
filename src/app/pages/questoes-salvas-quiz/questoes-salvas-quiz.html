@@ -1,10 +1,10 @@
 <main>
   <div>
-    <h1>Perguntas Salvas</h1>
-    <p>Aqui você pode visualizar todas as perguntas salvas</p>
+    <h1>Questões Salvas</h1>
+    <p>Aqui você pode visualizar todas as questões salvas</p>
   </div>
   <p-table
-    style="border: 1px solid #ccc; border-top: none"
+    style="border: 1px solid #ccc;"
     [value]="listaQuestoesSalvas"
     stripedRows
     [rows]="5"
@@ -13,7 +13,7 @@
     <ng-template pTemplate="caption">
       <p-button
         (click)="abrirDialogAdcionarPergunta()"
-        label="Adicionar Nova Pergunta"
+        label="Adicionar Nova Questão"
       />
     </ng-template>
     <ng-template pTemplate="header">
@@ -21,20 +21,17 @@
         <th>ID</th>
         <th>Título</th>
         <th>Tipo</th>
-        <th>Descrição Da Imagem</th>
         <th style="text-align: center; width: 200px">Opções</th>
       </tr>
     </ng-template>
     <ng-template pTemplate="body" let-question>
       <tr>
         <td>{{ question.id }}</td>
-        <td>{{ question.titulo }}</td>
-        <td>{{ question.tipo | typeQuestEnumTransform }}</td>
         <td>
-          <span [ngClass]="!question.descricaoImagem ? 'not-image' : ''"
-            >{{ question.descricaoImagem || 'Sem Imagem' }}</span
-          >
+          @if (question.tipo !== 'IMAGEM') { {{ question.titulo }} } @else { {{
+          question.descricaoImagem }} }
         </td>
+        <td>{{ question.tipo | typeQuestEnumTransform }}</td>
         <td
           style="
             display: flex;
@@ -58,7 +55,7 @@
       <tr>
         <td colspan="5">
           <span *ngIf="!carregandoQuestoes && listaQuestoesSalvas.length === 0">
-            Nenhuma Pergunta salva
+            Nenhuma Questão salva
           </span>
           <div
             *ngIf="carregandoQuestoes"
@@ -73,8 +70,8 @@
       <tr>
         <td colspan="6">
           <span style="font-size: 14px; color: #333">
-            Você possui {{ listaQuestoesSalvas ? listaQuestoesSalvas.length :
-            0 }} perguntas salvas!
+            Você possui {{ listaQuestoesSalvas ? listaQuestoesSalvas.length : 0
+            }} questões salvas!
           </span>
         </td>
       </tr>
@@ -82,7 +79,7 @@
   </p-table>
 </main>
 <p-dialog
-  [header]="modoDialog === 'edit' ? 'Editar Pergunta' : 'Novo modelo de Pergunta'"
+  [header]="modoDialog === 'edit' ? 'Editar Questão' : 'Novo modelo de Questão'"
   [modal]="true"
   [draggable]="false"
   [(visible)]="visibilidadeDialogAdicionarQuestao"
@@ -90,13 +87,13 @@
 >
   <div class="quests-form">
     <div class="input-group">
-      <label for="titulo-quest">Título da Pergunta:</label>
+      <label for="titulo-quest">Título da Questão:</label>
       <input
         id="titulo-quest"
         type="text"
         pInputText
         [(ngModel)]="novaQuestao.titulo"
-        placeholder="Título da Pergunta"
+        placeholder="Título da Questão"
       />
     </div>
     <div class="opcao-quest">
@@ -109,10 +106,10 @@
           optionLabel="nome"
           optionValue="value"
           placeholder="Selecione o tipo de Questão"
-          />
-          <!-- (onChange)="mudancaTipoQuestao($event)" -->
+        />
       </div>
       <p-button
+      [style]="{'margin-top': '10px', 'width': '100%'}"
         *ngIf="novaQuestao.tipo === 'MULTIPLA' || novaQuestao.tipo === 'UNICA'"
         label="Adicionar opção"
         icon="pi pi-plus"
@@ -226,15 +223,16 @@
         </div>
       </div>
     </ng-container>
+    @if (novaQuestao.tipo === 'IMAGEM') {
     <div class="image-group">
       <div class="input-group">
-        <label for="titulo-quest">Imagem da Pergunta:</label>
+        <label for="titulo-quest">Imagem da Questão:</label>
         <input
           id="titulo-quest"
           type="text"
           pInputText
           [(ngModel)]="novaQuestao.imagem"
-          placeholder="Imagem da Pergunta (URL)"
+          placeholder="Imagem da Questão (URL)"
           [invalid]="!urlImagemValida(novaQuestao.imagemUrl || '') && (novaQuestao.imagemUrl || '').trim() !== ''"
           pTooltip="Opcional."
         />
@@ -251,15 +249,9 @@
         />
       </div>
     </div>
-    <p-fieldset
-      legend="Vizualizar Pergunta"
-      toggleable="true"
-      [collapsed]="true"
-    >
-      <app-visualizar-questao [questao]="novaQuestao"></app-visualizar-questao>
-    </p-fieldset>
+    }
     <p-button
-      [label]="modoDialog == 'edit' ? 'Editar Pergunta' : 'Adicionar Pergunta'"
+      [label]="modoDialog == 'edit' ? 'Editar Questão' : 'Adicionar Questão'"
       [style]="{ marginTop: '10px', width: '100%' }"
       icon="pi pi-check"
       (click)="modoDialog === 'edit' ? editarQuestaoSalva() : adicionarQuestaoSalva()"

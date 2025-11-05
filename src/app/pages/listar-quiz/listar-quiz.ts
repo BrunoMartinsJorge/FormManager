@@ -135,8 +135,6 @@ export class ListarQuiz {
       next: (data: any[]) => {
         this.listaQuizzes = data.sort((a: any, b: any) => b.idQuiz - a.idQuiz);
         this.listarQuizzes = [...this.listaQuizzes];
-        // this.quizSelecionado =
-        //   this.listaQuizzes.length > 0 ? this.listaQuizzes[0] : null;
         this.quizSelecionadoPorId =
           this.listaQuizzes.length > 0 ? this.listaQuizzes[0].idQuiz : null;
         this.getDadosQuizSelecionado();
@@ -190,31 +188,7 @@ export class ListarQuiz {
       },
     });
   }
-
-  // private mapearRespostasPorRespondente(data: QuizSelected): any[] {
-  //   const questoes = data.questoes || [];
-  //   const respostas = data.respostas || [];
-
-  //   if (!questoes.length || !respostas.length) return [];
-
-  //   return respostas.map((resp: any) => {
-  //     // resp.respostas eh um array com as respostas de uma submissão
-  //     const respostasUsuario = resp.respostas.map((r: any) => ({
-  //       idQuestao: r.idQuestao,
-  //       valor: r.valor,
-  //       score: r.score,
-  //       correta: r.correta,
-  //     }));
-
-  //     return {
-  //       idResposta: resp.idResposta,
-  //       dataEnviada: resp.dataEnviada,
-  //       respostas: respostasUsuario,
-  //       totalScore: resp.totalScore ?? 0,
-  //     };
-  //   });
-  // }
-
+  
   /**
    *
    * @param respostaUsuario - Resposta do usuário

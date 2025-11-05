@@ -181,7 +181,7 @@ span#urlForm {
   display: flex;
   flex-wrap: wrap;
   grid-gap: 1em;
-  align-items: end;
+  align-items: center;
 
   .input-group {
     flex: 1;

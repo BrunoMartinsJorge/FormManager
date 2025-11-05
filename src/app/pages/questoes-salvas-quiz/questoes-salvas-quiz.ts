@@ -72,7 +72,7 @@ export class QuestoesSalvasQuiz {
     },
     { separator: true },
     {
-      label: 'Apagar Pergunta',
+      label: 'Apagar Questão',
       icon: 'pi pi-trash',
       command: () => {
         //this.gerarPDF(this.formularioSelecionado);
@@ -223,7 +223,7 @@ export class QuestoesSalvasQuiz {
     if (quest.imagem == null || quest.imagem == '') {
       this.opcoesMenu = [
         {
-          label: 'Apagar Pergunta',
+          label: 'Apagar Questão',
           icon: 'pi pi-trash',
           command: () => {
             //this.gerarPDF(this.formularioSelecionado);
@@ -241,7 +241,7 @@ export class QuestoesSalvasQuiz {
         },
         { separator: true },
         {
-          label: 'Apagar Pergunta',
+          label: 'Apagar Questão',
           icon: 'pi pi-trash',
           command: () => {
             //this.gerarPDF(this.formularioSelecionado);
@@ -253,7 +253,7 @@ export class QuestoesSalvasQuiz {
 
   /**
    * 
-   * @description Abre o dialog para adicionar uma pergunta
+   * @description Abre o dialog para adicionar uma Questão
    */
   public abrirDialogAdcionarPergunta(): void {
     this.modoDialog = 'add';
@@ -268,7 +268,7 @@ export class QuestoesSalvasQuiz {
 
   /**
    * 
-   * @description Edita uma pergunta
+   * @description Edita uma Questão
    */
   public editarQuestaoSalva(): void {
     this.service.editarQuestao(this.novaQuestao).subscribe({
@@ -294,7 +294,7 @@ export class QuestoesSalvasQuiz {
   /**
    * 
    * @param questao - Objeto da questão
-   * @description Abre o dialog para editar uma pergunta
+   * @description Abre o dialog para editar uma Questão
    */
   public mudarVisibilidadeDialogEditarQuestao(questao: any): void {
     this.modoDialog = 'edit';
@@ -422,17 +422,17 @@ export class QuestoesSalvasQuiz {
         this.toast.add({
           severity: 'success',
           summary: 'Sucesso',
-          detail: 'Pergunta salva com sucesso!',
+          detail: 'Questão salva com sucesso!',
         });
         this.visibilidadeDialogAdicionarQuestao = false;
         this.getPerguntasSalvas();
       },
       error: (err) => {
-        console.error('Erro ao salvar Pergunta:', err);
+        console.error('Erro ao salvar Questão:', err);
         this.toast.add({
           severity: 'error',
           summary: 'Erro',
-          detail: 'Não foi possível salvar a Pergunta.',
+          detail: 'Não foi possível salvar a Questão.',
         });
       },
     });

@@ -55,55 +55,61 @@
       </div>
     </div>
     <div class="form-select">
-      @if (carregandoFormularioSelecionado && !formularioSelecionado){
+      @if (this.formularioSelecionado == null) { @if
+      (!carregandoFormularioSelecionado) {
       <div class="loading">
         <p-progressSpinner></p-progressSpinner>
         <span>Carregando formulário...</span>
       </div>
-      } @else if (!formularioSelecionado && !carregandoFormularioSelecionado) {
-      <p
-        style="
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          text-align: center;
-          flex: 1;
-        "
-      >
-        Problemas ao carregar formulário
-      </p>
-      } @if (formularioSelecionado && !carregandoFormularioSelecionado) {
+      } @else if (problemaAoCarregarFormulario) {
+      <p class="mensagem-vazia">Problemas ao carregar formulário.</p>
+      } }
+      @if (formularioSelecionado && !carregandoFormularioSelecionado) {
       <div class="header-form-selected">
         <h3
           style="display: flex; justify-content: space-between; flex-wrap: wrap"
         >
           {{getFormularioSelecionado.titulo}}
-          <span id="form-published">{{formularioSelecionado.ativo ? 'Publicado' : 'Não Publicado'}}</span>
+          <span id="form-published"
+            >{{formularioSelecionado.ativo ? 'Publicado' : 'Não Publicado'}}</span
+          >
         </h3>
         <span>{{getFormularioSelecionado.descricao}}</span>
         <p>
           <span
-            ><i class="pi pi-calendar"></i>Criado em
-            {{getFormularioSelecionado.dataCriacao | date : 'dd/MM/yyyy HH:mm'}}</span
+            ><i class="pi pi-calendar"></i>
+            Criado em {{getFormularioSelecionado.dataCriacao | date : 'dd/MM/yyyy HH:mm'}}</span
           >
         </p>
         <div class="btn-list">
-          <button (click)="criarPDF()">
-            <i class="pi pi-file-pdf"></i>
-            Gerar PDF
-          </button>
-          <button (click)="exportarFormularioParaExcel()">
-            <i class="pi pi-file-excel"></i>
-            Gerar Excel
-          </button>
-          <button (click)="abrirFormulario()">
-            <i class="pi pi-external-link"></i>
-            Acessar Formulário
-          </button>
-          <button (click)="criarGraficos()">
-            <i class="pi pi-chart-line"></i>
-            Gerar Gráficos
-          </button>
+          <p-button
+            label="Gerar PDF"
+            (click)="criarPDF()"
+            icon="pi pi-file-pdf"
+            severity="contrast"
+            variant="outlined"
+          />
+          <p-button
+            label="Gerar Excel"
+            (click)="exportarFormularioParaExcel()"
+            icon="pi pi-file-excel"
+            severity="contrast"
+            variant="outlined"
+          />
+          <p-button
+            label="Acessar Formulário"
+            (click)="abrirFormulario()"
+            icon="pi pi-external-link"
+            severity="contrast"
+            variant="outlined"
+          />
+          <p-button
+            label="Gerar Gráficos"
+            (click)="criarGraficos()"
+            icon="pi pi-chart-line"
+            severity="contrast"
+            variant="outlined"
+          />
         </div>
       </div>
       <div class="body-form-selected">
@@ -118,26 +124,29 @@
               icon="pi pi-eye"
               [label]="buscarLabelBotao"
               severity="contrast"
-              [disabled]="!formularioSelecionado || formularioSelecionado.respostasPorUsuario?.length === 0"
+              [disabled]="!formularioSelecionado || formularioSelecionado.respostasPorUsuario!.length === 0"
               (click)="mudarRespostasOuPerguntas()"
             />
           </div>
-          @if (respostasOuPerguntas == 'quest') { @if (formularioSelecionado != null){
+          @if (respostasOuPerguntas == 'quest') { @if (formularioSelecionado !=
+          null){
           <div
             class="quest-element"
             *ngFor="let quest of getPerguntas; let i = index"
           >
             <div class="header-question">
               <strong>{{ i + 1 }}º Questão - {{ quest.titulo }}</strong>
-              <span class="type-quest">{{ quest.tipo }}</span>
+              <span class="type-quest"
+                >{{ procurarDescricaoPorTipoPergunta(quest.tipo || '') }}
+              </span>
             </div>
             <span class="responses">
               <i class="pi pi-eye"></i>
               Respostas - {{ getQuantidadeRespostas(quest.id) }}
             </span>
           </div>
-          } } @if (respostasOuPerguntas == 'responses') { @if (formularioSelecionado !=
-          null){
+          } } @if (respostasOuPerguntas == 'responses') { @if
+          (formularioSelecionado != null){
           <section class="response-sends">
             <div class="header-response">
               <p-button
@@ -167,7 +176,7 @@
                     {{response.titulo}}</strong
                   >
                   <div class="type-quest">
-                    {{getTipoPerguntaPorIdPergunta(response.idQuestao)}}
+                    {{ procurarDescricaoPorIdPergunta(response.idQuestao || '') }}
                   </div>
                 </div>
                 <p>Resposta - {{response.valor}}</p>

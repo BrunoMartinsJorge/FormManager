@@ -169,7 +169,7 @@ main {
         border-bottom: 1px solid #ccc;
 
         span {
-          color: #a6a6a6;
+          /* color: #a6a6a6; */
           font-size: 15px;
           font-weight: lighter;
         }
@@ -204,25 +204,9 @@ main {
         div.btn-list {
           display: flex;
           grid-gap: 0.5em;
-
-          button {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            grid-gap: 0.5em;
-            border: 1px solid #a6a6a6;
-            border-radius: 4px;
-            padding: 0.5em 1em;
-            color: #a6a6a6;
-            cursor: pointer;
-            flex: 1;
-            background-color: transparent;
-            transition: 0.4s all ease-in-out;
-
-            &:hover {
-              background-color: #f3f3f3;
-            }
-          }
+          align-items: center;
+          justify-content: space-evenly;
+          flex-wrap: wrap;
         }
       }
 

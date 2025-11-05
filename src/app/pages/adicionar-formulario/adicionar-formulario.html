@@ -193,12 +193,14 @@
       </div>
     </div>
     <div class="footer-quest" [@questaoAnimation]>
-      <p-togglebutton
+      @if (questao.tipo !== 'IMAGEM') {
+        <p-togglebutton
         [(ngModel)]="questao.obrigatorio"
         onLabel="Obrigatório"
         offLabel="Não Obrigatório"
         class="w-24"
-      />
+        />
+      }
       <p-button
         label="Remover Questão"
         icon="pi pi-trash"
@@ -274,17 +276,22 @@
   >
     <ng-template #header>
       <tr>
-        <th>Questão</th>
+        <th>Tipo</th>
+        <th>Descrição</th>
         <th style="width: 75px; text-align: center">Utilizar?</th>
       </tr>
     </ng-template>
     <ng-template #body let-questao>
       <tr>
         <td>
-          <app-visualizar-questao
-            [questao]="questao"
-            [buttonSendIsVisible]="false"
-          ></app-visualizar-questao>
+          {{ questao.tipo | typeQuestEnumTransform }}
+        </td>
+        <td>
+          @if (questao.tipo !== 'IMAGEM') {
+            {{ questao.titulo }}
+          } @else {
+            {{ questao.descricaoImagem }}
+          }
         </td>
         <td style="text-align: center">
           <p-checkbox
@@ -298,12 +305,12 @@
     </ng-template>
     <ng-template #emptymessage>
       <tr>
-        <td colspan="2">Nenhuma questão salva ainda.</td>
+        <td colspan="3">Nenhuma questão salva ainda.</td>
       </tr>
     </ng-template>
     <ng-template #footer>
       <tr>
-        <td colspan="2">
+        <td colspan="3">
           <p-button
             icon="pi pi-plus"
             [label]="questoesSelecionadas.length === 0 ? 'Selecione questões' : questoesSelecionadas.length > 1 ? 'Adicionar questões' : 'Adicionar questão'"

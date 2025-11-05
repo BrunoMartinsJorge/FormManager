@@ -33,6 +33,7 @@ import { TableModule } from 'primeng/table';
 import { InfoTipoQuestao } from '../../shared/info-tipo-questao/info-tipo-questao';
 import { RadioButton } from "primeng/radiobutton";
 import { ToggleButtonModule } from 'primeng/togglebutton';
+import { TypeQuestEnumTransformPipe } from "../../shared/pipes/type-quest-enum-transform-pipe";
 
 export interface Opcao {
   id: number;
@@ -64,7 +65,8 @@ export interface Opcao {
     TableModule,
     InfoTipoQuestao,
     RadioButton,
-    ToggleButtonModule
+    ToggleButtonModule,
+    TypeQuestEnumTransformPipe
 ],
   standalone: true,
   providers: [FormulariosServices],
@@ -164,7 +166,7 @@ export class AdicionarFormulario {
         titulo: question.titulo,
         tipo: question.tipo,
         opcoes: question.opcoes,
-        imagemUrl: question.imagem,
+        imagemUrl: question.urlImagem,
         descricaoImagem: question.descricaoImagem,
       };
       this.formulario.questoes.push(novaQuestao);

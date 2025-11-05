@@ -37,12 +37,26 @@
               <p>{{ quiz.descricao }}</p>
             </div>
             <div class="info-form">
-              <span>Criado em {{ quiz.dataCriacao | date: 'dd/MM/yyyy HH:mm' }}</span>
+              <span
+                >Criado em {{ quiz.dataCriacao | date: 'dd/MM/yyyy HH:mm'
+                }}</span
+              >
               <span>ID: {{ quiz.idQuiz }}</span>
             </div>
           </div>
         </ng-container>
-        <p *ngIf="listarQuizzes.length === 0">Nenhum quiz encontrado</p>
+        <p
+          *ngIf="listarQuizzes.length === 0"
+          style="
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            flex: 1;
+          "
+        >
+          Nenhum quiz encontrado
+        </p>
       </div>
     </div>
 
@@ -62,37 +76,47 @@
           flex: 1;
         "
       >
-        {{listaQuizzes.length === 0 ? 'Nenhum quiz encontrado' : 'Problemas ao carregar quiz'}}
+        {{listaQuizzes.length === 0 ? 'Nenhum quiz encontrado' : 'Problemas ao
+        carregar quiz'}}
       </p>
       }
       <div *ngIf="quizSelecionado && !carregandoQuiz">
         <div class="header-info-api">
           <p-inplace>
-    <ng-template #display>
-        <span style="display: flex;align-items: center;justify-content: center;grid-gap: 5px;">Aviso <i class="pi pi-exclamation-circle"></i></span>
-    </ng-template>
-    <ng-template #content>
-        <p style="display: flex;flex-direction: column;">
-            <span>
-            A API do Google Forms é limitada em seu uso, o que pode causar
-            problemas em aplicativos que necessitem de uma grande quantidade de
-            requisições. Além disso, algumas coisas podem precisar ser alteradas
-            manualmente, tornando o processo mais demorado. Por isso, é
-            importante ter em mente essas limitações ao utilizar a API do Google
-            Forms em seu aplicativo.
-          </span>
-          <p-button
-            label="Acessae Formulário Manualmente"
-            icon="pi pi-cog"
-            severity="contrast"
-            (click)="getLinkManualQuiz()"
-          ></p-button>
-          <span>
-            Caso ocorra problemas com o botão acima, tente acessar o formulário pelo seu perfil do Google Forms
-          </span>
-        </p>
-    </ng-template>
-</p-inplace>
+            <ng-template #display>
+              <span
+                style="
+                  display: flex;
+                  align-items: center;
+                  justify-content: center;
+                  grid-gap: 5px;
+                "
+                >Aviso <i class="pi pi-exclamation-circle"></i
+              ></span>
+            </ng-template>
+            <ng-template #content>
+              <p style="display: flex; flex-direction: column">
+                <span>
+                  A API do Google Forms é limitada em seu uso, o que pode causar
+                  problemas em aplicativos que necessitem de uma grande
+                  quantidade de requisições. Além disso, algumas coisas podem
+                  precisar ser alteradas manualmente, tornando o processo mais
+                  demorado. Por isso, é importante ter em mente essas limitações
+                  ao utilizar a API do Google Forms em seu aplicativo.
+                </span>
+                <p-button
+                  label="Acessae Formulário Manualmente"
+                  icon="pi pi-cog"
+                  severity="contrast"
+                  (click)="getLinkManualQuiz()"
+                ></p-button>
+                <span>
+                  Caso ocorra problemas com o botão acima, tente acessar o
+                  formulário pelo seu perfil do Google Forms
+                </span>
+              </p>
+            </ng-template>
+          </p-inplace>
         </div>
         <div class="header-form-selected">
           <h3>{{ quizSelecionado.titulo }}</h3>
@@ -178,12 +202,13 @@
                 <div class="pontuacao-candidato">
                   <i class="pi pi-star"></i>
                   Pontuação total: {{
-                  getPontuacaoPorResposta(getRespostaSelecionadaPorIndex).total }}
-                  pts
+                  getPontuacaoPorResposta(getRespostaSelecionadaPorIndex).total
+                  }} pts
                   <br />
                   <i class="pi pi-star"></i>
                   Pontuação maxima: {{
-                  getPontuacaoPorResposta(getRespostaSelecionadaPorIndex).max }} pts
+                  getPontuacaoPorResposta(getRespostaSelecionadaPorIndex).max }}
+                  pts
                 </div>
 
                 <div class="questions-list">

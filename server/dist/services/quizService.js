@@ -140,7 +140,6 @@ async function createQuiz(quizForm, userEmail) {
                 questao.valorCorreto !== undefined)) {
             let corretas = [];
             if (questao.tipo === 'VERDADEIRO_FALSO') {
-                // 🔹 Caso especial: índice 0 = Verdadeiro, índice 1 = Falso
                 const idx = Array.isArray(questao.valorCorreto) && questao.valorCorreto.length > 0
                     ? questao.valorCorreto[0]
                     : questao.valorCorreto;

@@ -111,7 +111,6 @@ export class AdicionarQuiz {
       tipoF.value = tipos[i];
       tiposFormatados[i] = tipoF;
     }
-    console.log(tiposFormatados);
 
     return tiposFormatados;
   }
@@ -125,7 +124,6 @@ export class AdicionarQuiz {
   public usarQuestoesSelecionadas(): void {
     if (this.questoesSelecionadas.length === 0) return;
     this.questoesSelecionadas.forEach((question) => {
-      console.log(question);
 
       const novaQuestao: QuestaoSalva = {
         titulo: question.titulo,
@@ -213,10 +211,11 @@ export class AdicionarQuiz {
     opcao: 'Verdadeiro' | 'Falso'
   ): boolean {
     const questao = this.quiz.questoes[indexQuestao];
-    if (!questao.respostasCorretas) questao.respostasCorretas = [];
     if (!questao.valorCorreto) return false;
-    
-    return questao.valorCorreto.includes(opcao);
+    const corretaIndex = questao.valorCorreto[0];
+    if (corretaIndex === undefined || corretaIndex === null) return false;
+    const indexOpcao = opcao === 'Verdadeiro' ? 0 : 1;
+    return indexOpcao === corretaIndex;
   }
 
   /**
@@ -257,6 +256,7 @@ export class AdicionarQuiz {
     if (questao.valorCorreto.length > 0) questao.valorCorreto = [];
     const index = opcao === 'Verdadeiro' ? 0 : 1;
     questao.valorCorreto.push(index);
+    
   }
 
   /**
@@ -267,7 +267,6 @@ export class AdicionarQuiz {
     this.carregando = true;
     this.erroAoCriarFormulario = false;
     this.mostrarTelaAcao = false;
-    console.log(this.quiz);
     // const form = {
     //   titulo: 'Testando Todos os Tipos de Campos',
     //   descricao: 'Testando Todos...',
@@ -443,7 +442,6 @@ export class AdicionarQuiz {
       idAlternativa: null,
       texto: '',
     });
-    console.log(questao);
   }
 
   /**

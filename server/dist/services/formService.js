@@ -19,6 +19,7 @@ const Tipo_Pergunta_1 = require("../models/Tipo_Pergunta");
 const ListaPerguntasDto_1 = require("../models/dto/ListaPerguntasDto");
 const Alternativa_Pergunta_1 = require("../models/Alternativa_Pergunta");
 const FormulariosListaDto_1 = require("../models/dto/FormulariosListaDto");
+const TypeQuestEnum_1 = require("../enums/TypeQuestEnum");
 async function salvarFormularioCompleto(dadosForm, userEmail) {
     const auth = await (0, googleAuth_1.getAuthClient)();
     const formsApi = googleapis_1.google.forms({ version: 'v1', auth });
@@ -289,31 +290,67 @@ function convertQuestionData(ativo, data) {
     const questoes = data.items || [];
     const responses = data.responses || [];
     const questoesFormatadas = questoes
-        .filter((quest) => quest.questionItem && quest.questionItem.question)
+        .filter((quest) => quest.questionItem?.question)
         .map((quest) => {
         const q = quest.questionItem.question;
-        let tipo = 'DESCONHECIDO';
+        let tipo = TypeQuestEnum_1.TypeQuestEnum.TEXTO;
         let opcoes;
-        if (q.textQuestion)
-            tipo = 'Texto';
-        if (q.choiceQuestion) {
-            tipo = 'Escolha';
-            opcoes = q.choiceQuestion.options.map((o) => o.value);
+        if (q.textQuestion) {
+            // Pode ser TEXTO ou PARÁGRAFO
+            tipo = q.textQuestion.paragraph
+                ? TypeQuestEnum_1.TypeQuestEnum.PARAGRAFO
+                : TypeQuestEnum_1.TypeQuestEnum.TEXTO;
         }
-        if (q.scaleQuestion)
-            tipo = 'Escala';
-        if (q.dateQuestion)
-            tipo = 'Data';
+        else if (q.choiceQuestion) {
+            const { type, options } = q.choiceQuestion;
+            opcoes = options?.map((o) => o.value) || [];
+            switch (type) {
+                case 'RADIO':
+                    tipo = TypeQuestEnum_1.TypeQuestEnum.UNICA;
+                    break;
+                case 'CHECKBOX':
+                    tipo = TypeQuestEnum_1.TypeQuestEnum.MULTIPLA;
+                    break;
+                case 'DROP_DOWN':
+                    tipo = TypeQuestEnum_1.TypeQuestEnum.UNICA;
+                    break;
+                default:
+                    tipo = TypeQuestEnum_1.TypeQuestEnum.UNICA;
+            }
+        }
+        else if (q.scaleQuestion) {
+            tipo = TypeQuestEnum_1.TypeQuestEnum.ESCALA;
+        }
+        else if (q.dateQuestion) {
+            tipo = TypeQuestEnum_1.TypeQuestEnum.DATA;
+        }
+        else if (q.timeQuestion) {
+            tipo = TypeQuestEnum_1.TypeQuestEnum.TEMPO;
+        }
+        else if (q.numberQuestion) {
+            tipo = TypeQuestEnum_1.TypeQuestEnum.NUMERO;
+        }
+        else if (q.trueFalseQuestion) {
+            tipo = TypeQuestEnum_1.TypeQuestEnum.VERDADEIRO_FALSO;
+        }
+        else if (q.imageQuestion) {
+            tipo = TypeQuestEnum_1.TypeQuestEnum.IMAGEM;
+        }
+        else if (q.pointQuestion) {
+            tipo = TypeQuestEnum_1.TypeQuestEnum.PONTUACAO;
+        }
+        else {
+            tipo = TypeQuestEnum_1.TypeQuestEnum.TEXTO;
+        }
         return {
             id: q.questionId,
-            titulo: quest.title,
+            titulo: quest.title || '',
             tipo,
             opcoes,
         };
     });
     const respostasFormatadas = responses.map((resp) => {
         const respostasQuestao = [];
-        // Extrair respostas das questões
         Object.values(resp.answers || {}).forEach((answer) => {
             if (answer.textAnswers) {
                 answer.textAnswers.answers.forEach((a) => {
@@ -335,7 +372,7 @@ function convertQuestionData(ativo, data) {
         return {
             idResposta: resp.responseId,
             dataEnviada: new Date(resp.lastSubmittedTime),
-            usuarioEmail: resp.respondentEmail, // <-- Aqui pegamos o email do respondente
+            usuarioEmail: resp.respondentEmail,
             respostas: respostasQuestao,
         };
     });
