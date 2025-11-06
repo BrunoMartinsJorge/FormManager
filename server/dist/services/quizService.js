@@ -284,7 +284,7 @@ async function salvarQuestao(form) {
     const alternativas = form.opcoes
         ? form.opcoes.map((texto) => {
             const alt = new Alternativa_Questao_1.Alternativa_Questao();
-            alt.Texto = texto;
+            alt.Texto = texto.texto;
             return alt;
         })
         : [];
@@ -307,7 +307,8 @@ async function salvarQuestao(form) {
         const alternativasSalvas = await repoAlt.findBy({
             Questao: { idQuestao: savedQuestao.idQuestao },
         });
-        const corretas = form.respostasCorretas
+        const index = form.respostasCorretas.map((op, index) => index);
+        const corretas = index
             .map((i) => alternativasSalvas[i])
             .filter(Boolean);
         savedQuestao.AlternativasCorretas = corretas;
@@ -358,11 +359,11 @@ async function editarQuestaoSalva(dados) {
         await repoAlt.save(alt);
     }
     console.log('Passou 7!');
-    if (dados.correta?.length) {
+    if (dados.respostasCorretas?.length) {
         const alternativasSalvas = await repoAlt.findBy({
             Questao: { idQuestao: savedQuest.idQuestao },
         });
-        const corretas = alternativasSalvas.filter((alt) => dados.correta?.some((c) => (c?.idAlternativa && c.idAlternativa === alt.idAlternativa) ||
+        const corretas = alternativasSalvas.filter((alt) => dados.respostasCorretas?.some((c) => (c?.idAlternativa && c.idAlternativa === alt.idAlternativa) ||
             c?.texto?.trim().toLowerCase() === alt.Texto.trim().toLowerCase()));
         savedQuest.AlternativasCorretas = corretas;
         await repoPergunta.save(savedQuest);

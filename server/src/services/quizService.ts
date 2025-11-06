@@ -6,7 +6,7 @@ import { NewQuiz } from '../forms/NewForm';
 import { Quiz } from '../models/Quiz';
 import { Questao } from '../models/Questao';
 import { ListaQuestoesDto } from '../models/dto/ListaQuestoesDto';
-import { NewQuestQuizSaved } from '../forms/NewQuestQuizSaved';
+import { NewQuestQuizSaved, OpcaoDaQuestao } from '../forms/NewQuestQuizSaved';
 import { Alternativa_Questao } from '../models/Alternativa_Questao';
 import { Tipo_Questao } from '../models/Tipo_Questao';
 import { QuizDto } from '../models/dto/QuizDto';
@@ -314,7 +314,7 @@ export async function salvarQuestao(form: NewQuestQuizSaved) {
   const alternativas = form.opcoes
     ? form.opcoes.map((texto) => {
         const alt = new Alternativa_Questao();
-        alt.Texto = texto;
+        alt.Texto = texto.texto;
         return alt;
       })
     : [];
@@ -342,7 +342,9 @@ export async function salvarQuestao(form: NewQuestQuizSaved) {
       Questao: { idQuestao: savedQuestao.idQuestao },
     });
 
-    const corretas = form.respostasCorretas
+    const index = form.respostasCorretas.map((op: OpcaoDaQuestao, index) => index);
+
+    const corretas = index
       .map((i) => alternativasSalvas[i])
       .filter(Boolean);
 
@@ -409,13 +411,13 @@ export async function editarQuestaoSalva(dados: ListaQuestoesDto) {
   }
 
   console.log('Passou 7!');
-  if (dados.correta?.length) {
+  if (dados.respostasCorretas?.length) {
     const alternativasSalvas = await repoAlt.findBy({
       Questao: { idQuestao: savedQuest.idQuestao },
     });
 
     const corretas = alternativasSalvas.filter((alt) =>
-      dados.correta?.some(
+      dados.respostasCorretas?.some(
         (c) =>
           (c?.idAlternativa && c.idAlternativa === alt.idAlternativa) ||
           c?.texto?.trim().toLowerCase() === alt.Texto.trim().toLowerCase()

@@ -9,7 +9,7 @@ export class ListaQuestoesDto {
   quiz?: Quiz;
   titulo: string;
   opcoes?: ALternativasDto[];
-  correta?: ALternativasDto[];
+  respostasCorretas?: ALternativasDto[];
   pontuacao?: number;
   feedbackCorreto?: string;
   feedbackErro?: string;
@@ -29,7 +29,7 @@ export class ListaQuestoesDto {
     this.opcoes = questao.Alternativas.map((alt) =>
       ALternativasDto.convert(alt)
     );
-    this.correta = Array.isArray(questao.AlternativasCorretas)
+    this.respostasCorretas = Array.isArray(questao.AlternativasCorretas)
       ? this.opcoes.filter((alt) =>
           questao.AlternativasCorretas.some(
             (c) =>

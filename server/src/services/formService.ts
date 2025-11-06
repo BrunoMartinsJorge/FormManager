@@ -70,9 +70,6 @@ export async function salvarFormularioCompleto(
           },
         });
         return;
-      case 'NUMERO':
-        item.questionItem.question = { textQuestion: {} };
-        break;
       case 'UNICA':
         item.questionItem.question = {
           choiceQuestion: {
@@ -339,6 +336,12 @@ const questoesFormatadas: QuestaoUnica[] = questoes
     const q = quest.questionItem.question;
     let tipo: TypeQuestEnum = TypeQuestEnum.TEXTO;
     let opcoes: string[] | undefined;
+    const escala = {
+      low: q.scaleQuestion?.low,
+      high: q.scaleQuestion?.high,
+      endLabel: q.scaleQuestion?.endLabel,
+      startLabel: q.scaleQuestion?.startLabel,
+    };
 
     if (q.textQuestion) {
       tipo = q.textQuestion.paragraph
@@ -367,8 +370,6 @@ const questoesFormatadas: QuestaoUnica[] = questoes
       tipo = TypeQuestEnum.DATA;
     } else if (q.timeQuestion) {
       tipo = TypeQuestEnum.TEMPO;
-    } else if (q.numberQuestion) {
-      tipo = TypeQuestEnum.NUMERO;
     } else if (q.trueFalseQuestion) {
       tipo = TypeQuestEnum.VERDADEIRO_FALSO;
     } else if (q.imageQuestion) {
@@ -383,6 +384,7 @@ const questoesFormatadas: QuestaoUnica[] = questoes
       id: q.questionId,
       titulo: quest.title || '',
       tipo,
+      escala,
       opcoes,
     };
   });

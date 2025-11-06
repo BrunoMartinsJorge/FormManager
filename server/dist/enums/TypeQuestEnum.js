@@ -5,7 +5,6 @@ var TypeQuestEnum;
 (function (TypeQuestEnum) {
     TypeQuestEnum["TEXTO"] = "TEXTO";
     TypeQuestEnum["PARAGRAFO"] = "PARAGRAFO";
-    TypeQuestEnum["NUMERO"] = "NUMERO";
     TypeQuestEnum["UNICA"] = "UNICA";
     TypeQuestEnum["MULTIPLA"] = "MULTIPLA";
     TypeQuestEnum["DATA"] = "DATA";

@@ -17,6 +17,7 @@ import { TableModule } from 'primeng/table';
 import { TypeQuestEnumTransformPipe } from '../../shared/pipes/type-quest-enum-transform-pipe';
 import { SplitButton } from 'primeng/splitbutton';
 import { ProgressSpinner } from 'primeng/progressspinner';
+import { Tooltip } from "primeng/tooltip";
 
 @Component({
   selector: 'app-questoes-salvas-formulario',
@@ -34,7 +35,8 @@ import { ProgressSpinner } from 'primeng/progressspinner';
     TypeQuestEnumTransformPipe,
     SplitButton,
     ProgressSpinner,
-  ],
+    Tooltip
+],
   providers: [FormulariosServices, MessageService],
   templateUrl: './questoes-salvas-formulario.html',
   styleUrl: './questoes-salvas-formulario.css',
@@ -199,6 +201,14 @@ export class QuestoesSalvasFormulario {
       opcoes: [],
       favorita: true,
     };
+  }
+
+  /**
+   * 
+   * @description Funcionalidade para recarregar a tabela
+   */
+  public recarregarTabela(): void {
+    this.getPerguntasSalvas();
   }
 
   /**

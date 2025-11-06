@@ -1,9 +1,10 @@
+<p-confirmpopup />
 <p-dialog
   [draggable]="false"
   [(visible)]="visibilityOfGenerateGraphic"
   [modal]="true"
   [style]="{ width: '50%'}"
-  (onHide)="closeDialog()"
+  (onHide)="fecharDialog()"
 >
   <ng-template #header>
     <div class="inline-flex items-center justify-center gap-2">
@@ -35,7 +36,7 @@
 
       <label>Selecione a questão</label>
       <p-select
-        [options]="optionsByDropdownQuests"
+        [options]="opcoesDePerguntasDisponiveis"
         [(ngModel)]="questSelected"
         optionLabel="label"
         placeholder="Selecione uma questão"
@@ -50,7 +51,7 @@
           pButton
           label="Adicionar gráfico"
           icon="pi pi-plus"
-          (click)="toAddGraphic()"
+          (click)="adicionarNovoGrafico()"
           [disabled]="!questSelected"
           class="p-button-success"
         ></button>
@@ -59,8 +60,8 @@
 
     <section class="graphic-list" style="margin-top: 1.5rem">
       <div
-        *ngFor="let g of graficos; let i = index; trackBy: trackByGrafico"
-        class="graphic-card"
+        *ngFor="let g of graficos; let i = index"
+        style="margin-bottom: 2rem"
       >
         <div
           style="
@@ -73,24 +74,42 @@
             <strong>{{ g.titulo }}</strong>
             <small style="margin-left: 0.5rem">({{ g.tipo }})</small>
           </div>
-          <div>
+
+          <div style="display: flex; flex-wrap: wrap; gap: 10px">
             <button
               pButton
+              pTooltip="Excluir gráfico"
               type="button"
               icon="pi pi-times"
               class="p-button-danger"
               (click)="removeGraphic(i)"
             ></button>
+
+            <button
+              pButton
+              pTooltip="Baixar imagem do gráfico"
+              type="button"
+              icon="pi pi-download"
+              class="p-button-success"
+              (click)="iniciarDownloadGrafico($event, i, g.titulo)"
+            ></button>
           </div>
         </div>
 
-        <div style="margin-top: 0.5rem">
+        <div
+          #graficoRef
+          style="
+            margin-top: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+          "
+        >
           <ng-container [ngSwitch]="g.tipo">
             <p-chart
               *ngSwitchCase="'bar'"
               type="bar"
               [data]="g.dados"
-              class="h-[30rem]"
             ></p-chart>
             <p-chart
               *ngSwitchCase="'pie'"
@@ -102,7 +121,7 @@
               *ngSwitchCase="'doughnut'"
               type="doughnut"
               [data]="g.dados"
-              class="h-[30rem]"
+              [style]="{width: '70%'}"
             ></p-chart>
 
             <div *ngSwitchCase="'texto'">

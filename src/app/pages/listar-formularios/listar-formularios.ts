@@ -8,10 +8,6 @@ import { Resposta, Resposta_Questao } from './models/Resposta.model';
 import { Dialog } from 'primeng/dialog';
 import { GerarGraficos } from '../../shared/components/gerar-graficos/gerar-graficos';
 import { GerarPdf } from '../../shared/components/gerar-pdf/gerar-pdf';
-import {
-  FormularioPdfModel,
-  QuestoesPdfModel,
-} from '../../shared/components/gerar-pdf/models/FormularioPdf.model';
 import { Router } from '@angular/router';
 import * as XLSX from 'xlsx';
 import saveAs from 'file-saver';
@@ -53,7 +49,7 @@ export class ListarFormularios {
   public indexPorResposta: number = 0;
   public formularioSelecionado!: RespostasFormDto | null;
   public responsesByUser: any;
-  public formPdfData: FormularioPdfModel | null = null;
+  public formPdfData: any = null;
 
   /**
    *
@@ -134,7 +130,10 @@ export class ListarFormularios {
   }
 
   public procurarDescricaoPorIdPergunta(idPergunta: string): string {
-    let pergunta: Questao | undefined = this.formularioSelecionado?.questoesFormatadas.questoes.find((p: Questao) => p.id === idPergunta);
+    let pergunta: Questao | undefined =
+      this.formularioSelecionado?.questoesFormatadas.questoes.find(
+        (p: Questao) => p.id === idPergunta
+      );
     if (!pergunta) return 'DESCONHECIDO';
     return getTypeQuestLabel(pergunta.tipo as TypeQuestEnum);
   }
@@ -272,14 +271,16 @@ export class ListarFormularios {
     ) as Formulario;
     if (!form) return;
 
-    const questoesConvertidas: QuestoesPdfModel[] =
+    const questoesConvertidas: any[] =
       this.formularioSelecionado?.questoesFormatadas.questoes.map(
         (questao: QuestaoUnica) => ({
-          id: Number(questao.id),
+          id: questao.id,
           titulo: questao.titulo,
           tipo: questao.tipo,
           opcoes: questao.opcoes?.map((opcao) => opcao),
-          escala: undefined,
+          escala: {
+            
+          },
         })
       ) || [];
 
@@ -318,8 +319,6 @@ export class ListarFormularios {
           this.formularioSelecionado!.formId = form.formId;
           this.formularioSelecionado!.idFormulario = form.idFormulario;
           this.formularioSelecionado!.titulo = form.titulo;
-          console.log(this.formularioSelecionado);
-
           this.responsesByUser = res.respostasPorUsuario;
           this.carregandoFormularioSelecionado = false;
           this.problemaAoCarregarFormulario = false;
@@ -337,7 +336,29 @@ export class ListarFormularios {
    * @description Função para retornar as perguntas do formulário selecionado
    */
   public get getPerguntas(): any[] {
-    return this.formularioSelecionado?.questoesFormatadas?.questoes || [];
+    if (!this.formularioSelecionado) return [];
+    if (!this.formularioSelecionado.questoesFormatadas) return [];
+    return this.formularioSelecionado.questoesFormatadas.questoes || [];
+  }
+
+  public get getRespostas(): any[] {
+    if (!this.formularioSelecionado) return [];
+    if (!this.formularioSelecionado.questoesFormatadas) return [];
+    
+    return (
+      this.formularioSelecionado.questoesFormatadas.respostas.map(
+        (resp) => resp.respostas
+      ) || []
+    );
+  }
+
+  public get getDadosParaGraficos(): any {
+    const perguntas = this.getPerguntas;
+    const respostas = this.getRespostas || [];
+    return {
+      perguntas,
+      respostas,
+    };
   }
 
   /**
@@ -358,7 +379,9 @@ export class ListarFormularios {
     const ordemQuestoes = questoes.map((questao: QuestaoUnica) => questao.id);
     const respostas = this.responsesByUser[this.indexPorResposta];
     respostas.respostas.sort((a: any, b: any) => {
-      return ordemQuestoes.indexOf(a.idQuestao) - ordemQuestoes.indexOf(b.idQuestao);
+      return (
+        ordemQuestoes.indexOf(a.idQuestao) - ordemQuestoes.indexOf(b.idQuestao)
+      );
     });
     return respostas;
   }

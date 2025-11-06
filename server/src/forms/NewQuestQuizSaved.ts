@@ -1,9 +1,9 @@
 export class NewQuestQuizSaved {
     titulo: string;
     tipo: string;
-    opcoes?: string[];
+    opcoes?: OpcaoDaQuestao[];
     favorita: boolean;
-    respostasCorretas?: number[];
+    respostasCorretas?: OpcaoDaQuestao[];
     pontos?: number;
     feedbackCorreto?: string;
     feedbackErrado?: string;
@@ -12,8 +12,8 @@ export class NewQuestQuizSaved {
         titulo: string,
         tipo: string,
         favorita: boolean,
-        opcoes?: string[],
-        respostasCorretas?: number[],
+        opcoes?: OpcaoDaQuestao[],
+        respostasCorretas?: OpcaoDaQuestao[],
         pontos?: number,
         feedbackCorreto?: string,
         feedbackErrado?: string
@@ -26,5 +26,15 @@ export class NewQuestQuizSaved {
         this.pontos = pontos;
         this.feedbackCorreto = feedbackCorreto;
         this.feedbackErrado = feedbackErrado;
+    }
+}
+
+export class OpcaoDaQuestao {
+    idAlternativa?: number | null;
+    texto: string;
+
+    constructor(texto: string, idAlternativa?: number | null) {
+        this.texto = texto;
+        this.idAlternativa = idAlternativa;
     }
 }

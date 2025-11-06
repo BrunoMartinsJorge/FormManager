@@ -27,6 +27,7 @@ export interface QuestaoUnica {
   titulo: string;
   tipo: string;
   opcoes?: string[];
+  escala?: any;
 }
 
 export interface Resposta_Questao {

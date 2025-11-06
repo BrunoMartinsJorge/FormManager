@@ -4,7 +4,7 @@
     <p>Aqui você pode visualizar todas as questões salvas</p>
   </div>
   <p-table
-    style="border: 1px solid #ccc;"
+    style="border: 1px solid #ccc"
     [value]="listaQuestoesSalvas"
     stripedRows
     [rows]="5"
@@ -100,6 +100,8 @@
       <div class="input-group">
         <label for="tipo-quest">Qual o tipo da Questão:</label>
         <p-select
+          (onChange)="limparQuestao($event)"
+          appendTo="body"
           id="tipo-quest"
           [options]="tipoDeCampo"
           [(ngModel)]="novaQuestao.tipo"
@@ -109,7 +111,7 @@
         />
       </div>
       <p-button
-      [style]="{'margin-top': '10px', 'width': '100%'}"
+        [style]="{'margin-top': '10px', 'width': '100%'}"
         *ngIf="novaQuestao.tipo === 'MULTIPLA' || novaQuestao.tipo === 'UNICA'"
         label="Adicionar opção"
         icon="pi pi-plus"
@@ -159,6 +161,7 @@
         />
         <p-inputgroup-addon>
           <p-button
+            [disabled]="novaQuestao.opcoes![index].texto === ''"
             [icon]="opcaoCorreta(index) ? 'pi pi-check' : 'pi pi-times'"
             (click)="mudarOpcaoCorreta(index)"
           />
@@ -231,9 +234,9 @@
           id="titulo-quest"
           type="text"
           pInputText
-          [(ngModel)]="novaQuestao.imagem"
+          [(ngModel)]="novaQuestao.urlImagem"
           placeholder="Imagem da Questão (URL)"
-          [invalid]="!urlImagemValida(novaQuestao.imagemUrl || '') && (novaQuestao.imagemUrl || '').trim() !== ''"
+          [invalid]="!urlImagemValida(novaQuestao.urlImagem || '') && (novaQuestao.urlImagem || '').trim() !== ''"
           pTooltip="Opcional."
         />
       </div>
@@ -245,7 +248,7 @@
           pInputText
           [(ngModel)]="novaQuestao.descricaoImagem"
           placeholder="Descrição da Imagem"
-          [disabled]="!urlImagemValida(novaQuestao.imagemUrl || '')"
+          [disabled]="!urlImagemValida(novaQuestao.urlImagem || '')"
         />
       </div>
     </div>

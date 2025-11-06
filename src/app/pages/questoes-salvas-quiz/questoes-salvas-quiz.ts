@@ -1,7 +1,10 @@
 import { Component } from '@angular/core';
 import { FormulariosServices } from '../../services/formularios-services';
 import { Dialog } from 'primeng/dialog';
-import { TypeQuestEnum } from '../adicionar-formulario/enums/TypeQuestEnum';
+import {
+  getTypeQuestLabel,
+  TypeQuestEnum,
+} from '../adicionar-formulario/enums/TypeQuestEnum';
 import { CommonModule } from '@angular/common';
 import { InputNumber } from 'primeng/inputnumber';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
@@ -18,7 +21,7 @@ import { SplitButton } from 'primeng/splitbutton';
 import { ProgressSpinner } from 'primeng/progressspinner';
 import { InputGroupAddon } from 'primeng/inputgroupaddon';
 import { Textarea } from 'primeng/textarea';
-import { QuestaoSalva } from './model/QuestaoSalva';
+import { ALternativasDto, QuestaoSalva } from './model/QuestaoSalva';
 import { QuizService } from '../../services/quiz-service';
 
 @Component({
@@ -50,18 +53,20 @@ export class QuestoesSalvasQuiz {
   public listaQuestoesSalvas: QuestaoSalva[] = [];
   public visibilidadeDialogAdicionarQuestao: boolean = false;
   public modoDialog: 'add' | 'edit' = 'add';
-  public novaQuestao: QuestaoSalva | any = {};
+  public novaQuestao: QuestaoSalva = {
+    titulo: '',
+    tipo: TypeQuestEnum.TEXTO,
+    opcoes: [],
+    favorita: true,
+    pontuacao: 0,
+    feedbackCorreto: '',
+    feedbackErro: '',
+    respostasCorretas: [],
+    urlImagem: '',
+    descricaoImagem: '',
+  };
   public carregandoQuestoes: boolean = false;
-  public tipoDeCampo: any[] = [
-    { nome: 'Texto', value: TypeQuestEnum.TEXTO },
-    { nome: 'Parágrafo', value: TypeQuestEnum.PARAGRAFO },
-    { nome: 'Número', value: TypeQuestEnum.NUMERO },
-    { nome: 'Única Escolha', value: TypeQuestEnum.UNICA },
-    { nome: 'Múltipla Escolha', value: TypeQuestEnum.MULTIPLA },
-    { nome: 'Data', value: TypeQuestEnum.DATA },
-    { nome: 'Escala', value: TypeQuestEnum.ESCALA },
-    { nome: 'Verdadeiro / Falso', value: TypeQuestEnum.VERDADEIRO_FALSO },
-  ];
+  public tipoDeCampo: any[] = this.carregarTiposCampos();
   public opcoesMenu: any[] = [
     {
       label: 'Ver Imagem',
@@ -80,6 +85,30 @@ export class QuestoesSalvasQuiz {
     },
   ];
 
+  /**
+   *
+   * @description Carrega os tipos de campos
+   * @returns - Tipos de campos
+   */
+  private carregarTiposCampos(): {
+    nome: string;
+    value: TypeQuestEnum;
+  }[] {
+    let tipos = Object.values(TypeQuestEnum);
+    let tiposFormatados = [];
+    for (let i = 0; i < tipos.length; i++) {
+      const tipoF = {
+        nome: '',
+        value: TypeQuestEnum.TEXTO,
+      };
+      tipoF.nome = getTypeQuestLabel(tipos[i]);
+      tipoF.value = tipos[i];
+      tiposFormatados[i] = tipoF;
+    }
+
+    return tiposFormatados;
+  }
+
   constructor(
     private formService: FormulariosServices,
     private toast: MessageService,
@@ -89,7 +118,7 @@ export class QuestoesSalvasQuiz {
   }
 
   /**
-   * 
+   *
    * @description Busca as perguntas salvas
    */
   private getPerguntasSalvas(): void {
@@ -112,19 +141,45 @@ export class QuestoesSalvasQuiz {
     });
   }
 
+  public limparQuestao(event: any): void {
+    const value = event.value;
+    if (!value) return;
+    const questao = this.novaQuestao;
+    this.novaQuestao = {
+    titulo: questao.titulo || '',
+    tipo: value,
+    opcoes: [],
+    favorita: true,
+    pontuacao: 0,
+    feedbackCorreto: '',
+    feedbackErro: '',
+    respostasCorretas: [],
+    urlImagem: '',
+    descricaoImagem: '',
+  };
+  }
+
   /**
-   * 
+   *
    * @param indexOpcao - Indice da opcao
    * @description Verifica se a opção selecionada eh a correta
    * @returns - Verdadeiro ou Falso
    */
   public opcaoCorreta(indexOpcao: number): boolean {
     const questao: QuestaoSalva = this.novaQuestao;
-    if (!questao.opcoes || !questao.correta) return false;
+    if (!questao.opcoes) return false;
+    console.log(questao);
+    if (!questao.respostasCorretas) {
+      console.log(questao.respostasCorretas);
+      return false;
+    }
     const alternativa = questao.opcoes[indexOpcao];
     if (!alternativa) return false;
-    for (let i = 0; i < questao.correta.length; i++) {
-      if (questao.correta[i].texto === alternativa.texto) {
+    for (let i = 0; i < questao.respostasCorretas!.length; i++) {
+      console.log(questao.respostasCorretas![i].texto);
+      console.log(alternativa.texto);
+      
+      if (questao.respostasCorretas![i].texto === alternativa.texto) {
         return true;
       }
     }
@@ -132,17 +187,18 @@ export class QuestoesSalvasQuiz {
   }
 
   /**
-   * 
+   *
    * @param opcao - Verdadeiro ou Falso
    * @description Verifica se a opção selecionada eh a correta
    * @returns - Verdadeiro ou Falso
    */
   public opcaoCorretaVerdadeiroFalse(opcao: 'Verdadeiro' | 'Falso'): boolean {
     const questao = this.novaQuestao;
-    const op = questao.opcoes.find((o: any) => o.texto === opcao);
+    if (!questao || !questao.opcoes) return false;
+    const op = questao.opcoes.find((o: ALternativasDto) => o.texto === opcao);
     let res = false;
-    if (!questao.correta || !op) return false;
-    questao.correta.forEach((c: any) => {
+    if (!questao.respostasCorretas || !op) return false;
+    questao.respostasCorretas.forEach((c: ALternativasDto) => {
       if (c.texto === opcao) {
         res = true;
       } else res = false;
@@ -151,7 +207,7 @@ export class QuestoesSalvasQuiz {
   }
 
   /**
-   * 
+   *
    * @param indexOpcao - Indice da opcao
    * @description Verifica se a opção selecionada eh a correta
    * @returns - Verdadeiro ou Falso
@@ -162,25 +218,25 @@ export class QuestoesSalvasQuiz {
 
     if (!questao.opcoes) return; // segurança
 
-    if (!Array.isArray(questao.correta)) {
-      questao.correta = [];
+    if (!Array.isArray(questao.respostasCorretas)) {
+      questao.respostasCorretas = [];
     }
 
     const alternativaSelecionada = questao.opcoes[idx];
 
     if (!alternativaSelecionada) return;
 
-    const indexNaCorreta = questao.correta.findIndex(
+    const indexNaCorreta = questao.respostasCorretas.findIndex(
       (a) => a.idAlternativa === alternativaSelecionada.idAlternativa
     );
 
     if (indexNaCorreta > -1) {
-      questao.correta.splice(indexNaCorreta, 1);
+      questao.respostasCorretas.splice(indexNaCorreta, 1);
     } else {
       if (questao.tipo === 'UNICA') {
-        questao.correta = [alternativaSelecionada];
+        questao.respostasCorretas = [alternativaSelecionada];
       } else {
-        questao.correta.push(alternativaSelecionada);
+        questao.respostasCorretas.push(alternativaSelecionada);
       }
     }
 
@@ -188,14 +244,12 @@ export class QuestoesSalvasQuiz {
   }
 
   /**
-   * 
+   *
    * @param opcao - Verdadeiro ou Falso
    * @description Verifica se a opção selecionada eh a correta
    * @returns - Verdadeiro ou Falso
    */
-  public mudarOpcaoCorretaVerdadeiroFalso(
-    opcao: 'Verdadeiro' | 'Falso'
-  ): void {
+  public mudarOpcaoCorretaVerdadeiroFalso(opcao: 'Verdadeiro' | 'Falso'): void {
     const questao = this.novaQuestao;
     questao.opcoes = [
       {
@@ -209,12 +263,12 @@ export class QuestoesSalvasQuiz {
     ];
     const alternativa = questao.opcoes.find((a: any) => a.texto === opcao);
     if (!alternativa) return;
-    questao.correta = [];
-    questao.correta.push(alternativa);
+    questao.respostasCorretas = [];
+    questao.respostasCorretas.push(alternativa);
   }
 
   /**
-   * 
+   *
    * @param event - Evento
    * @param quest - Objeto da questão
    * @description Verifica se a opção selecionada eh a correta
@@ -252,7 +306,7 @@ export class QuestoesSalvasQuiz {
   }
 
   /**
-   * 
+   *
    * @description Abre o dialog para adicionar uma Questão
    */
   public abrirDialogAdcionarPergunta(): void {
@@ -267,7 +321,7 @@ export class QuestoesSalvasQuiz {
   }
 
   /**
-   * 
+   *
    * @description Edita uma Questão
    */
   public editarQuestaoSalva(): void {
@@ -292,33 +346,46 @@ export class QuestoesSalvasQuiz {
   }
 
   /**
-   * 
+   *
    * @param questao - Objeto da questão
    * @description Abre o dialog para editar uma Questão
    */
   public mudarVisibilidadeDialogEditarQuestao(questao: any): void {
     this.modoDialog = 'edit';
 
-    this.visibilidadeDialogAdicionarQuestao = !this.visibilidadeDialogAdicionarQuestao;
+    this.visibilidadeDialogAdicionarQuestao =
+      !this.visibilidadeDialogAdicionarQuestao;
     if (this.visibilidadeDialogAdicionarQuestao) {
       this.novaQuestao = {
         descricaoImagem: questao.descricaoImagem,
         favorita: questao.favorito,
         id: questao.id,
-        imagem: questao.imagem,
+        urlImagem: questao.urlImagem,
         opcoes: questao.opcoes || [],
-        correta: questao.correta,
+        respostasCorretas: questao.respostasCorretas,
         titulo: questao.titulo,
         pontuacao: questao.pontuacao,
         feedbackCorreto: questao.feedbackCorreto,
         feedbackErro: questao.feedbackErro,
         tipo: questao.tipo,
       };
-    } else this.novaQuestao = {};
+    } else
+      this.novaQuestao = {
+        titulo: '',
+        tipo: TypeQuestEnum.TEXTO,
+        opcoes: [],
+        favorita: true,
+        pontuacao: 0,
+        feedbackCorreto: '',
+        feedbackErro: '',
+        respostasCorretas: [],
+        urlImagem: '',
+        descricaoImagem: '',
+      };
   }
 
   /**
-   * 
+   *
    * @param url - URL da imagem
    * @description Abre uma nova aba com a imagem
    */
@@ -327,7 +394,7 @@ export class QuestoesSalvasQuiz {
   }
 
   /**
-   * 
+   *
    * @description Adiciona uma nova opção
    */
   public adicionarOpcao(): void {
@@ -336,7 +403,7 @@ export class QuestoesSalvasQuiz {
   }
 
   /**
-   * 
+   *
    * @param index - Indice da opcao
    * @description Retorna o indice da opcao
    * @returns - Indice da opcao
@@ -346,7 +413,7 @@ export class QuestoesSalvasQuiz {
   }
 
   /**
-   * 
+   *
    * @param indexOpcao - Indice da opcao
    * @description Remove uma opcao
    * @returns - Indice da opcao
@@ -363,7 +430,7 @@ export class QuestoesSalvasQuiz {
   }
 
   /**
-   * 
+   *
    * @param url - URL da imagem
    * @description Verifica se a URL da imagem eh valida
    * @returns - Verdadeiro se a URL da imagem eh valida
@@ -376,7 +443,7 @@ export class QuestoesSalvasQuiz {
   }
 
   /**
-   * 
+   *
    * @description Verifica se a questão eh valida
    * @returns - Verdadeiro se a questão eh valida
    */
@@ -384,7 +451,7 @@ export class QuestoesSalvasQuiz {
     if (!this.novaQuestao.titulo || this.novaQuestao.titulo.trim() === '') {
       return false;
     }
-    if (this.novaQuestao.imagemUrl && this.novaQuestao.imagemUrl.trim() != '') {
+    if (this.novaQuestao.urlImagem && this.novaQuestao.urlImagem.trim() != '') {
       if (
         !this.novaQuestao.descricaoImagem ||
         this.novaQuestao.descricaoImagem.trim() === ''
@@ -402,7 +469,7 @@ export class QuestoesSalvasQuiz {
         }
       }
     }
-
+    if (!this.novaQuestao.opcoes) return false;
     for (let opcao of this.novaQuestao.opcoes) {
       if (!opcao || opcao.texto.trim() === '') {
         return false;
@@ -412,7 +479,7 @@ export class QuestoesSalvasQuiz {
   }
 
   /**
-   * 
+   *
    * @description Adiciona uma nova questão
    */
   public adicionarQuestaoSalva(): void {

@@ -3,24 +3,34 @@
   [draggable]="false"
   [modal]="true"
   [style]="{ width: '50%'}"
-  (onHide)="closeDialog()"
+  (onHide)="fecharDialog()"
   header="Gerar PDF"
 >
   <section>
     <div #pdfSection>
       <div class="header-form">
-        <h1>{{formSelected?.titulo}}</h1>
-        <p>{{formSelected?.descricao}}</p>
+        <h1>{{formularioSelecionado?.titulo}}</h1>
+        <p>{{formularioSelecionado?.descricao}}</p>
       </div>
-      <br>
+      <br />
       <div class="body-form">
         <h2>Questões do Formulário</h2>
         <div class="quest-list">
-          @for (quest of formSelected?.questoes; let i = $index; track
+          @for (quest of questoesFormatadas; let i = $index; track
           quest.id){
           <div class="quest-element">
             <strong>{{i+1}}. {{quest.titulo}}</strong>
-            <div class="response-element"></div>
+            @if (quest.tipo == 'TEXTO'){
+            <div class="response-element" style="height: 100px"></div>
+            } @else if (quest.tipo == 'MULTIPLA'){
+              @for (opcao of quest.opcoes; let i = $index; track opcao.valor){
+                <div class="input-select">
+                  <p-checkbox [(ngModel)]="quest.selecionado" [binary]="true">
+                    {{opcao.valor}}
+                  </p-checkbox>
+                </div>
+              }
+            }
           </div>
           }
         </div>
@@ -31,8 +41,9 @@
         </div>
         <p>
           <span
-            ><i class="pi pi-calendar"></i>Criado em {{formSelected?.dataCriacao
-            | date : 'dd/MM/yyyy HH:mm'}}</span
+            ><i class="pi pi-calendar"></i>Criado em
+            {{formularioSelecionado?.dataCriacao | date : 'dd/MM/yyyy
+            HH:mm'}}</span
           >
         </p>
       </div>
@@ -41,7 +52,7 @@
   <br />
   <p-button
     label="Gerar PDF"
-    (click)="createPdf()"
+    (click)="criarPDF()"
     icon="pi pi-file-pdf"
     severity="contrast"
     [style]="{width: '100%'}"

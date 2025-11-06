@@ -7,7 +7,6 @@ import { ProgressSpinner } from 'primeng/progressspinner';
 import { MessageService } from 'primeng/api';
 import { GerarGraficos } from '../../shared/components/gerar-graficos/gerar-graficos';
 import { GerarPdf } from '../../shared/components/gerar-pdf/gerar-pdf';
-import { FormularioPdfModel } from '../../shared/components/gerar-pdf/models/FormularioPdf.model';
 import * as XLSX from 'xlsx';
 import { QuizService } from '../../services/quiz-service';
 import { QuestaoModel } from '../../shared/models/questao.model';

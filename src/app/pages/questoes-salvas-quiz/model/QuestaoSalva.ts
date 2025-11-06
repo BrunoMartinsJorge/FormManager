@@ -1,9 +1,9 @@
 export interface QuestaoSalva {
-  id: number;
+  id?: number;
   tipo: string;
   titulo: string;
   opcoes?: ALternativasDto[];
-  correta?: ALternativasDto[];
+  respostasCorretas?: ALternativasDto[];
   favorita: boolean;
   urlImagem?: string;
   descricaoImagem?: string;
@@ -15,6 +15,6 @@ export interface QuestaoSalva {
 }
 
 export interface ALternativasDto {
-  idAlternativa: number;
+  idAlternativa: number | null;
   texto: string;
 }

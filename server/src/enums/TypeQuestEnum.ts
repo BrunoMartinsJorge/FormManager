@@ -1,7 +1,6 @@
 export enum TypeQuestEnum {
   TEXTO = 'TEXTO',
   PARAGRAFO = 'PARAGRAFO',
-  NUMERO = 'NUMERO',
   UNICA = 'UNICA',
   MULTIPLA = 'MULTIPLA',
   DATA = 'DATA',

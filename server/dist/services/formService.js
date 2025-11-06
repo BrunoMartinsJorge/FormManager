@@ -65,9 +65,6 @@ async function salvarFormularioCompleto(dadosForm, userEmail) {
                     },
                 });
                 return;
-            case 'NUMERO':
-                item.questionItem.question = { textQuestion: {} };
-                break;
             case 'UNICA':
                 item.questionItem.question = {
                     choiceQuestion: {
@@ -295,8 +292,13 @@ function convertQuestionData(ativo, data) {
         const q = quest.questionItem.question;
         let tipo = TypeQuestEnum_1.TypeQuestEnum.TEXTO;
         let opcoes;
+        const escala = {
+            low: q.scaleQuestion?.low,
+            high: q.scaleQuestion?.high,
+            endLabel: q.scaleQuestion?.endLabel,
+            startLabel: q.scaleQuestion?.startLabel,
+        };
         if (q.textQuestion) {
-            // Pode ser TEXTO ou PARÁGRAFO
             tipo = q.textQuestion.paragraph
                 ? TypeQuestEnum_1.TypeQuestEnum.PARAGRAFO
                 : TypeQuestEnum_1.TypeQuestEnum.TEXTO;
@@ -327,9 +329,6 @@ function convertQuestionData(ativo, data) {
         else if (q.timeQuestion) {
             tipo = TypeQuestEnum_1.TypeQuestEnum.TEMPO;
         }
-        else if (q.numberQuestion) {
-            tipo = TypeQuestEnum_1.TypeQuestEnum.NUMERO;
-        }
         else if (q.trueFalseQuestion) {
             tipo = TypeQuestEnum_1.TypeQuestEnum.VERDADEIRO_FALSO;
         }
@@ -346,6 +345,7 @@ function convertQuestionData(ativo, data) {
             id: q.questionId,
             titulo: quest.title || '',
             tipo,
+            escala,
             opcoes,
         };
     });

@@ -10,7 +10,7 @@ class ListaQuestoesDto {
         this.quiz = questao.Quiz || undefined;
         this.titulo = questao.Titulo;
         this.opcoes = questao.Alternativas.map((alt) => ALternativasDto.convert(alt));
-        this.correta = Array.isArray(questao.AlternativasCorretas)
+        this.respostasCorretas = Array.isArray(questao.AlternativasCorretas)
             ? this.opcoes.filter((alt) => questao.AlternativasCorretas.some((c) => c.idAlternativa === alt.idAlternativa && c.Texto === alt.texto))
             : [];
         this.high = 0;

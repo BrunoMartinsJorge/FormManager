@@ -268,6 +268,12 @@ export class AdicionarFormulario {
     this.formulario.questoes.splice(index, 1);
   }
 
+  public limparSelecaoPerguntas(): void {
+    // console.log("A");
+    this.questoesSelecionadas = [];
+    // this.perguntasSalvas = [];
+  }
+
   /**
    *
    * @description Verifica se o formulário esta valido

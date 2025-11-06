@@ -128,7 +128,7 @@ export class AdicionarQuiz {
       const novaQuestao: QuestaoSalva = {
         titulo: question.titulo,
         tipo: question.tipo,
-        correta: question.correta,
+        respostasCorretas: question.correta,
         opcoes: question.opcoes,
         urlImagem: question.imagem,
         descricaoImagem: question.descricaoImagem,
