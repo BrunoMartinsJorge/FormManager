@@ -93,8 +93,9 @@
     <input
       type="number"
       pInputText
-      [(ngModel)]="questao.pontuacao"
+      [(ngModel)]="questao.nivelPontuacao"
       [min]="0"
+      [max]="10"
       placeholder="Nivel de pontuação"
     />
     <p-fieldset legend="Icone de pontuação">
@@ -168,8 +169,29 @@
         <label for="anos">Incluir Tempo?</label>
       </span>
     </div>
-    }
-    <div class="info-input" *ngIf="questao.tipo === 'ESCALA'">
+    } @if (questao.tipo == 'ESCALA') {
+    <br />
+    <hr />
+    <br />
+    <div class="info-input">
+      <div class="input-group">
+        <label for="min-label">Texto da escala minima:</label>
+        <input
+          pInputText
+          id="min-label"
+          [(ngModel)]="questao.startLabel"
+          placeholder="Valor mínimo"
+        />
+      </div>
+      <div class="input-group">
+        <label for="max-label">Texto da escala máximo:</label>
+        <input
+          pInputText
+          id="max-label"
+          [(ngModel)]="questao.endLabel"
+          placeholder="Valor máximo"
+        />
+      </div>
       <div class="input-group">
         <label for="min-quest">Valor mínimo:</label>
         <p-input-number
@@ -186,20 +208,22 @@
         <p-input-number
           id="max-quest"
           type="number"
-          [min]="questao.low ? questao.low : 1"
+          [min]="questao.low ? questao.low + 1 : 1"
+          [max]="10"
           [(ngModel)]="questao.high"
           placeholder="Valor máximo"
         />
       </div>
     </div>
+    }
     <div class="footer-quest" [@questaoAnimation]>
       @if (questao.tipo !== 'IMAGEM') {
-        <p-togglebutton
+      <p-togglebutton
         [(ngModel)]="questao.obrigatorio"
         onLabel="Obrigatório"
         offLabel="Não Obrigatório"
         class="w-24"
-        />
+      />
       }
       <p-button
         label="Remover Questão"
@@ -209,9 +233,11 @@
       />
     </div>
   </div>
-  <div class="quest-empty" *ngIf="formulario.questoes.length === 0">
+  @if (formulario.questoes.length === 0) {
+  <div class="quest-empty">
     <span>Nenhuma questão adicionada ainda.</span>
   </div>
+  }
 </section>
 <footer>
   <p-button
@@ -243,21 +269,40 @@
   header="Formulário criado com sucesso!"
   [modal]="true"
 >
-  <p-inputgroup>
+  @if (respostaCriarFormulario.url && respostaCriarFormulario.url !== '') {
+  <p>O formulário foi criado com sucesso e já está disponível para uso!</p>
+  <div
+    style="margin: 0.5em 0; display: flex; justify-content: center; gap: 10px"
+  >
     <p-button
-      pTooltip="Copiar link"
-      tooltipPosition="top"
+      label="Copiar Link de Acesso"
       icon="pi pi-copy"
-      severity="contrast"
+      severity="info"
       (click)="copiarLink()"
     />
-    <input
-      pInputText
-      placeholder="Link do formulário"
-      [(ngModel)]="urlForm"
-      [disabled]="true"
+    <p-button
+      label="Acessar Formulário"
+      icon="pi pi-external-link"
+      severity="info"
+      (click)="acessarFormulario()"
     />
-  </p-inputgroup>
+  </div>
+  } @else {
+  <p style="text-align: center">
+    O formulário foi criado com sucesso, porem não foi publicado, favor acessar
+    o formulário para publicá-lo a partir do botão abaixo!
+  </p>
+  <div
+    style="
+      margin: 0.5em 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    "
+  >
+    <p-button label="Acessar Formulário" icon="pi pi-cog" severity="contrast" (click)="acessarFormularioManualmente()"/>
+  </div>
+  }
 </p-dialog>
 <p-dialog
   [style]="{ width: '50%' }"
@@ -284,15 +329,10 @@
     </ng-template>
     <ng-template #body let-questao>
       <tr>
+        <td>{{ questao.tipo | typeQuestEnumTransform }}</td>
         <td>
-          {{ questao.tipo | typeQuestEnumTransform }}
-        </td>
-        <td>
-          @if (questao.tipo !== 'IMAGEM') {
-            {{ questao.titulo }}
-          } @else {
-            {{ questao.descricaoImagem }}
-          }
+          @if (questao.tipo !== 'IMAGEM') { {{ questao.titulo }} } @else { {{
+          questao.descricaoImagem }} }
         </td>
         <td style="text-align: center">
           <p-checkbox

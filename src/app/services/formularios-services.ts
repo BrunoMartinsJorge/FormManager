@@ -22,7 +22,10 @@ export class FormulariosServices {
   }
 
   public adicionarNovaPerguntaSalva(question: any): Observable<any> {
-    return this.http.post<any>(`${this.baseUrl}/formularios/questoes`, question);
+    return this.http.post<any>(
+      `${this.baseUrl}/formularios/questoes`,
+      question
+    );
   }
 
   public criarQuiz(quiz: any): Observable<any> {
@@ -42,11 +45,16 @@ export class FormulariosServices {
   }
 
   public apagarPerguntaSalva(idPergunta: number): Observable<any> {
-    return this.http.delete<any>(`${this.baseUrl}/formularios/questoes/${idPergunta}`);
+    return this.http.delete<any>(
+      `${this.baseUrl}/formularios/questoes/${idPergunta}`
+    );
   }
 
   public editarPergunta(questao: any): Observable<any> {
-    return this.http.put<any>(`${this.baseUrl}/formularios/questoes-salvas/edit`, questao);
+    return this.http.put<any>(
+      `${this.baseUrl}/formularios/questoes-salvas/edit`,
+      questao
+    );
   }
 
   public deletarFormulario(formId: number) {
@@ -55,10 +63,18 @@ export class FormulariosServices {
     });
   }
   public buscarRespostasDeFormularioPorIdForm(formId: string): Observable<any> {
-    return this.http.get<any>(`${this.baseUrl}/formularios/${formId}/responses`);
+    return this.http.get<any>(
+      `${this.baseUrl}/formularios/${formId}/responses`
+    );
   }
 
   public buscarQuestoesDeFormularioPorIdForm(formId: string): Observable<any> {
     return this.http.get<any>(`${this.baseUrl}/api/forms/${formId}/questions`);
+  }
+
+  public apagarQuestao(questaoId: number): Observable<any> {
+    return this.http.delete<any>(
+      `${this.baseUrl}/quiz/questoes-salvas/${questaoId}`
+    );
   }
 }

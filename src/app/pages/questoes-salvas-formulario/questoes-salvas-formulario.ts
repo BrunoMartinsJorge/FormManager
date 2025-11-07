@@ -17,7 +17,12 @@ import { TableModule } from 'primeng/table';
 import { TypeQuestEnumTransformPipe } from '../../shared/pipes/type-quest-enum-transform-pipe';
 import { SplitButton } from 'primeng/splitbutton';
 import { ProgressSpinner } from 'primeng/progressspinner';
-import { Tooltip } from "primeng/tooltip";
+import { Tooltip } from 'primeng/tooltip';
+import { FieldsetModule } from 'primeng/fieldset';
+import { RadioButton } from 'primeng/radiobutton';
+import { NewQuest } from '../adicionar-formulario/forms/NewQuest';
+import { ToggleSwitch } from 'primeng/toggleswitch';
+import { ToggleButton } from "primeng/togglebutton";
 
 @Component({
   selector: 'app-questoes-salvas-formulario',
@@ -35,17 +40,22 @@ import { Tooltip } from "primeng/tooltip";
     TypeQuestEnumTransformPipe,
     SplitButton,
     ProgressSpinner,
-    Tooltip
+    Tooltip,
+    FieldsetModule,
+    RadioButton,
+    ToggleSwitch,
+    ToggleButton
 ],
   providers: [FormulariosServices, MessageService],
   templateUrl: './questoes-salvas-formulario.html',
   styleUrl: './questoes-salvas-formulario.css',
 })
 export class QuestoesSalvasFormulario {
-  public listaPerguntasSalvas: any[] = [];
+  private listaPerguntasSalvas: NewQuest[] = [];
+  public listaFiltrada: NewQuest[] = [];
   public visibilidadeAdicionarPergunta: boolean = false;
   public modoDialog: 'add' | 'edit' = 'add';
-  public novaPergunta: any = {};
+  public novaPergunta: NewQuest = this.montarPergunta;
   public carregandoPergunta: boolean = false;
   private idPerguntaSelecionada: number = 0;
   public tipoDeCampo: any[] = this.carregarTiposCampos();
@@ -54,7 +64,7 @@ export class QuestoesSalvasFormulario {
       label: 'Ver Imagem',
       icon: 'pi pi-image',
       command: () => {
-        this.verImagemPergunta(this.novaPergunta.urlImagem);
+        this.verImagemPergunta(this.novaPergunta?.imagemUrl || '');
       },
     },
     { separator: true },
@@ -66,6 +76,16 @@ export class QuestoesSalvasFormulario {
       },
     },
   ];
+
+  public filtroTipo: TypeQuestEnum | undefined = undefined;
+
+  private get montarPergunta(): NewQuest {
+    return {
+      titulo: '',
+      tipo: TypeQuestEnum.TEXTO,
+      opcoes: [],
+    };
+  }
 
   /**
    *
@@ -95,6 +115,22 @@ export class QuestoesSalvasFormulario {
     private formService: FormulariosServices,
     private toast: MessageService
   ) {
+    this.getPerguntasSalvas();
+  }
+
+  /**
+   * 
+   * @description Funcionalidade para recarregar o filtro
+   */
+  public recarregarFiltro(): void {
+    if (!this.filtroTipo) return;
+    this.listaFiltrada = this.listaPerguntasSalvas.filter(
+      (pergunta) => pergunta.tipo === this.filtroTipo
+    );
+  }
+
+  public limparFiltros(): void {
+    this.filtroTipo = undefined;
     this.getPerguntasSalvas();
   }
 
@@ -131,10 +167,13 @@ export class QuestoesSalvasFormulario {
    */
   private getPerguntasSalvas(): void {
     this.listaPerguntasSalvas = [];
+    this.listaFiltrada = [];
     this.carregandoPergunta = true;
     this.formService.buscarTodasPerguntasSalvas().subscribe({
       next: (response: any) => {
         this.listaPerguntasSalvas = response || [];
+        this.listaFiltrada = response || [];
+        if (this.filtroTipo) this.recarregarFiltro();
         this.carregandoPergunta = false;
       },
       error: (err) => {
@@ -199,12 +238,11 @@ export class QuestoesSalvasFormulario {
       titulo: '',
       tipo: TypeQuestEnum.TEXTO,
       opcoes: [],
-      favorita: true,
     };
   }
 
   /**
-   * 
+   *
    * @description Funcionalidade para recarregar a tabela
    */
   public recarregarTabela(): void {
@@ -216,15 +254,23 @@ export class QuestoesSalvasFormulario {
    * @description Funcionalidade para editar uma pergunta salva
    */
   public editarPerguntaSalva(): void {
-    const quest: any = {
-      idPergunta: this.novaPergunta.id,
+    if (!this.novaPergunta) return;
+    const quest: NewQuest = {
+      idPergunta: this.novaPergunta.idPergunta,
       descricaoImagem: this.novaPergunta.descricaoImagem,
-      favorita: this.novaPergunta.favorito,
-      id: this.novaPergunta.idPergunta,
-      imagem: this.novaPergunta.imagem,
+      imagemUrl: this.novaPergunta.imagemUrl,
       opcoes: this.novaPergunta.opcoes,
       titulo: this.novaPergunta.titulo,
       tipo: this.novaPergunta.tipo,
+      nivelPontuacao: this.novaPergunta.nivelPontuacao,
+      anos: this.novaPergunta.anos,
+      tempo: this.novaPergunta.tempo,
+      low: this.novaPergunta.low,
+      high: this.novaPergunta.high,
+      startLabel: this.novaPergunta.startLabel,
+      endLabel: this.novaPergunta.endLabel,
+      iconPontuacao: this.novaPergunta.iconPontuacao,
+      obrigatorio: this.novaPergunta.obrigatorio,
     };
     this.formService.editarPergunta(quest).subscribe({
       next: (response: any) => {
@@ -259,16 +305,22 @@ export class QuestoesSalvasFormulario {
     if (this.visibilidadeAdicionarPergunta) {
       this.novaPergunta = {
         descricaoImagem: questao.descricaoImagem,
-        favorita: questao.favorito,
-        id: questao.idPergunta,
+        idPergunta: questao.idPergunta,
         imagemUrl: questao.urlImagem,
         opcoes: questao.opcoes,
         titulo: questao.titulo,
         tipo: questao.tipo,
+        anos: questao.anos,
+        endLabel: questao.endLabel,
+        startLabel: questao.startLabel,
+        high: questao.high,
+        low: questao.low,
+        tempo: questao.tempo,
+        nivelPontuacao: questao.nivelPontuacao,
+        iconPontuacao: questao.iconPontuacao,
+        obrigatorio: questao.obrigatorio,
       };
-      console.log(questao);
-      
-    } else this.novaPergunta = {};
+    } else this.novaPergunta = this.montarPergunta;
   }
 
   /**
@@ -285,6 +337,7 @@ export class QuestoesSalvasFormulario {
    * @description Adiciona uma opcao na pergunta
    */
   public adicionarOpcao(): void {
+    if (!this.novaPergunta) return;
     if (!this.novaPergunta.opcoes) this.novaPergunta.opcoes = [];
     this.novaPergunta.opcoes.push('');
   }
@@ -334,6 +387,7 @@ export class QuestoesSalvasFormulario {
    * @returns - Verifica se a pergunta eh valida
    */
   public perguntaValida(): boolean {
+    if (!this.novaPergunta) return false;
     if (this.novaPergunta.tipo !== 'IMAGEM') {
       if (!this.novaPergunta.titulo || this.novaPergunta.titulo.trim() === '') {
         return false;
@@ -360,6 +414,7 @@ export class QuestoesSalvasFormulario {
         }
       }
     }
+    if (!this.novaPergunta.opcoes) return false;
     for (let opcao of this.novaPergunta.opcoes) {
       if (!opcao || opcao.trim() === '') {
         return false;

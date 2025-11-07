@@ -108,8 +108,8 @@ router.post('/formularios', async (req, res) => {
         const oauth2 = googleapis_1.google.oauth2({ auth, version: 'v2' });
         const userInfo = await oauth2.userinfo.get();
         const userEmail = userInfo.data.email;
-        const url = await (0, formService_1.salvarFormularioCompleto)(req.body, userEmail ?? null);
-        res.json({ url });
+        const resposta = await (0, formService_1.salvarFormularioCompleto)(req.body, userEmail ?? null);
+        res.json({ resposta });
     }
     catch (err) {
         console.error(err);
@@ -155,6 +155,19 @@ router.put('/quiz/questoes-salvas', async (req, res) => {
     catch (err) {
         res.status(500).send('Erro ao editar pergunta');
         console.error(err);
+    }
+});
+router.delete('/quiz/questoes-salvas/:questId', async (req, res) => {
+    try {
+        const id = Number(req.params.questId);
+        if (!id)
+            return res.status(400).send('ID inválido.');
+        await (0, quizService_1.apagarQuestao)(id);
+        res.status(200).send({ resposta: 'Pergunta apagada com sucesso!' });
+    }
+    catch (err) {
+        console.error(err);
+        res.status(500).send('Erro ao apagar pergunta');
     }
 });
 router.get('/quiz/questoes-salvas', async (req, res) => {

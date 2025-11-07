@@ -21,8 +21,10 @@ import { SplitButton } from 'primeng/splitbutton';
 import { ProgressSpinner } from 'primeng/progressspinner';
 import { InputGroupAddon } from 'primeng/inputgroupaddon';
 import { Textarea } from 'primeng/textarea';
-import { ALternativasDto, QuestaoSalva } from './model/QuestaoSalva';
+import { QuestaoSalva } from './model/QuestaoSalva';
 import { QuizService } from '../../services/quiz-service';
+import { ToggleSwitch } from "primeng/toggleswitch";
+import { RadioButton } from "primeng/radiobutton";
 
 @Component({
   selector: 'app-questoes-salvas-quiz',
@@ -32,24 +34,26 @@ import { QuizService } from '../../services/quiz-service';
     InputNumber,
     ReactiveFormsModule,
     FormsModule,
-    Fieldset,
     Button,
     Select,
     InputText,
     InputGroup,
-    VisualizarQuestao,
     TableModule,
     TypeQuestEnumTransformPipe,
     SplitButton,
     ProgressSpinner,
     InputGroupAddon,
     Textarea,
-  ],
+    ToggleSwitch,
+    Fieldset,
+    RadioButton
+],
   templateUrl: './questoes-salvas-quiz.html',
   styleUrl: './questoes-salvas-quiz.css',
   providers: [FormulariosServices, MessageService],
 })
 export class QuestoesSalvasQuiz {
+  public idQuestaoSelecionada: number = 0;
   public listaQuestoesSalvas: QuestaoSalva[] = [];
   public visibilidadeDialogAdicionarQuestao: boolean = false;
   public modoDialog: 'add' | 'edit' = 'add';
@@ -57,10 +61,9 @@ export class QuestoesSalvasQuiz {
     titulo: '',
     tipo: TypeQuestEnum.TEXTO,
     opcoes: [],
-    favorita: true,
     pontuacao: 0,
     feedbackCorreto: '',
-    feedbackErro: '',
+    feedbackErrado: '',
     respostasCorretas: [],
     urlImagem: '',
     descricaoImagem: '',
@@ -80,10 +83,34 @@ export class QuestoesSalvasQuiz {
       label: 'Apagar Questão',
       icon: 'pi pi-trash',
       command: () => {
-        //this.gerarPDF(this.formularioSelecionado);
+        this.apargarQuestao();
       },
     },
   ];
+
+  public apargarQuestao(): void {
+    if (!this.idQuestaoSelecionada) return;
+    console.log("Ta aqui!, ", this.idQuestaoSelecionada);
+    this.formService.apagarQuestao(this.idQuestaoSelecionada).subscribe({
+      next: (response: any) => {
+        this.toast.add({
+          severity: 'success',
+          summary: 'Sucesso',
+          detail: 'Questão apagada com sucesso.',
+        });
+        this.getPerguntasSalvas();
+        this.visibilidadeDialogAdicionarQuestao = false;
+      },
+      error: (err) => {
+        console.error('Erro ao apagar questão:', err);
+        this.toast.add({
+          severity: 'error',
+          summary: 'Erro',
+          detail: 'Erro ao apagar questão.',
+        });
+      },
+    });
+  }
 
   /**
    *
@@ -146,17 +173,15 @@ export class QuestoesSalvasQuiz {
     if (!value) return;
     const questao = this.novaQuestao;
     this.novaQuestao = {
-    titulo: questao.titulo || '',
-    tipo: value,
-    opcoes: [],
-    favorita: true,
-    pontuacao: 0,
-    feedbackCorreto: '',
-    feedbackErro: '',
-    respostasCorretas: [],
-    urlImagem: '',
-    descricaoImagem: '',
-  };
+      titulo: questao.titulo || '',
+      tipo: value,
+      opcoes: [],
+      feedbackCorreto: '',
+      feedbackErrado: '',
+      respostasCorretas: [],
+      urlImagem: '',
+      descricaoImagem: '',
+    };
   }
 
   /**
@@ -168,18 +193,13 @@ export class QuestoesSalvasQuiz {
   public opcaoCorreta(indexOpcao: number): boolean {
     const questao: QuestaoSalva = this.novaQuestao;
     if (!questao.opcoes) return false;
-    console.log(questao);
     if (!questao.respostasCorretas) {
-      console.log(questao.respostasCorretas);
       return false;
     }
     const alternativa = questao.opcoes[indexOpcao];
     if (!alternativa) return false;
     for (let i = 0; i < questao.respostasCorretas!.length; i++) {
-      console.log(questao.respostasCorretas![i].texto);
-      console.log(alternativa.texto);
-      
-      if (questao.respostasCorretas![i].texto === alternativa.texto) {
+      if (questao.respostasCorretas![i] === alternativa) {
         return true;
       }
     }
@@ -195,14 +215,16 @@ export class QuestoesSalvasQuiz {
   public opcaoCorretaVerdadeiroFalse(opcao: 'Verdadeiro' | 'Falso'): boolean {
     const questao = this.novaQuestao;
     if (!questao || !questao.opcoes) return false;
-    const op = questao.opcoes.find((o: ALternativasDto) => o.texto === opcao);
+    const op = questao.opcoes.find((o: string) => o === opcao);
     let res = false;
     if (!questao.respostasCorretas || !op) return false;
-    questao.respostasCorretas.forEach((c: ALternativasDto) => {
-      if (c.texto === opcao) {
+    questao.respostasCorretas.forEach((c: string) => {
+      if (c === opcao) {
         res = true;
       } else res = false;
     });
+    console.log(questao);
+    
     return res;
   }
 
@@ -227,7 +249,7 @@ export class QuestoesSalvasQuiz {
     if (!alternativaSelecionada) return;
 
     const indexNaCorreta = questao.respostasCorretas.findIndex(
-      (a) => a.idAlternativa === alternativaSelecionada.idAlternativa
+      (a) => a === alternativaSelecionada
     );
 
     if (indexNaCorreta > -1) {
@@ -251,16 +273,7 @@ export class QuestoesSalvasQuiz {
    */
   public mudarOpcaoCorretaVerdadeiroFalso(opcao: 'Verdadeiro' | 'Falso'): void {
     const questao = this.novaQuestao;
-    questao.opcoes = [
-      {
-        idAlternativa: null,
-        texto: 'Verdadeiro',
-      },
-      {
-        idAlternativa: null,
-        texto: 'Falso',
-      },
-    ];
+    questao.opcoes = ['Verdadeiro', 'Falso'];
     const alternativa = questao.opcoes.find((a: any) => a.texto === opcao);
     if (!alternativa) return;
     questao.respostasCorretas = [];
@@ -274,13 +287,16 @@ export class QuestoesSalvasQuiz {
    * @description Verifica se a opção selecionada eh a correta
    */
   public selecionarQuestao(event: any, quest: any): void {
+    this.idQuestaoSelecionada = quest.id;
+    console.log(this.idQuestaoSelecionada);
+    
     if (quest.imagem == null || quest.imagem == '') {
       this.opcoesMenu = [
         {
           label: 'Apagar Questão',
           icon: 'pi pi-trash',
           command: () => {
-            //this.gerarPDF(this.formularioSelecionado);
+            this.apargarQuestao();
           },
         },
       ];
@@ -298,7 +314,7 @@ export class QuestoesSalvasQuiz {
           label: 'Apagar Questão',
           icon: 'pi pi-trash',
           command: () => {
-            //this.gerarPDF(this.formularioSelecionado);
+            this.apargarQuestao();
           },
         },
       ];
@@ -316,7 +332,7 @@ export class QuestoesSalvasQuiz {
       titulo: '',
       tipo: TypeQuestEnum.TEXTO,
       opcoes: [],
-      favorita: true,
+      respostasCorretas: [],
     };
   }
 
@@ -358,7 +374,6 @@ export class QuestoesSalvasQuiz {
     if (this.visibilidadeDialogAdicionarQuestao) {
       this.novaQuestao = {
         descricaoImagem: questao.descricaoImagem,
-        favorita: questao.favorito,
         id: questao.id,
         urlImagem: questao.urlImagem,
         opcoes: questao.opcoes || [],
@@ -366,18 +381,22 @@ export class QuestoesSalvasQuiz {
         titulo: questao.titulo,
         pontuacao: questao.pontuacao,
         feedbackCorreto: questao.feedbackCorreto,
-        feedbackErro: questao.feedbackErro,
+        feedbackErrado: questao.feedbackErrado,
         tipo: questao.tipo,
+        anos: questao.anos,
+        tempo: questao.tempo,
+        nivelPontuacao: questao.nivelPontuacao,
+        iconPontuacao: questao.iconPontuacao,
+        obrigatorio: questao.obrigatorio,
       };
     } else
       this.novaQuestao = {
         titulo: '',
         tipo: TypeQuestEnum.TEXTO,
         opcoes: [],
-        favorita: true,
         pontuacao: 0,
         feedbackCorreto: '',
-        feedbackErro: '',
+        feedbackErrado: '',
         respostasCorretas: [],
         urlImagem: '',
         descricaoImagem: '',
@@ -399,7 +418,7 @@ export class QuestoesSalvasQuiz {
    */
   public adicionarOpcao(): void {
     if (!this.novaQuestao.opcoes) this.novaQuestao.opcoes = [];
-    this.novaQuestao.opcoes.push({ idAlternativa: null, texto: '' });
+    this.novaQuestao.opcoes.push('');
   }
 
   /**
@@ -464,14 +483,14 @@ export class QuestoesSalvasQuiz {
       this.novaQuestao.tipo === TypeQuestEnum.UNICA
     ) {
       for (let opcao of this.novaQuestao.opcoes ?? []) {
-        if (!opcao || opcao.texto.trim() === '') {
+        if (!opcao || opcao.trim() === '') {
           return false;
         }
       }
     }
     if (!this.novaQuestao.opcoes) return false;
     for (let opcao of this.novaQuestao.opcoes) {
-      if (!opcao || opcao.texto.trim() === '') {
+      if (!opcao || opcao.trim() === '') {
         return false;
       }
     }

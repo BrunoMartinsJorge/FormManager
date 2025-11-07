@@ -6,7 +6,6 @@ import { Pergunta } from '../models/Pergunta';
 import { Tipo_Pergunta } from '../models/Tipo_Pergunta';
 import { NewQuestFormSaved } from '../forms/NewQuestFormSaved';
 import { ListaPerguntasDto } from '../models/dto/ListaPerguntasDto';
-import { EditQuest } from '../forms/EditQuestao';
 import { Alternativa_Pergunta } from '../models/Alternativa_Pergunta';
 import {
   QuestaoUnica,
@@ -16,10 +15,11 @@ import {
   RespostaUnica,
 } from '../models/dto/RespostasFormDto';
 import { FormulariosListaDto } from '../models/dto/FormulariosListaDto';
-import { TypeQuestEnum } from '../enums/TypeQuestEnum';
+import { getTypeQuestLabel, TypeQuestEnum } from '../enums/TypeQuestEnum';
+import { FormularioForm, NovaPergunta } from '../forms/FormularioForm';
 
 export async function salvarFormularioCompleto(
-  dadosForm: any,
+  dadosForm: FormularioForm,
   userEmail: string | null
 ) {
   const auth = await getAuthClient();
@@ -34,7 +34,7 @@ export async function salvarFormularioCompleto(
 
   let requests: any[] = [];
 
-  (dadosForm.questoes || []).forEach((questao: any, index: number) => {
+  (dadosForm.questoes || []).forEach((questao: NovaPergunta, index: number) => {
     const item: any = {
       title: questao.titulo,
       questionItem: { question: {} },
@@ -50,7 +50,7 @@ export async function salvarFormularioCompleto(
       case 'PONTUACAO':
         item.questionItem.question = {
           ratingQuestion: {
-            ratingScaleLevel: questao.pontuacao,
+            ratingScaleLevel: questao.nivelPontuacao,
             iconType: questao.iconPontuacao ?? 'STAR',
           },
         };
@@ -95,14 +95,11 @@ export async function salvarFormularioCompleto(
         break;
       case 'ESCALA':
         item.questionItem.question = {
-          scaleQuestion: { low: questao.low || 1, high: questao.high || 5 },
-        };
-        break;
-      case 'VERDADEIRO_FALSO':
-        item.questionItem.question = {
-          choiceQuestion: {
-            type: 'RADIO',
-            options: [{ value: 'Verdadeiro' }, { value: 'Falso' }],
+          scaleQuestion: {
+            lowLabel: questao.startLabel || '',
+            low: questao.low || 1,
+            highLabel: questao.endLabel || '',
+            high: questao.high || 5,
           },
         };
         break;
@@ -157,7 +154,7 @@ export async function salvarFormularioCompleto(
       Link_Url: createRes.data.responderUri ?? '',
       formId: formId ?? '',
       email: userEmail ?? 'sem_email',
-      publicado: dadosForm.false,
+      publicado: createRes.data.responderUri ? true : false,
     });
     await formRepo.save(form);
 
@@ -168,27 +165,44 @@ export async function salvarFormularioCompleto(
         await tipoRepo.save(tipo);
       }
 
-      const pergunta = perguntaRepo.create({
-        Tipo_Pergunta: tipo,
-        Formulario: form,
-        Titulo: q.titulo,
-        Favorita: q.favorito,
-      });
-      await perguntaRepo.save(pergunta);
+      if (!q.idPergunta) {
+        const pergunta = perguntaRepo.create({
+          Tipo_Pergunta: tipo,
+          Formulario: form,
+          Titulo: q.titulo,
+          Favorita: false,
+          anos: q.anos ?? false,
+          tempo: q.tempo ?? false,
+          DescricaoImagem: q.descricaoImagem ?? '',
+          UrlImagem: q.imagemUrl ?? '',
+          obrigatorio: q.obrigatorio ?? false,
+          low: q.low ?? 0,
+          endLabel: q.endLabel ?? '',
+          high: q.high ?? 0,
+          iconPontuacao: q.iconPontuacao ?? '',
+          nivelPontuacao: q.nivelPontuacao ?? 0,
+          startLabel: q.startLabel ?? '',
+        });
 
-      if (q.opcoes?.length) {
-        for (const opcao of q.opcoes) {
-          const alt = altRepo.create({ Pergunta: pergunta, Texto: opcao });
-          await altRepo.save(alt);
+        await perguntaRepo.save(pergunta);
+
+        if (q.opcoes?.length) {
+          for (const opcao of q.opcoes) {
+            const alt = altRepo.create({ Pergunta: pergunta, Texto: opcao });
+            await altRepo.save(alt);
+          }
         }
       }
     }
 
-    return createRes.data.responderUri;
+    return {
+      url: createRes.data.responderUri ?? '',
+      formId: form.formId,
+    };
   });
 }
 
-export async function editarPerguntaSalva(dados: EditQuest) {
+export async function editarPerguntaSalva(dados: NewQuestFormSaved) {
   const repoPergunta = AppDataSource.getRepository(Pergunta);
   const repoTipo = AppDataSource.getRepository(Tipo_Pergunta);
   const repoAlt = AppDataSource.getRepository(Alternativa_Pergunta);
@@ -200,13 +214,25 @@ export async function editarPerguntaSalva(dados: EditQuest) {
 
   if (!questao) throw new Error('Questão não encontrada!');
 
-  const tipo = await repoTipo.findOneBy({
-    Descricao: questao.Tipo_Pergunta.Descricao,
+  const tipoNovo = await repoTipo.findOneBy({
+    Descricao: dados.tipo,
   });
 
   questao.Titulo = dados.titulo;
-  questao.Tipo_Pergunta = tipo ?? questao.Tipo_Pergunta;
+  questao.Tipo_Pergunta = tipoNovo ?? questao.Tipo_Pergunta;
   questao.Favorita = true;
+  questao.anos = dados.anos ?? false;
+  questao.tempo = dados.tempo ?? false;
+  questao.DescricaoImagem = dados.descricaoImagem ?? '';
+  questao.UrlImagem = dados.imagemUrl ?? '';
+  questao.obrigatorio = dados.obrigatorio ?? false;
+  questao.low = dados.low ?? 0;
+  questao.endLabel = dados.endLabel ?? '';
+  questao.high = dados.high ?? 0;
+  questao.iconPontuacao = dados.iconPontuacao ?? '';
+  questao.nivelPontuacao = dados.nivelPontuacao ?? 0;
+  questao.startLabel = dados.startLabel ?? '';
+  questao.idPergunta = dados.idPergunta ?? 0;
 
   if (dados.opcoes && dados.opcoes.length > 0) {
     questao.Alternativas = await Promise.all(
@@ -264,9 +290,21 @@ export async function buscarFormularioPorId(idFormulario: number) {
 
 export async function salvarPergunta(form: NewQuestFormSaved) {
   const repo = AppDataSource.getRepository(Pergunta);
-  const tipo = await AppDataSource.getRepository(Tipo_Pergunta).findOneBy({
+  let tipo = await AppDataSource.getRepository(Tipo_Pergunta).findOneBy({
     Descricao: form.tipo,
   });
+  if (!tipo) {
+    const tiposSalvos = Object.values(TypeQuestEnum);
+    if (tiposSalvos.includes(form.tipo as TypeQuestEnum)) {
+      const newTipo = new Tipo_Pergunta();
+      newTipo.Descricao = form.tipo;
+      await AppDataSource.getRepository(Tipo_Pergunta).save(newTipo);
+      tipo = newTipo;
+    }
+  }
+  if (!tipo) {
+    throw new Error('Tipo de pergunta inválido!');
+  }
   const repoAlt = AppDataSource.getRepository(Alternativa_Pergunta);
 
   let alternativas: Alternativa_Pergunta[] = [];
@@ -293,6 +331,9 @@ export async function salvarPergunta(form: NewQuestFormSaved) {
     high: form.high ?? 0,
     endLabel: form.endLabel ?? '',
     startLabel: form.startLabel ?? '',
+    nivelPontuacao: form.nivelPontuacao ?? 0,
+    iconPontuacao: form.iconPontuacao ?? '',
+    obrigatorio: form.obrigatorio ?? false,
   });
 
   const saved = await repo.save(pergunta);
@@ -330,64 +371,62 @@ function convertQuestionData(ativo: boolean, data: any): RespostasFormDto {
   const questoes: any[] = data.items || [];
   const responses = data.responses || [];
 
-const questoesFormatadas: QuestaoUnica[] = questoes
-  .filter((quest) => quest.questionItem?.question)
-  .map((quest) => {
-    const q = quest.questionItem.question;
-    let tipo: TypeQuestEnum = TypeQuestEnum.TEXTO;
-    let opcoes: string[] | undefined;
-    const escala = {
-      low: q.scaleQuestion?.low,
-      high: q.scaleQuestion?.high,
-      endLabel: q.scaleQuestion?.endLabel,
-      startLabel: q.scaleQuestion?.startLabel,
-    };
+  const questoesFormatadas: QuestaoUnica[] = questoes
+    .filter((quest) => quest.questionItem?.question)
+    .map((quest) => {
+      const q = quest.questionItem.question;
+      let tipo: TypeQuestEnum = TypeQuestEnum.TEXTO;
+      let opcoes: string[] | undefined;
+      const escala = {
+        low: q.scaleQuestion?.low,
+        high: q.scaleQuestion?.high,
+        endLabel: q.scaleQuestion?.endLabel,
+        startLabel: q.scaleQuestion?.startLabel,
+      };
 
-    if (q.textQuestion) {
-      tipo = q.textQuestion.paragraph
-        ? TypeQuestEnum.PARAGRAFO
-        : TypeQuestEnum.TEXTO;
-    } else if (q.choiceQuestion) {
-      const { type, options } = q.choiceQuestion;
-      opcoes = options?.map((o: any) => o.value) || [];
+      if (q.textQuestion) {
+        tipo = q.textQuestion.paragraph
+          ? TypeQuestEnum.PARAGRAFO
+          : TypeQuestEnum.TEXTO;
+      } else if (q.choiceQuestion) {
+        const { type, options } = q.choiceQuestion;
+        opcoes = options?.map((o: any) => o.value) || [];
 
-      switch (type) {
-        case 'RADIO':
-          tipo = TypeQuestEnum.UNICA;
-          break;
-        case 'CHECKBOX':
-          tipo = TypeQuestEnum.MULTIPLA;
-          break;
-        case 'DROP_DOWN':
-          tipo = TypeQuestEnum.UNICA;
-          break;
-        default:
-          tipo = TypeQuestEnum.UNICA;
+        switch (type) {
+          case 'RADIO':
+            tipo = TypeQuestEnum.UNICA;
+            break;
+          case 'CHECKBOX':
+            tipo = TypeQuestEnum.MULTIPLA;
+            break;
+          case 'DROP_DOWN':
+            tipo = TypeQuestEnum.UNICA;
+            break;
+          default:
+            tipo = TypeQuestEnum.UNICA;
+        }
+      } else if (q.scaleQuestion) {
+        tipo = TypeQuestEnum.ESCALA;
+      } else if (q.dateQuestion) {
+        tipo = TypeQuestEnum.DATA;
+      } else if (q.timeQuestion) {
+        tipo = TypeQuestEnum.TEMPO;
+      } else if (q.imageQuestion) {
+        tipo = TypeQuestEnum.IMAGEM;
+      } else if (q.pointQuestion) {
+        tipo = TypeQuestEnum.PONTUACAO;
+      } else {
+        tipo = TypeQuestEnum.TEXTO;
       }
-    } else if (q.scaleQuestion) {
-      tipo = TypeQuestEnum.ESCALA;
-    } else if (q.dateQuestion) {
-      tipo = TypeQuestEnum.DATA;
-    } else if (q.timeQuestion) {
-      tipo = TypeQuestEnum.TEMPO;
-    } else if (q.trueFalseQuestion) {
-      tipo = TypeQuestEnum.VERDADEIRO_FALSO;
-    } else if (q.imageQuestion) {
-      tipo = TypeQuestEnum.IMAGEM;
-    } else if (q.pointQuestion) {
-      tipo = TypeQuestEnum.PONTUACAO;
-    } else {
-      tipo = TypeQuestEnum.TEXTO;
-    }
 
-    return {
-      id: q.questionId,
-      titulo: quest.title || '',
-      tipo,
-      escala,
-      opcoes,
-    };
-  });
+      return {
+        id: q.questionId,
+        titulo: quest.title || '',
+        tipo,
+        escala,
+        opcoes,
+      };
+    });
 
   const respostasFormatadas: RespostaUnica[] = responses.map((resp: any) => {
     const respostasQuestao: Resposta_Questao[] = [];
@@ -487,5 +526,16 @@ export async function buscarQuestoesSalvas(email: string | null) {
     where: { Favorita: true },
     relations: ['Alternativas', 'Tipo_Pergunta'],
   });
+  for (const pergunta of questoes) {
+    if (!pergunta.Tipo_Pergunta && typeof pergunta.Tipo_Pergunta === 'string') {
+      const tiposSalvos = Object.values(TypeQuestEnum);
+      if (tiposSalvos.includes(pergunta.Tipo_Pergunta as TypeQuestEnum)) {
+        const newTipo = new Tipo_Pergunta();
+        newTipo.Descricao = pergunta.Tipo_Pergunta;
+        await AppDataSource.getRepository(Tipo_Pergunta).save(newTipo);
+        pergunta.Tipo_Pergunta = newTipo;
+      }
+    }
+  }
   return questoes.map((pergunta) => ListaPerguntasDto.convert(pergunta));
 }

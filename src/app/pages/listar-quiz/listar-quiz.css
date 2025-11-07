@@ -200,6 +200,7 @@ main {
 
         div.btn-list {
           display: flex;
+          justify-content: space-between;
           grid-gap: 0.5em;
 
           button {

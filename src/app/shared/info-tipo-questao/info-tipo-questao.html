@@ -9,18 +9,20 @@
   [(visible)]="visibilidadeDeInfo"
   [modal]="true"
   [style]="{ width: '50%'}"
+  (onHide)="limpar()"
 >
-  @switch (tipoQuestao) { @case ('TEXTO') {
+  @switch (tipoQuestao) { 
+  @case ('TEXTO') {
   <h3>TEXTO</h3>
   <p>
     Esse tipo de campo permite que o respondente escreva uma resposta. Podendo
     conter múltiplas linhas com caracteres.
   </p>
   <p-fieldset legend="Exemplo">
-    <input type="text" pInputText />
+    <input type="text" pInputText [(ngModel)]="resposta" />
   </p-fieldset>
   } @case ('PARAGRAFO') {
-  <h3>PARAGRAFO</h3>
+  <h3>PARÁGRAFO</h3>
   <p>
     Sendo semelhante ao campo TEXTO, o PARAGRAFO permite que o respondente
     escreva uma resposta. Podendo conter múltiplas linhas com caracteres. A
@@ -32,10 +34,9 @@
     </textarea>
   </p-fieldset>
   } @case ('UNICA') {
-  <h3>UNICA</h3>
+  <h3>ÚNICA</h3>
   <p>
-    Esse tipo de campo permite que o respondente insira números. Entretando com
-    o Google Forms ele támbem permite outros caracteres.
+    Esse campo perti ao respondente selecionar uma das opções feitas.
   </p>
   <p-fieldset legend="Exemplo">
     <div
@@ -51,10 +52,9 @@
     </div>
   </p-fieldset>
   } @case ('MULTIPLA') {
-  <h3>UNICA</h3>
+  <h3>MÚLTIPLA</h3>
   <p>
-    Esse tipo de campo permite que o respondente insira números. Entretando com
-    o Google Forms ele támbem permite outros caracteres.
+    Esse campo perti ao respondente selecionar mais de uma das opções feitas.
   </p>
   <p-fieldset legend="Exemplo">
     <div
@@ -88,15 +88,6 @@
       <input type="text" [(ngModel)]="resposta" pInputText />
       <img src="{{resposta}}" alt="Imagem..." width="200px" />
     </div>
-  </p-fieldset>
-  } @case ('DATA') {
-  <h3>DATA</h3>
-  <p>
-    Esse tipo de campo permite que o respondente insira uma data. No formato
-    DD/MM (Dia e mês)
-  </p>
-  <p-fieldset legend="Exemplo">
-    <p-inputMask mask="99/99" [(ngModel)]="resposta"></p-inputMask>
   </p-fieldset>
   } @case ('ESCALA') {
   <h3>ESCALA</h3>
@@ -133,35 +124,74 @@
       </div>
     </div>
   </p-fieldset>
-  } @case ('VERDADEIRO_FALSO') {
-  <h3>Verdadeiro/Falso</h3>
+  } @case ('PONTUACAO') {
+  <h3>PONTUAÇÃO</h3>
   <p>
-    Esse tipo de campo cria uma imagem que pode auxiliar o respondente. Não pode
-    ser acossiado a nenhuma outra questão.
+    Esse campo criar uma sere de inputs para o respondente selecionar a
+    pontuação de acordo com o a quantidade de opções.
+  </p>
+  <i style="font-size: 12px">Sendo a pontuação de 0 a 10</i>
+  <p-fieldset legend="Exemplo">
+    <input
+      type="number"
+      pInputText
+      [(ngModel)]="resposta"
+      [min]="0"
+      [max]="10"
+      placeholder="Nivel de pontuação"
+      [style]="{'width': '100%'}"
+    />
+    <p-fieldset legend="Icone de pontuação">
+      <div
+        style="display: flex; flex-wrap: wrap; gap: 15px; align-items: center"
+      >
+        <span style="display: flex; align-items: center; gap: 10px">
+          <p-radiobutton id="STAR" [(ngModel)]="opcao" [value]="'STAR'" />
+          <label for="STAR">Estrela <i class="pi pi-star"></i></label>
+        </span>
+        <span style="display: flex; align-items: center; gap: 10px">
+          <p-radiobutton id="HEART" [(ngModel)]="opcao" [value]="'HEART'" />
+          <label for="HEART">Coração <i class="pi pi-heart"></i></label>
+        </span>
+        <span style="display: flex; align-items: center; gap: 10px">
+          <p-radiobutton
+            id="THUMB_UP"
+            [(ngModel)]="opcao"
+            [value]="'THUMB_UP'"
+          />
+          <label for="THUMB_UP">Polegar <i class="pi pi-thumbs-up"></i></label>
+        </span>
+      </div>
+    </p-fieldset>
+  </p-fieldset>
+  } @case ('TEMPO') {
+  <h3>TEMPO</h3>
+  <p>Esse campo cria uma sere de inputs para o respondente inserir um tempo.</p>
+  <p-fieldset legend="Exemplo">
+    <p-inputMask mask="99:99" [(ngModel)]="resposta"></p-inputMask>
+  </p-fieldset>
+  } @case ('DATA'){
+  <h3>DATA</h3>
+  <p>
+    Esse tipo de campo permite que o respondente insira uma data. No formato
+    DD/MM (Dia e mês) Podendo ser adicionar ano e tempo.
   </p>
   <p-fieldset legend="Exemplo">
-    <div
-      style="display: flex; flex-wrap: wrap; flex-direction: column;"
-    >
-      <span style="display: flex; gap: 10px; flex-wrap: wrap;">
-          <p-radioButton
-          type="radio"
-          id="true"
-          [(ngModel)]="resposta"
-          [value]="true"
-          />
-          <label for="true">Verdadeiro</label>
+    <p-datepicker [(ngModel)]="data.infoDate" />
+    <div style="display: flex; gap: 10px; flex-wrap: wrap">
+      <span
+        style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap"
+      >
+        <p-toggleswitch [(ngModel)]="data.ano" id="anos" />
+        <label for="anos">Incluir Anos?</label>
       </span>
-        <span style="display: flex; gap: 10px; flex-wrap: wrap;">
-            <p-radioButton
-            type="radio"
-            id="false"
-            [(ngModel)]="resposta"
-            [value]="false"
-            />
-            <label for="false">Falso</label>
+      <span
+        style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap"
+      >
+        <p-toggleswitch [(ngModel)]="data.tempo" id="tempo" />
+        <label for="anos">Incluir Tempo?</label>
       </span>
     </div>
   </p-fieldset>
-  } @default { Default case. } }
+  }@default { <h2>TIPO NÃO ENCONTRADO</h2> } }
 </p-dialog>

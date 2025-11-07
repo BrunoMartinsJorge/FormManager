@@ -1,20 +1,23 @@
+import { TypeQuestEnum } from '../../adicionar-formulario/enums/TypeQuestEnum';
+
 export interface QuestaoSalva {
   id?: number;
-  tipo: string;
   titulo: string;
-  opcoes?: ALternativasDto[];
-  respostasCorretas?: ALternativasDto[];
-  favorita: boolean;
-  urlImagem?: string;
-  descricaoImagem?: string;
+  tipo: TypeQuestEnum | undefined;
+  opcoes: string[] | undefined;
+  respostasCorretas: string[] | undefined;
   low?: number;
   high?: number;
+  startLabel?: string;
+  endLabel?: string;
+  urlImagem?: string;
+  descricaoImagem?: string;
+  anos?: boolean;
+  tempo?: boolean;
+  nivelPontuacao?: number;
+  iconPontuacao?: string;
+  obrigatorio?: boolean;
   feedbackCorreto?: string;
-  feedbackErro?: string;
+  feedbackErrado?: string;
   pontuacao?: number;
-}
-
-export interface ALternativasDto {
-  idAlternativa: number | null;
-  texto: string;
 }

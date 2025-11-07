@@ -211,3 +211,9 @@ span.not-image{
   color: #f00;
   font-weight: 600;
 }
+
+div.lista-filtros {
+  display: flex;
+  flex-wrap: wrap;
+  grid-gap: 0.5em;
+}

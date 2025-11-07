@@ -4,13 +4,11 @@ import { FormulariosServices } from '../../services/formularios-services';
 import { Button } from 'primeng/button';
 import { ProgressSpinner } from 'primeng/progressspinner';
 import { Questao } from './models/Questao.model';
-import { Resposta, Resposta_Questao } from './models/Resposta.model';
-import { Dialog } from 'primeng/dialog';
+import { Resposta_Questao } from './models/Resposta.model';
 import { GerarGraficos } from '../../shared/components/gerar-graficos/gerar-graficos';
 import { GerarPdf } from '../../shared/components/gerar-pdf/gerar-pdf';
 import { Router } from '@angular/router';
 import * as XLSX from 'xlsx';
-import saveAs from 'file-saver';
 import {
   QuestaoUnica,
   RespostasFormDto,
@@ -21,6 +19,7 @@ import {
   getTypeQuestLabel,
   TypeQuestEnum,
 } from '../adicionar-formulario/enums/TypeQuestEnum';
+import { Tooltip } from 'primeng/tooltip';
 
 @Component({
   selector: 'app-listar-formularios',
@@ -28,9 +27,9 @@ import {
     CommonModule,
     Button,
     ProgressSpinner,
-    Dialog,
     GerarGraficos,
     GerarPdf,
+    Tooltip,
   ],
   templateUrl: './listar-formularios.html',
   styleUrl: './listar-formularios.css',
@@ -82,6 +81,16 @@ export class ListarFormularios {
    */
   public criarNovoFormulario(): void {
     this.router.navigate(['/adicionar-formulario']);
+  }
+
+  public getLinkManualFormulario(): void {
+        if (!this.formularioSelecionado) return;
+    const quiz = this.listaFormularios.find(
+      (q) => q.idFormulario === this.formularioSelecionadoId
+    );
+    if (!quiz || !quiz.formId) return;
+    const urlPadrao: string = `https://docs.google.com/forms/d/${quiz.formId}/edit`;
+    window.open(urlPadrao, '_blank');
   }
 
   /**

@@ -121,9 +121,9 @@ section.container {
     }
 
     .info-input{
-      display: flex;
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
       grid-gap: 1em;
-      flex-wrap: wrap;
 
       .input-group {
         flex: 1;

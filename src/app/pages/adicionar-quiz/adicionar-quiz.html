@@ -337,17 +337,17 @@
   >
     <ng-template #header>
       <tr>
-        <th>Questão</th>
+        <th>Tipo</th>
+        <th>Descrição</th>
         <th style="width: 75px; text-align: center">Utilizar?</th>
       </tr>
     </ng-template>
     <ng-template #body let-questao>
       <tr>
+        <td>{{ questao.tipo | typeQuestEnumTransform }}</td>
         <td>
-          <app-visualizar-questao
-            [questao]="questao"
-            [buttonSendIsVisible]="false"
-          ></app-visualizar-questao>
+          @if (questao.tipo !== 'IMAGEM') { {{ questao.titulo }} } @else { {{
+          questao.descricaoImagem }} }
         </td>
         <td style="text-align: center">
           <p-checkbox
@@ -361,12 +361,12 @@
     </ng-template>
     <ng-template #emptymessage>
       <tr>
-        <td colspan="2">Nenhuma questão salva ainda.</td>
+        <td colspan="3">Nenhuma questão salva ainda.</td>
       </tr>
     </ng-template>
     <ng-template #footer>
       <tr>
-        <td colspan="2">
+        <td colspan="3">
           <p-button
             icon="pi pi-plus"
             [label]="questoesSelecionadas.length === 0 ? 'Selecione questões' : questoesSelecionadas.length > 1 ? 'Adicionar questões' : 'Adicionar questão'"

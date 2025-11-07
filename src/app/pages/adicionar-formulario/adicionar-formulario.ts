@@ -1,12 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
-import {
-  FormControl,
-  FormGroup,
-  FormsModule,
-  ReactiveFormsModule,
-  Validators,
-} from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { InputTextModule } from 'primeng/inputtext';
 import { TextareaModule } from 'primeng/textarea';
 import { ButtonModule } from 'primeng/button';
@@ -18,7 +12,6 @@ import { getTypeQuestLabel, TypeQuestEnum } from './enums/TypeQuestEnum';
 import { ToggleSwitchModule } from 'primeng/toggleswitch';
 import { SelectModule } from 'primeng/select';
 import { FieldsetModule } from 'primeng/fieldset';
-import { VisualizarQuestao } from '../../shared/visualizar-questao/visualizar-questao';
 import { DialogModule } from 'primeng/dialog';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { InputNumberModule } from 'primeng/inputnumber';
@@ -27,13 +20,14 @@ import { InputGroupModule } from 'primeng/inputgroup';
 import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
 import { trigger, transition, style, animate } from '@angular/animations';
 import { SplitButtonModule } from 'primeng/splitbutton';
-import { MenuItem } from 'primeng/api';
+import { MenuItem, MessageService } from 'primeng/api';
 import { CheckboxModule } from 'primeng/checkbox';
 import { TableModule } from 'primeng/table';
 import { InfoTipoQuestao } from '../../shared/info-tipo-questao/info-tipo-questao';
-import { RadioButton } from "primeng/radiobutton";
+import { RadioButton } from 'primeng/radiobutton';
 import { ToggleButtonModule } from 'primeng/togglebutton';
-import { TypeQuestEnumTransformPipe } from "../../shared/pipes/type-quest-enum-transform-pipe";
+import { TypeQuestEnumTransformPipe } from '../../shared/pipes/type-quest-enum-transform-pipe';
+import { ValidarFormulario } from '../../utils/ValidarFormulariosQuiz';
 
 export interface Opcao {
   id: number;
@@ -53,7 +47,6 @@ export interface Opcao {
     ToggleSwitchModule,
     SelectModule,
     FieldsetModule,
-    VisualizarQuestao,
     DialogModule,
     ProgressSpinnerModule,
     InputNumberModule,
@@ -66,8 +59,8 @@ export interface Opcao {
     InfoTipoQuestao,
     RadioButton,
     ToggleButtonModule,
-    TypeQuestEnumTransformPipe
-],
+    TypeQuestEnumTransformPipe,
+  ],
   standalone: true,
   providers: [FormulariosServices],
   templateUrl: './adicionar-formulario.html',
@@ -94,15 +87,16 @@ export class AdicionarFormulario {
   public erroAoCriarFormulario: boolean = false;
   public mostrarTelaAcao: boolean = false;
   public visibilidadeDialog: boolean = false;
-  public urlForm: string = '';
+  public respostaCriarFormulario: any = {
+    url: '',
+    formId: '',
+  };
   public carregando: boolean = false;
   public questoesSelecionadas: any[] = [];
   public formulario: NewForm = {
     titulo: '',
     descricao: '',
     questoes: [],
-    dataAbertura: new Date(),
-    dataFechamento: new Date(),
   };
   public visibilidadePerguntasSalvas: boolean = false;
   public opcao: Opcao[] = [];
@@ -119,7 +113,7 @@ export class AdicionarFormulario {
   public tipoDeCampo: any[] = this.carregarTiposCampos();
 
   /**
-   * 
+   *
    * @description Carrega os tipos de campos
    * @returns - Tipos de campos
    */
@@ -138,8 +132,6 @@ export class AdicionarFormulario {
       tipoF.value = tipos[i];
       tiposFormatados[i] = tipoF;
     }
-    console.log(tiposFormatados);
-    
     return tiposFormatados;
   }
 
@@ -150,7 +142,6 @@ export class AdicionarFormulario {
    */
   public adicionarOpcao(indexQuestao: number): void {
     const questao = this.formulario.questoes[indexQuestao];
-
     if (!questao.opcoes) questao.opcoes = [];
     questao.opcoes.push('');
   }
@@ -163,18 +154,32 @@ export class AdicionarFormulario {
     if (this.questoesSelecionadas.length === 0) return;
     this.questoesSelecionadas.forEach((question) => {
       const novaQuestao: NewQuest = {
+        idPergunta: question.id,
         titulo: question.titulo,
         tipo: question.tipo,
         opcoes: question.opcoes,
         imagemUrl: question.urlImagem,
         descricaoImagem: question.descricaoImagem,
+        anos: question.anos,
+        nivelPontuacao: question.nivelPontuacao,
+        endLabel: question.endLabel,
+        startLabel: question.startLabel,
+        iconPontuacao: question.iconPontuacao,
+        tempo: question.tempo,
+        low: question.low,
+        high: question.high,
+        obrigatorio: question.obrigatorio,
       };
       this.formulario.questoes.push(novaQuestao);
     });
+    
     this.visibilidadePerguntasSalvas = false;
   }
 
-  constructor(private formulariosService: FormulariosServices) {}
+  constructor(
+    private formulariosService: FormulariosServices,
+    private toast: MessageService
+  ) {}
 
   /**
    *
@@ -187,8 +192,6 @@ export class AdicionarFormulario {
       opcoes: [],
     };
     this.formulario.questoes.push(novaQuestao);
-    console.log(this.formulario.questoes);
-    
   }
 
   /**
@@ -243,7 +246,8 @@ export class AdicionarFormulario {
 
     this.formulariosService.criarFormulario(payload).subscribe(
       (response) => {
-        this.urlForm = response.url;
+        this.respostaCriarFormulario.formId = response.resposta.formId;
+        this.respostaCriarFormulario.url = response.resposta.url;
         this.visibilidadeDialog = true;
         this.carregando = false;
       },
@@ -269,9 +273,7 @@ export class AdicionarFormulario {
   }
 
   public limparSelecaoPerguntas(): void {
-    // console.log("A");
     this.questoesSelecionadas = [];
-    // this.perguntasSalvas = [];
   }
 
   /**
@@ -280,49 +282,46 @@ export class AdicionarFormulario {
    * @returns - Retorna true se o formulário for valido
    */
   public formularioValido(): boolean {
-    if (!this.formulario.titulo || !this.formulario.descricao) return false;
-    if (!this.formulario.dataAbertura || !this.formulario.dataFechamento)
-      return false;
-    if (!this.formulario.questoes || this.formulario.questoes.length === 0)
-      return false;
-    for (let questao of this.formulario.questoes) {
-      if (questao.tipo !== TypeQuestEnum.IMAGEM) {
-        if (questao.descricaoImagem && questao.descricaoImagem.trim() === '') {
-          return false;
-        }
-        if (!questao.imagemUrl && questao.imagemUrl?.trim() === '') {
-          return false;
-        }
-        if (!questao.titulo) {
-          return false;
-        }
-      }
-      if (
-        questao.tipo === TypeQuestEnum.MULTIPLA ||
-        questao.tipo === TypeQuestEnum.UNICA
-      ) {
-        for (let opcao of questao.opcoes ?? []) {
-          if (!opcao || opcao.trim() === '') {
-            return false;
-          }
-        }
-      }
-      if (questao.opcoes && questao.opcoes.length > 0) {
-        for (let opcao of questao.opcoes) {
-          if (!opcao) {
-            return false;
-          }
-        }
-      }
-      if (questao.imagemUrl && questao.imagemUrl.trim() != '') {
-        if (!questao.descricaoImagem || questao.descricaoImagem.trim() === '') {
-          return false;
-        }
-      }
-    }
-    if (this.formulario.dataAbertura > this.formulario.dataFechamento)
-      return false;
-    return true;
+    // if (!this.formulario.titulo || !this.formulario.descricao) return false;
+    // if (!this.formulario.questoes || this.formulario.questoes.length === 0)
+    //   return false;
+    // for (let questao of this.formulario.questoes) {
+    //   if (questao.tipo !== TypeQuestEnum.IMAGEM) {
+    //     if (questao.descricaoImagem && questao.descricaoImagem.trim() === '') {
+    //       return false;
+    //     }
+    //     if (!questao.imagemUrl && questao.imagemUrl?.trim() === '') {
+    //       return false;
+    //     }
+    //     if (!questao.titulo) {
+    //       return false;
+    //     }
+    //   }
+    //   if (
+    //     questao.tipo === TypeQuestEnum.MULTIPLA ||
+    //     questao.tipo === TypeQuestEnum.UNICA
+    //   ) {
+    //     for (let opcao of questao.opcoes ?? []) {
+    //       if (!opcao || opcao.trim() === '') {
+    //         return false;
+    //       }
+    //     }
+    //   }
+    //   if (questao.opcoes && questao.opcoes.length > 0) {
+    //     for (let opcao of questao.opcoes) {
+    //       if (!opcao) {
+    //         return false;
+    //       }
+    //     }
+    //   }
+    //   if (questao.imagemUrl && questao.imagemUrl.trim() != '') {
+    //     if (!questao.descricaoImagem || questao.descricaoImagem.trim() === '') {
+    //       return false;
+    //     }
+    //   }
+    // }
+    // return true;
+    return ValidarFormulario(this.formulario);
   }
 
   /**
@@ -349,6 +348,31 @@ export class AdicionarFormulario {
    * @description Copia o link do formulário
    */
   public copiarLink(): void {
-    navigator.clipboard.writeText(this.urlForm);
+    navigator.clipboard.writeText(this.respostaCriarFormulario.url);
+    this.toast.add({
+      severity: 'success',
+      summary: 'Sucesso',
+      life: 1000,
+      detail: 'Link copiado com sucesso!',
+    });
+  }
+
+  /**
+   *
+   * @description Acessa o formulário via Link
+   */
+  public acessarFormulario(): void {
+    if (!this.respostaCriarFormulario || !this.respostaCriarFormulario.url)
+      return;
+    window.open(this.respostaCriarFormulario.url, '_blank');
+  }
+
+  /**
+   *
+   * @description Acessa o formulário manualmente
+   */
+  public acessarFormularioManualmente(): void {
+    const urlPadrao: string = `https://docs.google.com/forms/d/e/${this.respostaCriarFormulario.formId}/viewform`;
+    window.open(urlPadrao, '_blank');
   }
 }

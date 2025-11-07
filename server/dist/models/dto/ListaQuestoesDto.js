@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.ALternativasDto = exports.ListaQuestoesDto = void 0;
+exports.ListaQuestoesDto = void 0;
 class ListaQuestoesDto {
     constructor(questao) {
         this.id = questao.idQuestao;
@@ -9,31 +9,26 @@ class ListaQuestoesDto {
             : '';
         this.quiz = questao.Quiz || undefined;
         this.titulo = questao.Titulo;
-        this.opcoes = questao.Alternativas.map((alt) => ALternativasDto.convert(alt));
+        this.opcoes = questao.Alternativas.map((alt) => alt.Texto);
         this.respostasCorretas = Array.isArray(questao.AlternativasCorretas)
-            ? this.opcoes.filter((alt) => questao.AlternativasCorretas.some((c) => c.idAlternativa === alt.idAlternativa && c.Texto === alt.texto))
+            ? this.opcoes.filter((alt) => questao.AlternativasCorretas.some((c) => c.Texto === alt))
             : [];
         this.high = 0;
         this.low = 0;
         this.pontuacao = questao.Pontuacao;
         this.feedbackCorreto = questao.FeedbackCorreto;
-        this.feedbackErro = questao.FeedbackErrado;
+        this.feedbackErrado = questao.FeedbackErrado;
         this.favorita = questao.Favorita;
         this.urlImagem = questao.UrlImagem;
         this.descricaoImagem = questao.DescricaoImagem;
+        this.anos = questao.anos;
+        this.tempo = questao.tempo;
+        this.nivelPontuacao = questao.nivelPontuacao;
+        this.iconPontuacao = questao.iconPontuacao;
+        this.obrigatorio = questao.obrigatorio;
     }
     static convert(questao) {
         return new ListaQuestoesDto(questao);
     }
 }
 exports.ListaQuestoesDto = ListaQuestoesDto;
-class ALternativasDto {
-    constructor(alt) {
-        this.idAlternativa = alt.idAlternativa;
-        this.texto = alt.Texto;
-    }
-    static convert(alt) {
-        return new ALternativasDto(alt);
-    }
-}
-exports.ALternativasDto = ALternativasDto;

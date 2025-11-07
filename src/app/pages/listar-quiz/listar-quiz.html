@@ -81,43 +81,6 @@
       </p>
       }
       <div *ngIf="quizSelecionado && !carregandoQuiz">
-        <div class="header-info-api">
-          <p-inplace>
-            <ng-template #display>
-              <span
-                style="
-                  display: flex;
-                  align-items: center;
-                  justify-content: center;
-                  grid-gap: 5px;
-                "
-                >Aviso <i class="pi pi-exclamation-circle"></i
-              ></span>
-            </ng-template>
-            <ng-template #content>
-              <p style="display: flex; flex-direction: column">
-                <span>
-                  A API do Google Forms é limitada em seu uso, o que pode causar
-                  problemas em aplicativos que necessitem de uma grande
-                  quantidade de requisições. Além disso, algumas coisas podem
-                  precisar ser alteradas manualmente, tornando o processo mais
-                  demorado. Por isso, é importante ter em mente essas limitações
-                  ao utilizar a API do Google Forms em seu aplicativo.
-                </span>
-                <p-button
-                  label="Acessae Formulário Manualmente"
-                  icon="pi pi-cog"
-                  severity="contrast"
-                  (click)="getLinkManualQuiz()"
-                ></p-button>
-                <span>
-                  Caso ocorra problemas com o botão acima, tente acessar o
-                  formulário pelo seu perfil do Google Forms
-                </span>
-              </p>
-            </ng-template>
-          </p-inplace>
-        </div>
         <div class="header-form-selected">
           <h3>{{ quizSelecionado.titulo }}</h3>
           <span>{{ quizSelecionado.descricao }}</span>
@@ -128,18 +91,34 @@
             >
           </p>
           <div class="btn-list">
-            <button (click)="abrirDialogDePDF(quizSelecionado)">
-              <i class="pi pi-file-pdf"></i> Gerar PDF
-            </button>
-            <button (click)="exportarQuizParaExcel()">
-              <i class="pi pi-file-excel"></i> Gerar Excel
-            </button>
-            <button (click)="acessarQuiz()">
-              <i class="pi pi-external-link"></i> Acessar Quiz
-            </button>
-            <button (click)="abrirDialogDeGrafico()">
-              <i class="pi pi-chart-line"></i> Gerar Gráficos
-            </button>
+            <p-button
+              label="Gerar PDF"
+              (click)="abrirDialogDePDF(quizSelecionado)"
+              icon="pi pi-file-pdf"
+              severity="contrast"
+              variant="outlined"
+            />
+            <p-button
+              label="Gerar Excel"
+              (click)="exportarQuizParaExcel()"
+              icon="pi pi-file-excel"
+              severity="contrast"
+              variant="outlined"
+            />
+            <p-button
+              label="Acessar Formulário"
+              (click)="acessarQuiz()"
+              icon="pi pi-external-link"
+              severity="contrast"
+              variant="outlined"
+            />
+            <p-button
+              label="Gerar Gráficos"
+              (click)="abrirDialogDeGrafico()"
+              icon="pi pi-chart-line"
+              severity="contrast"
+              variant="outlined"
+            />
           </div>
         </div>
 
@@ -151,13 +130,22 @@
                 {{ respostasOuQuestoes !== 'quest' ? 'Respostas do Quiz' :
                 'Questões do Quiz' }}
               </h3>
-              <p-button
-                icon="pi pi-eye"
-                [label]="respostasOuQuestoes === 'responses' ? 'Ver Questões' : (quizSelecionado.questoesFormatadas.respostas?.length === 0 ? 'Sem respostas' : 'Ver Respostas')"
-                severity="contrast"
-                [disabled]="!quizSelecionado || quizSelecionado.questoesFormatadas.respostas?.length === 0"
-                (click)="mudarRespostasOuQuestoes()"
-              ></p-button>
+              <div style="display: flex; flex-wrap: wrap; gap: 10px">
+                <p-button
+                  tooltipPosition="top"
+                  pTooltip="Caso hajam problemas, acesse o quiz por essa opção!"
+                  (click)="getLinkManualQuiz()"
+                  icon="pi pi-cog"
+                  severity="contrast"
+                />
+                <p-button
+                  icon="pi pi-eye"
+                  [label]="respostasOuQuestoes === 'responses' ? 'Ver Questões' : (quizSelecionado.questoesFormatadas.respostas?.length === 0 ? 'Sem respostas' : 'Ver Respostas')"
+                  severity="contrast"
+                  [disabled]="!quizSelecionado || quizSelecionado.questoesFormatadas.respostas?.length === 0"
+                  (click)="mudarRespostasOuQuestoes()"
+                ></p-button>
+              </div>
             </div>
             <ng-container
               *ngIf="respostasOuQuestoes === 'quest' && quizSelecionado"

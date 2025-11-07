@@ -86,16 +86,18 @@
   [style]="{'maxWidth': '600px', 'width': '100%'}"
 >
   <div class="quests-form">
-    <div class="input-group">
-      <label for="titulo-quest">Título da Questão:</label>
-      <input
+    @if (novaQuestao.tipo !== 'IMAGEM') {
+      <div class="input-group">
+        <label for="titulo-quest">Título da Questão:</label>
+        <input
         id="titulo-quest"
         type="text"
         pInputText
         [(ngModel)]="novaQuestao.titulo"
         placeholder="Título da Questão"
-      />
-    </div>
+        />
+      </div>
+    }
     <div class="opcao-quest">
       <div class="input-group">
         <label for="tipo-quest">Qual o tipo da Questão:</label>
@@ -118,29 +120,60 @@
         (click)="adicionarOpcao()"
       />
     </div>
-    <div
-      class="inputs-list"
-      *ngIf="novaQuestao.tipo && (novaQuestao.tipo === 'VERDADEIRO_FALSO')"
-    >
-      <p-inputgroup pSize="small">
-        <input pInputText value="Verdadeiro" [disabled]="true" />
-        <p-inputgroup-addon>
-          <p-button
-            [icon]="opcaoCorretaVerdadeiroFalse('Verdadeiro') ? 'pi pi-check' : 'pi pi-times'"
-            (click)="mudarOpcaoCorretaVerdadeiroFalso('Verdadeiro')"
-          />
-        </p-inputgroup-addon>
-      </p-inputgroup>
-      <p-inputgroup pSize="small">
-        <input pInputText value="Falso" [disabled]="true" />
-        <p-inputgroup-addon>
-          <p-button
-            [icon]="opcaoCorretaVerdadeiroFalse('Falso') ? 'pi pi-check' : 'pi pi-times'"
-            (click)="mudarOpcaoCorretaVerdadeiroFalso('Falso')"
-          />
-        </p-inputgroup-addon>
-      </p-inputgroup>
+    @if (novaQuestao.tipo === 'DATA'){
+    <div style="display: flex; gap: 10px; flex-wrap: wrap">
+      <span
+        style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap"
+      >
+        <p-toggleswitch [(ngModel)]="novaQuestao.anos" id="anos" />
+        <label for="anos">Incluir Anos?</label>
+      </span>
+      <span
+        style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap"
+      >
+        <p-toggleswitch [(ngModel)]="novaQuestao.tempo" id="tempo" />
+        <label for="anos">Incluir Tempo?</label>
+      </span>
     </div>
+    } @if (novaQuestao.tipo === 'PONTUACAO') {
+    <input
+      type="number"
+      pInputText
+      [(ngModel)]="novaQuestao.nivelPontuacao"
+      [min]="0"
+      placeholder="Nivel de pontuação"
+    />
+    <p-fieldset legend="Icone de pontuação">
+      <div
+        style="display: flex; flex-wrap: wrap; gap: 15px; align-items: center"
+      >
+        <span style="display: flex; align-items: center; gap: 10px">
+          <p-radiobutton
+            id="STAR"
+            [(ngModel)]="novaQuestao.iconPontuacao"
+            [value]="'STAR'"
+          />
+          <label for="STAR">Estrela <i class="pi pi-star"></i></label>
+        </span>
+        <span style="display: flex; align-items: center; gap: 10px">
+          <p-radiobutton
+            id="HEART"
+            [(ngModel)]="novaQuestao.iconPontuacao"
+            [value]="'HEART'"
+          />
+          <label for="HEART">Coração <i class="pi pi-heart"></i></label>
+        </span>
+        <span style="display: flex; align-items: center; gap: 10px">
+          <p-radiobutton
+            id="THUMB_UP"
+            [(ngModel)]="novaQuestao.iconPontuacao"
+            [value]="'THUMB_UP'"
+          />
+          <label for="THUMB_UP">Polegar <i class="pi pi-thumbs-up"></i></label>
+        </span>
+      </div>
+    </p-fieldset>
+    }
     <div
       class="inputs-list"
       *ngIf="novaQuestao.tipo && (novaQuestao.tipo === 'UNICA' || novaQuestao.tipo === 'MULTIPLA')"
@@ -157,11 +190,11 @@
         <input
           pInputText
           placeholder="Opção..."
-          [(ngModel)]="novaQuestao.opcoes![index].texto"
+          [(ngModel)]="novaQuestao.opcoes![index]"
         />
         <p-inputgroup-addon>
           <p-button
-            [disabled]="novaQuestao.opcoes![index].texto === ''"
+            [disabled]="novaQuestao.opcoes![index] === ''"
             [icon]="opcaoCorreta(index) ? 'pi pi-check' : 'pi pi-times'"
             (click)="mudarOpcaoCorreta(index)"
           />
@@ -192,7 +225,7 @@
       </div>
     </div>
     <ng-container
-      *ngIf="novaQuestao.tipo == 'UNICA' || novaQuestao.tipo == 'MULTIPLA' || novaQuestao.tipo == 'VERDADEIRO_FALSO'"
+      *ngIf="novaQuestao.tipo == 'UNICA' || novaQuestao.tipo == 'MULTIPLA'"
     >
       <div class="pontos-questao">
         <div class="input-group">
@@ -220,7 +253,7 @@
           <textarea
             id="feedback-quest"
             pInputTextarea
-            [(ngModel)]="novaQuestao.feedbackErro"
+            [(ngModel)]="novaQuestao.feedbackErrado"
             placeholder="Feedback"
           ></textarea>
         </div>

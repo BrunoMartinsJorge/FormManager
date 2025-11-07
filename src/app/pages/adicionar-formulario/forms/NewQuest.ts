@@ -1,10 +1,9 @@
 import { TypeQuestEnum } from '../enums/TypeQuestEnum';
 
 export interface NewQuest {
+  idPergunta?: number;
   titulo: string;
   tipo: TypeQuestEnum | undefined;
-  min?: number;
-  max?: number;
   opcoes: string[] | undefined;
   low?: number;
   high?: number;
@@ -14,7 +13,7 @@ export interface NewQuest {
   descricaoImagem?: string;
   anos?: boolean;
   tempo?: boolean;
-  pontuacao?: number;
+  nivelPontuacao?: number;
   iconPontuacao?: string;
   obrigatorio?: boolean;
 }

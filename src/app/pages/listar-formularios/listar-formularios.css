@@ -202,10 +202,10 @@ main {
 
         div.btn-list {
           display: flex;
-          grid-gap: 0.5em;
+          gap: 0.5em;
           align-items: center;
-          justify-content: space-evenly;
-          flex-wrap: wrap;
+          justify-content: space-between;
+          /* flex-wrap: wrap; */
         }
       }
 

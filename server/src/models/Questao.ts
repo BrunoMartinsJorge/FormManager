@@ -8,7 +8,6 @@ import {
   JoinTable,
   JoinColumn,
 } from 'typeorm';
-import { Tipo_Pergunta } from './Tipo_Pergunta';
 import { Quiz } from './Quiz';
 import { Alternativa_Questao } from './Alternativa_Questao';
 import { Tipo_Questao } from './Tipo_Questao';

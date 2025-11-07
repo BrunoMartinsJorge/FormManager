@@ -5,7 +5,6 @@ export enum TypeQuestEnum {
   MULTIPLA = 'MULTIPLA',
   DATA = 'DATA',
   ESCALA = 'ESCALA',
-  VERDADEIRO_FALSO = 'VERDADEIRO_FALSO',
   IMAGEM = 'IMAGEM',
   TEMPO = 'TEMPO',
   PONTUACAO = 'PONTUACAO',
@@ -23,8 +22,6 @@ export function getTypeQuestLabel(type: TypeQuestEnum): string {
       return 'Data';
     case TypeQuestEnum.ESCALA:
       return 'Escala';
-    case TypeQuestEnum.VERDADEIRO_FALSO:
-      return 'Verdadeiro / Falso';
     case TypeQuestEnum.PARAGRAFO:
       return 'Parágrafo';
     case TypeQuestEnum.IMAGEM:
@@ -42,6 +39,5 @@ export const tiposParaGraficos = [
   TypeQuestEnum.UNICA,
   TypeQuestEnum.MULTIPLA,
   TypeQuestEnum.ESCALA,
-  TypeQuestEnum.PONTUACAO,
-  TypeQuestEnum.VERDADEIRO_FALSO
+  TypeQuestEnum.PONTUACAO
 ]

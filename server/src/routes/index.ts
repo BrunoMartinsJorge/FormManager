@@ -19,6 +19,7 @@ import {
   storeTokens,
 } from '../services/googleAuth';
 import {
+  apagarQuestao,
   buscarQuizPorId,
   createQuiz,
   editarQuestaoSalva,
@@ -139,8 +140,11 @@ router.post('/formularios', async (req, res) => {
     const userInfo = await oauth2.userinfo.get();
     const userEmail = userInfo.data.email;
 
-    const url = await salvarFormularioCompleto(req.body, userEmail ?? null);
-    res.json({ url });
+    const resposta = await salvarFormularioCompleto(
+      req.body,
+      userEmail ?? null
+    );
+    res.json({ resposta });
   } catch (err) {
     console.error(err);
     res.status(500).send('Erro ao salvar formulário');
@@ -185,6 +189,18 @@ router.put('/quiz/questoes-salvas', async (req, res) => {
   } catch (err) {
     res.status(500).send('Erro ao editar pergunta');
     console.error(err);
+  }
+});
+
+router.delete('/quiz/questoes-salvas/:questId', async (req, res) => {
+  try {
+    const id = Number(req.params.questId);
+    if (!id) return res.status(400).send('ID inválido.');
+    await apagarQuestao(id);
+    res.status(200).send({ resposta: 'Pergunta apagada com sucesso!' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Erro ao apagar pergunta');
   }
 });
 

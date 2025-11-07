@@ -5,24 +5,54 @@
   </div>
   <p-table
     style="border: 1px solid #ccc"
-    [value]="listaPerguntasSalvas"
+    [value]="listaFiltrada"
     stripedRows
     [rows]="8"
     [paginator]="true"
   >
     <ng-template pTemplate="caption">
-      <p-button
-        (click)="abrirDialogAdcionarPergunta()"
-        label="Adicionar Nova Pergunta"
-      />
-      <p-button
-        icon="pi pi-refresh"
-        severity="info"
-        pTooltip="Recarregar"
-        tooltipPosition="top"
-        [style]="{ marginLeft: '10px' }"
-        (click)="recarregarTabela()"
-      />
+      <div
+        style="
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+        "
+      >
+        <div>
+          <p-button
+            (click)="abrirDialogAdcionarPergunta()"
+            label="Adicionar Nova Pergunta"
+          />
+          <p-button
+            icon="pi pi-refresh"
+            severity="info"
+            pTooltip="Recarregar"
+            tooltipPosition="top"
+            [style]="{ marginLeft: '10px' }"
+            (click)="recarregarTabela()"
+          />
+        </div>
+        <div class="lista-filtros">
+          <p-button
+            [disabled]="filtroTipo == undefined"
+            icon="pi pi-trash"
+            severity="danger"
+            (click)="limparFiltros()"
+            pTooltip="Limpar filtro"
+          />
+          <p-select
+            pTooltip="Filtrar perguntas por tipo"
+            [options]="tipoDeCampo"
+            appendTo="body"
+            [(ngModel)]="filtroTipo"
+            optionLabel="nome"
+            optionValue="value"
+            placeholder="Selecione o tipo de pergunta"
+            (onChange)="recarregarFiltro()"
+          >
+          </p-select>
+        </div>
+      </div>
     </ng-template>
     <ng-template pTemplate="header">
       <tr>
@@ -62,9 +92,7 @@
     <ng-template pTemplate="emptymessage">
       <tr>
         <td colspan="5">
-          <span
-            *ngIf="!carregandoPergunta && listaPerguntasSalvas.length === 0"
-          >
+          <span *ngIf="!carregandoPergunta && listaFiltrada.length === 0">
             Nenhuma pergunta salva
           </span>
           <div
@@ -80,8 +108,8 @@
       <tr>
         <td colspan="6">
           <span style="font-size: 14px; color: #333">
-            Você possui {{ listaPerguntasSalvas ? listaPerguntasSalvas.length :
-            0 }} perguntas salvas!
+            Você possui {{ listaFiltrada ? listaFiltrada.length : 0 }} perguntas
+            salvas!
           </span>
         </td>
       </tr>
@@ -96,7 +124,7 @@
   [(visible)]="visibilidadeAdicionarPergunta"
 >
   <div class="quests-form">
-    @if (novaPergunta.tipo !== 'IMAGEM') {
+    @if (novaPergunta!.tipo !== 'IMAGEM') {
     <div class="input-group">
       <label for="titulo-quest">Título da Pergunta:</label>
       <input
@@ -108,6 +136,7 @@
       />
     </div>
     }
+
     <div class="opcao-quest">
       <div class="input-group">
         <label for="tipo-quest">Qual o tipo da pergunta:</label>
@@ -154,6 +183,59 @@
         />
       </div>
     </div>
+    } @if (novaPergunta.tipo === 'PONTUACAO') {
+    <input
+      type="number"
+      pInputText
+      [(ngModel)]="novaPergunta.nivelPontuacao"
+      [min]="0"
+      placeholder="Nivel de pontuação"
+    />
+    <p-fieldset legend="Icone de pontuação">
+      <div
+        style="display: flex; flex-wrap: wrap; gap: 15px; align-items: center"
+      >
+        <span style="display: flex; align-items: center; gap: 10px">
+          <p-radiobutton
+            id="STAR"
+            [(ngModel)]="novaPergunta.iconPontuacao"
+            [value]="'STAR'"
+          />
+          <label for="STAR">Estrela <i class="pi pi-star"></i></label>
+        </span>
+        <span style="display: flex; align-items: center; gap: 10px">
+          <p-radiobutton
+            id="HEART"
+            [(ngModel)]="novaPergunta.iconPontuacao"
+            [value]="'HEART'"
+          />
+          <label for="HEART">Coração <i class="pi pi-heart"></i></label>
+        </span>
+        <span style="display: flex; align-items: center; gap: 10px">
+          <p-radiobutton
+            id="THUMB_UP"
+            [(ngModel)]="novaPergunta.iconPontuacao"
+            [value]="'THUMB_UP'"
+          />
+          <label for="THUMB_UP">Polegar <i class="pi pi-thumbs-up"></i></label>
+        </span>
+      </div>
+    </p-fieldset>
+    } @if (novaPergunta.tipo === 'DATA'){
+    <div style="display: flex; gap: 10px; flex-wrap: wrap">
+      <span
+        style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap"
+      >
+        <p-toggleswitch [(ngModel)]="novaPergunta.anos" id="anos" />
+        <label for="anos">Incluir Anos?</label>
+      </span>
+      <span
+        style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap"
+      >
+        <p-toggleswitch [(ngModel)]="novaPergunta.tempo" id="tempo" />
+        <label for="anos">Incluir Tempo?</label>
+      </span>
+    </div>
     }
     <div
       class="inputs-list"
@@ -199,6 +281,13 @@
         />
       </div>
     </div>
+    @if (novaPergunta.tipo !== 'IMAGEM') {
+    <p-togglebutton
+      [(ngModel)]="novaPergunta.obrigatorio"
+      onLabel="Obrigatório"
+      offLabel="Não Obrigatório"
+    />
+    }
     <p-button
       [label]="modoDialog == 'edit' ? 'Editar Pergunta' : 'Adicionar Pergunta'"
       [style]="{ marginTop: '10px', width: '100%' }"

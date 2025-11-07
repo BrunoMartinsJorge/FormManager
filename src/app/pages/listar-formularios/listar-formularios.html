@@ -55,15 +55,24 @@
       </div>
     </div>
     <div class="form-select">
-      @if (this.formularioSelecionado == null) { @if
-      (!carregandoFormularioSelecionado) {
+      @if (carregandoFormularioSelecionado && !formularioSelecionado) {
       <div class="loading">
         <p-progressSpinner></p-progressSpinner>
         <span>Carregando formulário...</span>
       </div>
-      } @else if (problemaAoCarregarFormulario) {
-      <p class="mensagem-vazia">Problemas ao carregar formulário.</p>
-      } } @if (formularioSelecionado && !carregandoFormularioSelecionado) {
+      } @else if(problemaAoCarregarFormulario){
+      <p
+        style="
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          text-align: center;
+          flex: 1;
+        "
+      >
+        Problemas ao carregar formulário
+      </p>
+      }@else if(formularioSelecionado){
       <div class="header-form-selected">
         <h3
           style="display: flex; justify-content: space-between; flex-wrap: wrap"
@@ -121,13 +130,22 @@
               {{respostasOuPerguntas != 'quest' ? 'Respostas do Formulário' :
               'Questões do Formulário'}}
             </h3>
-            <p-button
-              icon="pi pi-eye"
-              [label]="buscarLabelBotao"
-              severity="contrast"
-              [disabled]="!formularioSelecionado || formularioSelecionado.respostasPorUsuario!.length === 0"
-              (click)="mudarRespostasOuPerguntas()"
-            />
+            <div style="display: flex; flex-wrap: wrap; gap: 10px">
+              <p-button
+                tooltipPosition="top"
+                pTooltip="Caso hajam problemas, acesse o quiz por essa opção!"
+                (click)="getLinkManualFormulario()"
+                icon="pi pi-cog"
+                severity="contrast"
+              />
+              <p-button
+                icon="pi pi-eye"
+                [label]="buscarLabelBotao"
+                severity="contrast"
+                [disabled]="!formularioSelecionado || formularioSelecionado.respostasPorUsuario!.length === 0"
+                (click)="mudarRespostasOuPerguntas()"
+              />
+            </div>
           </div>
           @if (respostasOuPerguntas == 'quest') { @if (formularioSelecionado !=
           null){

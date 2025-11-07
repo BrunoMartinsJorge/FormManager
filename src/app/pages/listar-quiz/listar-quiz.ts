@@ -14,6 +14,7 @@ import { QuizSelected } from '../../shared/models/QuizSelected.model';
 import { InplaceModule } from 'primeng/inplace';
 import { QuizDto } from './models/QuizDto';
 import { RespostasPorUsuario } from '../listar-formularios/models/RespostasFormDto';
+import { Tooltip } from "primeng/tooltip";
 
 export interface Quest {
   titulo: string;
@@ -38,7 +39,8 @@ export interface Form {
     GerarGraficos,
     GerarPdf,
     InplaceModule,
-  ],
+    Tooltip
+],
   templateUrl: './listar-quiz.html',
   styleUrl: './listar-quiz.css',
 })
