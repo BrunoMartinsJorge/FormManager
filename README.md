@@ -11,6 +11,8 @@ Aplicativo **desktop** para gerenciamento de formulários digitais, desenvolvido
 
 O sistema permite a geração automática de **PDFs**, **gráficos**, **relatórios analíticos** e **exportação de dados em XML**, facilitando a visualização e o tratamento das informações coletadas.
 
+Tendo como demais participantes @Artmr7 e @CarlosEZaul.
+
 ![Desktop App](https://img.shields.io/badge/Desktop%20App-Electron-blue?style=for-the-badge)
 ![Full Stack](https://img.shields.io/badge/Full%20Stack-Application-purple?style=for-the-badge)
 ![Status](https://img.shields.io/badge/Status-Em%20Desenvolvimento-yellow?style=for-the-badge)
